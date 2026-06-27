@@ -4,7 +4,7 @@ A clean, themeable calculator app built with Flutter — available on iOS.
 
 ## Download
 
-[![App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/app/id1611258200)
+[![App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/nz/app/swiftsum-simple-calculator/id1610829871)
 
 ## Features
 
