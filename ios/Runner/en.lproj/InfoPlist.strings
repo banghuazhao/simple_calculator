@@ -1,0 +1,10 @@
+/* 
+  InfoPlist.strings
+  Runner
+
+  Created by Lulin Y on 2022/2/19.
+  
+*/
+
+"CFBundleDisplayName" = "SwiftSum";
+"NSUserTrackingUsageDescription" = "This identifier will be used to deliver personalized ads to you";

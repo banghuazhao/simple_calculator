@@ -1,0 +1,5 @@
+// AdMob App ID default for debug builds (Google's official test App ID).
+// Release builds override this via ADMOB_APP_ID_IOS in --dart-define-from-file.
+ADMOB_APP_ID_IOS = ca-app-pub-3940256099942544~3347511713
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"
+#include "Generated.xcconfig"

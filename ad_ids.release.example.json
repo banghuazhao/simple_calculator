@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy this file to ad_ids.release.json and fill in your real AdMob production IDs. ad_ids.release.json is git-ignored. Inject it into release builds with --dart-define-from-file=ad_ids.release.json (see scripts/build_release.sh).",
+  "ADMOB_APP_ID_ANDROID": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
+  "ADMOB_APP_ID_IOS": "ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX",
+  "BANNER_ANDROID": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "BANNER_IOS": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "INTERSTITIAL_ANDROID": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "INTERSTITIAL_IOS": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "APP_OPEN_ANDROID": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX",
+  "APP_OPEN_IOS": "ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX"
+}

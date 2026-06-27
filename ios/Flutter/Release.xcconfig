@@ -1,0 +1,5 @@
+// AdMob App ID fallback for release builds. Overridden by ADMOB_APP_ID_IOS
+// injected via --dart-define-from-file=ad_ids.release.json (see scripts/build_release.sh).
+ADMOB_APP_ID_IOS = ca-app-pub-3940256099942544~3347511713
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
+#include "Generated.xcconfig"
