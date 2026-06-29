@@ -4,123 +4,142 @@ import 'package:simple_calculator/calculator-key.dart';
 import 'package:simple_calculator/key-controller.dart';
 import 'package:simple_calculator/key-symbol.dart';
 
+/// Structured output emitted on every state change.
+class CalcState {
+  final String current; // main large display
+  final String history; // small equation line above (empty when not applicable)
+  final bool isResult; // true when showing a freshly computed result
+
+  const CalcState({
+    required this.current,
+    required this.history,
+    this.isResult = false,
+  });
+}
+
 abstract class Processor {
   static KeySymbol? _operator;
   static String _valA = '0';
   static String? _valB;
   static String? _result;
 
-  static StreamController _controller = StreamController();
-  static Stream get _stream => _controller.stream;
+  static final StreamController<CalcState> _controller =
+      StreamController<CalcState>.broadcast();
 
-  static StreamSubscription listen(Function(dynamic) handler) => _stream.listen(handler);
-  static void refresh() => _fire(_output);
+  static StreamSubscription<CalcState> listen(void Function(CalcState) handler) =>
+      _controller.stream.listen(handler);
 
-  static void _fire(String data) => _controller.add(_output);
+  static void refresh() => _controller.add(_calcState);
 
-  static String get _output => _result ?? _equation;
+  static CalcState get _calcState {
+    if (_result != null) {
+      if (_result == 'Error') {
+        return const CalcState(current: 'Error', history: '', isResult: true);
+      }
+      return CalcState(
+        current: _result!,
+        history: '$_valA ${_operator!.value} $_valB =',
+        isResult: true,
+      );
+    }
+    if (_operator != null) {
+      return CalcState(
+        current: _valB ?? _valA,
+        history: '$_valA ${_operator!.value}',
+      );
+    }
+    return CalcState(current: _valA, history: '');
+  }
 
-  static String get _equation =>
-      _valA +
-      (_operator != null ? ' ' + _operator!.value : '') +
-      (_valB != null ? ' ' + _valB! : '');
+  static void dispose() => _controller.close();
 
-  static dispose() => _controller.close();
-
-  static process(dynamic event) {
-    CalculatorKey key = (event as KeyEvent).key;
+  static void process(dynamic event) {
+    final CalculatorKey key = (event as KeyEvent).key;
     switch (key.symbol.type) {
       case KeyType.FUNCTION:
-        return handleFunction(key);
-
+        return _handleFunction(key);
       case KeyType.OPERATOR:
-        return handleOperator(key);
-
+        return _handleOperator(key);
       case KeyType.INTEGER:
-        return handleInteger(key);
+        return _handleInteger(key);
     }
   }
 
-  static void handleFunction(CalculatorKey key) {
-    if (_result != null) {
-      _condense();
+  static void _handleFunction(CalculatorKey key) {
+    if (_result != null) _condense();
+
+    switch (key.symbol) {
+      case Keys.clear:
+        _clear();
+        break;
+      case Keys.sign:
+        _sign();
+        break;
+      case Keys.percent:
+        _percent();
+        break;
+      case Keys.back:
+        _back();
+        break;
     }
-
-    Map<KeySymbol, dynamic> table = {
-      Keys.clear: () => _clear(),
-      Keys.sign: () => _sign(),
-      Keys.percent: () => _percent(),
-      Keys.decimal: () => _decimal(),
-      Keys.back: () => _back(),
-    };
-
-    table[key.symbol]();
     refresh();
   }
 
-  static void handleOperator(CalculatorKey key) {
-    if (_valA == '.' || (_valB != null && _valB == '.')) {
-      return;
-    }
+  static void _handleOperator(CalculatorKey key) {
+    // Don't operate on a bare decimal input
+    if (_valA == '0.' || (_valB != null && _valB == '0.')) return;
+
     if (key.symbol == Keys.equals) {
       return _calculate();
     }
-    if (_valA != null && _valB != null) {
-      _calculate();
-    }
-
-    if (_result != null) {
-      _condense();
-    }
+    // Chain operations: evaluate pending before setting next operator
+    if (_valB != null) _calculate();
+    if (_result != null) _condense();
 
     _operator = key.symbol;
     refresh();
   }
 
-  static void handleInteger(CalculatorKey key) {
-    String val = key.symbol.value;
-    if (_result != null) {
-      _condense();
-    }
+  static void _handleInteger(CalculatorKey key) {
+    final String val = key.symbol.value;
+    if (_result != null) _condense();
 
     if (_operator == null) {
-      if (_valA.contains('.') && val == '.') {
-        return;
-      }
-      _valA = (_valA == '0') ? val : _valA + val;
-    } else {
-      if (_valB != null && _valB!.contains('.') && val == '.') {
-        return;
-      }
-      if (_valB != null) {
-        _valB = (_valB == '0') ? val : _valB! + val;
+      if (val == '.') {
+        if (!_valA.contains('.')) _valA += '.';
       } else {
-        _valB = val;
+        if (_countDigits(_valA) >= 9) return; // digit limit
+        _valA = (_valA == '0') ? val : _valA + val;
+      }
+    } else {
+      if (_valB == null) {
+        _valB = val == '.' ? '0.' : val;
+      } else {
+        if (val == '.') {
+          if (!_valB!.contains('.')) _valB = _valB! + '.';
+        } else {
+          if (_countDigits(_valB!) >= 9) return; // digit limit
+          _valB = (_valB == '0') ? val : _valB! + val;
+        }
       }
     }
-    if (_result != null) {
-      print("_result: " + (_result ?? 'null'));
-    }
-    print("_equation: " + _equation);
-    print("_output: " + _output);
     refresh();
   }
 
+  static int _countDigits(String s) =>
+      s.replaceAll(RegExp(r'[^0-9]'), '').length;
+
   static void _back() {
+    if (_result != null) {
+      _clear();
+      return;
+    }
     if (_valB != null) {
-      if (_valB!.length == 1) {
-        _valB = null;
-      } else {
-        _valB = _valB!.substring(0, _valB!.length - 1);
-      }
+      _valB = _valB!.length == 1 ? null : _valB!.substring(0, _valB!.length - 1);
     } else if (_operator != null) {
       _operator = null;
     } else if (_valA != '0') {
-      if (_valA.length == 1) {
-        _valA = '0';
-      } else {
-        _valA = _valA.substring(0, _valA.length - 1);
-      }
+      _valA = _valA.length == 1 ? '0' : _valA.substring(0, _valA.length - 1);
     }
   }
 
@@ -132,54 +151,61 @@ abstract class Processor {
 
   static void _sign() {
     if (_valB != null) {
-      _valB = (_valB!.contains('-') ? _valB!.substring(1) : '-' + _valB!);
+      _valB = _valB!.startsWith('-') ? _valB!.substring(1) : '-$_valB';
     } else if (_valA != '0') {
-      _valA = (_valA.contains('-') ? _valA.substring(1) : '-' + _valA);
+      _valA = _valA.startsWith('-') ? _valA.substring(1) : '-$_valA';
     }
   }
-
-  static String calcPercent(String x) => (double.parse(x) / 100).toString();
 
   static void _percent() {
     if (_valB != null) {
-      _valB = calcPercent(_valB!);
+      _valB = _formatResult(double.parse(_valB!) / 100);
     } else if (_valA != '0') {
-      _valA = calcPercent(_valA);
-    }
-  }
-
-  static void _decimal() {
-    if (_valB != null && !_valB!.contains('.')) {
-      _valB = _valB! + '.';
-    } else if (_valA != '0' && !_valA.contains('.')) {
-      _valA = _valA + '.';
+      _valA = _formatResult(double.parse(_valA) / 100);
     }
   }
 
   static void _calculate() {
-    if (_operator == null || _valB == null) {
+    if (_operator == null || _valB == null) return;
+
+    final double a = double.parse(_valA);
+    final double b = double.parse(_valB!);
+
+    if (_operator == Keys.divide && b == 0) {
+      _result = 'Error';
+      refresh();
       return;
     }
 
-    Map<KeySymbol, dynamic> table = {
-      Keys.divide: (a, b) => (a / b),
-      Keys.multiply: (a, b) => (a * b),
-      Keys.subtract: (a, b) => (a - b),
-      Keys.add: (a, b) => (a + b)
-    };
-
-    double result = table[_operator!](double.parse(_valA), double.parse(_valB!));
-    String str = result.toString();
-
-    while ((str.contains('.') && str.endsWith('0')) || str.endsWith('.')) {
-      str = str.substring(0, str.length - 1);
+    double result;
+    if (_operator == Keys.divide) {
+      result = a / b;
+    } else if (_operator == Keys.multiply) {
+      result = a * b;
+    } else if (_operator == Keys.subtract) {
+      result = a - b;
+    } else {
+      result = a + b;
     }
 
-    _result = str;
+    _result = _formatResult(result);
     refresh();
   }
 
+  static String _formatResult(double value) {
+    String str = value.toString();
+    // Remove trailing zeros after decimal point
+    if (str.contains('.')) {
+      str = str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    }
+    return str.isEmpty ? '0' : str;
+  }
+
   static void _condense() {
+    if (_result == 'Error') {
+      _clear();
+      return;
+    }
     _valA = _result!;
     _valB = null;
     _result = _operator = null;

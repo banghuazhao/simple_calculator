@@ -4,47 +4,122 @@ import 'package:provider/provider.dart';
 import 'package:simple_calculator/util/ThemeModel.dart';
 
 class Display extends StatelessWidget {
-  Display({Key? key, required this.value}) : super(key: key);
+  const Display({
+    Key? key,
+    required this.current,
+    required this.history,
+    this.isResult = false,
+  }) : super(key: key);
 
-  final String value;
+  final String current;
+  final String history;
+  final bool isResult;
 
-  String get _output => value.toString();
+  /// Formats a number string with thousand separators for display only.
+  String _formatForDisplay(String s) {
+    if (s == 'Error') return s;
+    if (s.contains('e') || s.contains('E')) return s; // scientific notation
+
+    final isNeg = s.startsWith('-');
+    final abs = isNeg ? s.substring(1) : s;
+    final dotIndex = abs.indexOf('.');
+    final intStr = dotIndex >= 0 ? abs.substring(0, dotIndex) : abs;
+    final decStr = dotIndex >= 0 ? abs.substring(dotIndex) : '';
+
+    final buf = StringBuffer();
+    for (int i = 0; i < intStr.length; i++) {
+      if (i > 0 && (intStr.length - i) % 3 == 0) buf.write(',');
+      buf.write(intStr[i]);
+    }
+
+    return (isNeg ? '-' : '') + buf.toString() + decStr;
+  }
 
   @override
   Widget build(BuildContext context) {
-    var model = Provider.of<ThemeModel>(context, listen: false);
+    final model = Provider.of<ThemeModel>(context, listen: false);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-          TextStyle style = Theme.of(context)
-          .textTheme
-          .headlineMedium
-          ?.copyWith(color: model.textColor1, fontWeight: FontWeight.w400) ?? TextStyle();
+    final double inset = screenWidth > 600 ? (screenWidth - 560) / 2 : 24.0;
+    final bool compact = screenHeight <= 740;
 
-    double inset = 30;
-    double size = (MediaQuery.of(context).size.width - 40) / 4;
-    if (size > 150) {
-      inset = (MediaQuery.of(context).size.width - 600) / 2;
-    }
+    final Color textColor = model.textColor1;
+    final Color historyColor = textColor.withValues(alpha: 0.5);
 
-    var bottomInset = 20.0;
-    if (MediaQuery.of(context).size.height <= 740) {
-      bottomInset = 10.0;
-              style = Theme.of(context)
-            .textTheme
-            .headlineSmall
-            ?.copyWith(color: model.textColor1, fontWeight: FontWeight.w400) ?? TextStyle();
-    }
+    final mainStyle = Theme.of(context).textTheme.displayMedium?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w300,
+              fontSize: compact ? 48 : 60,
+            ) ??
+        const TextStyle();
 
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: Container(
-          // padding: EdgeInsets.only(top: _margin, bottom: _margin),
-          padding: EdgeInsets.fromLTRB(inset, 0, inset, bottomInset),
-          // decoration: BoxDecoration(gradient: _gradient),
-          child: AutoSizeText(
-            _output,
-            style: style,
-            maxLines: 2,
-          )),
+    final historyStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: historyColor,
+              fontSize: compact ? 14 : 16,
+            ) ??
+        const TextStyle();
+
+    final formattedCurrent = _formatForDisplay(current);
+    // Unique key: animate when result appears or when error, not on every digit
+    final displayKey = isResult
+        ? ValueKey('result_$formattedCurrent')
+        : const ValueKey('input');
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(inset, 0, inset, compact ? 8 : 16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // History / equation line — fades in/out
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            transitionBuilder: (child, anim) =>
+                FadeTransition(opacity: anim, child: child),
+            child: history.isNotEmpty
+                ? Align(
+                    key: ValueKey(history),
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      history,
+                      style: historyStyle,
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('no-history')),
+          ),
+          SizedBox(height: compact ? 2 : 4),
+          // Main number — slides up when result appears
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.25),
+                  end: Offset.zero,
+                ).animate(
+                    CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+                child: child,
+              ),
+            ),
+            child: Align(
+              key: displayKey,
+              alignment: Alignment.centerRight,
+              child: AutoSizeText(
+                formattedCurrent,
+                style: mainStyle,
+                maxLines: 1,
+                textAlign: TextAlign.right,
+                minFontSize: 24,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

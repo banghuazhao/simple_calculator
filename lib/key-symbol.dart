@@ -6,18 +6,18 @@ class KeySymbol {
   const KeySymbol(this.value);
   final String value;
 
-  static List<KeySymbol> _functions = [
+  static const List<KeySymbol> _functions = [
     Keys.clear,
     Keys.sign,
     Keys.percent,
-    Keys.back
+    Keys.back,
   ];
-  static List<KeySymbol> _operators = [
+  static const List<KeySymbol> _operators = [
     Keys.divide,
     Keys.multiply,
     Keys.subtract,
     Keys.add,
-    Keys.equals
+    Keys.equals,
   ];
 
   @override
@@ -27,7 +27,6 @@ class KeySymbol {
   bool get isFunction => _functions.contains(this);
   bool get isInteger => !isOperator && !isFunction;
 
-  KeyType get type => isFunction
-      ? KeyType.FUNCTION
-      : (isOperator ? KeyType.OPERATOR : KeyType.INTEGER);
+  KeyType get type =>
+      isFunction ? KeyType.FUNCTION : (isOperator ? KeyType.OPERATOR : KeyType.INTEGER);
 }

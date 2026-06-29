@@ -7,12 +7,12 @@ class ThemeModel with ChangeNotifier {
   /// 当前主题颜色
   int _themeColor = 0;
   int get themeColor => _themeColor;
-  var backgroundColor;
-  var buttonColor1;
-  var buttonColor2;
-  var buttonColor3;
-  var textColor1;
-  var textColor2;
+  late Color backgroundColor;
+  late Color buttonColor1;
+  late Color buttonColor2;
+  late Color buttonColor3;
+  late Color textColor1;
+  late Color textColor2;
 
   ThemeModel() {
     /// 获取主题色

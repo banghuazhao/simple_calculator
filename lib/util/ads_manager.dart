@@ -157,7 +157,6 @@ class AppOpenAdManager {
     AppOpenAd.load(
       adUnitId: AdsManager.appOpenAdUnitId,
       request: const AdRequest(),
-      orientation: AppOpenAd.orientationPortrait,
       adLoadCallback: AppOpenAdLoadCallback(
         onAdLoaded: (ad) {
           _appOpenLoadTime = DateTime.now();
