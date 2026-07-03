@@ -96,9 +96,9 @@ class _CalculatorState extends State<Calculator> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        final entries = Processor.historyLog;
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
+            final entries = Processor.historyLog;
             return SizedBox(
               height: MediaQuery.of(context).size.height * 0.65,
               child: Column(
@@ -132,9 +132,32 @@ class _CalculatorState extends State<Calculator> {
                         const Spacer(),
                         if (entries.isNotEmpty)
                           TextButton(
-                            onPressed: () {
-                              Processor.clearHistory();
-                              setSheetState(() {});
+                            onPressed: () async {
+                              final confirmed = await showDialog<bool>(
+                                context: ctx,
+                                builder: (dialogCtx) => AlertDialog(
+                                  title: const Text('Clear history?'),
+                                  content: const Text(
+                                      'This will remove all saved calculations.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(dialogCtx, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(dialogCtx, true),
+                                      child: const Text('Clear'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirmed == true) {
+                                Processor.clearHistory();
+                                HapticFeedback.mediumImpact();
+                                setSheetState(() {});
+                              }
                             },
                             child: Text(
                               'Clear',
@@ -168,38 +191,54 @@ class _CalculatorState extends State<Calculator> {
                                     color: textColor.withValues(alpha: 0.08)),
                             itemBuilder: (_, i) {
                               final entry = entries[i];
-                              return InkWell(
-                                onTap: () {
-                                  Processor.setFromHistory(entry.result);
-                                  Navigator.pop(ctx);
+                              return Dismissible(
+                                key: ValueKey(entry.id),
+                                direction: DismissDirection.endToStart,
+                                background: Container(
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.only(right: 24),
+                                  color: Colors.red,
+                                  child: const Icon(Icons.delete_outline,
+                                      color: Colors.white),
+                                ),
+                                onDismissed: (_) {
+                                  Processor.removeHistoryEntry(entry.id);
+                                  HapticFeedback.lightImpact();
+                                  setSheetState(() {});
                                 },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24, vertical: 12),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        entry.equation,
-                                        style: TextStyle(
-                                          color:
-                                              textColor.withValues(alpha: 0.5),
-                                          fontSize: 14,
+                                child: InkWell(
+                                  onTap: () {
+                                    Processor.setFromHistory(entry.result);
+                                    Navigator.pop(ctx);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          entry.equation,
+                                          style: TextStyle(
+                                            color: textColor.withValues(
+                                                alpha: 0.5),
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.right,
                                         ),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        entry.result,
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 26,
-                                          fontWeight: FontWeight.w300,
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          entry.result,
+                                          style: TextStyle(
+                                            color: textColor,
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.w300,
+                                          ),
+                                          textAlign: TextAlign.right,
                                         ),
-                                        textAlign: TextAlign.right,
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );

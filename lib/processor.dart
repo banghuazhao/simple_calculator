@@ -19,9 +19,14 @@ class CalcState {
 
 /// A single completed calculation kept in the history log.
 class HistoryEntry {
+  final int id;
   final String equation; // e.g. "3 + 4 ="
   final String result;   // raw value without formatting
-  const HistoryEntry({required this.equation, required this.result});
+  const HistoryEntry({
+    required this.id,
+    required this.equation,
+    required this.result,
+  });
 }
 
 class _Snapshot {
@@ -40,6 +45,7 @@ abstract class Processor {
 
   static final List<HistoryEntry> _history = [];
   static final List<_Snapshot> _undoStack = [];
+  static int _historyIdSeq = 0;
 
   static final StreamController<CalcState> _controller =
       StreamController<CalcState>.broadcast();
@@ -94,6 +100,9 @@ abstract class Processor {
   // ── History ───────────────────────────────────────────────────────────────
 
   static void clearHistory() => _history.clear();
+
+  static void removeHistoryEntry(int id) =>
+      _history.removeWhere((e) => e.id == id);
 
   /// Load a history result back into the calculator as the current value.
   static void setFromHistory(String result) {
@@ -242,6 +251,7 @@ abstract class Processor {
     _result = _formatResult(result);
 
     _history.insert(0, HistoryEntry(
+      id: _historyIdSeq++,
       equation: '$_valA ${_operator!.value} $_valB =',
       result: _result!,
     ));
