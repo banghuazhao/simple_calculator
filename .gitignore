@@ -48,3 +48,7 @@ app.*.map.json
 # AdMob production ad unit IDs — injected at release build time only.
 # Keep real IDs out of source; ad_ids.release.example.json is the committed template.
 ad_ids.release.json
+
+# Agent artifacts
+.artifacts/
+.claude/
