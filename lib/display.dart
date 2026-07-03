@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/util/ThemeModel.dart';
 
@@ -15,10 +16,9 @@ class Display extends StatelessWidget {
   final String history;
   final bool isResult;
 
-  /// Formats a number string with thousand separators for display only.
   String _formatForDisplay(String s) {
     if (s == 'Error') return s;
-    if (s.contains('e') || s.contains('E')) return s; // scientific notation
+    if (s.contains('e') || s.contains('E')) return s;
 
     final isNeg = s.startsWith('-');
     final abs = isNeg ? s.substring(1) : s;
@@ -33,6 +33,30 @@ class Display extends StatelessWidget {
     }
 
     return (isNeg ? '-' : '') + buf.toString() + decStr;
+  }
+
+  void _copyToClipboard(BuildContext context) {
+    if (current == 'Error') return;
+    HapticFeedback.mediumImpact();
+    Clipboard.setData(ClipboardData(text: current));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Copied',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          duration: const Duration(milliseconds: 1200),
+          behavior: SnackBarBehavior.floating,
+          width: 100,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 4,
+        ),
+      );
   }
 
   @override
@@ -61,7 +85,6 @@ class Display extends StatelessWidget {
         const TextStyle();
 
     final formattedCurrent = _formatForDisplay(current);
-    // Unique key: animate when result appears or when error, not on every digit
     final displayKey = isResult
         ? ValueKey('result_$formattedCurrent')
         : const ValueKey('input');
@@ -72,7 +95,7 @@ class Display extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // History / equation line — fades in/out
+          // History / equation line
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 180),
             transitionBuilder: (child, anim) =>
@@ -92,29 +115,32 @@ class Display extends StatelessWidget {
                 : const SizedBox.shrink(key: ValueKey('no-history')),
           ),
           SizedBox(height: compact ? 2 : 4),
-          // Main number — slides up when result appears
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            transitionBuilder: (child, anim) => FadeTransition(
-              opacity: anim,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.25),
-                  end: Offset.zero,
-                ).animate(
-                    CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-                child: child,
+          // Main number — tap to copy
+          GestureDetector(
+            onTap: () => _copyToClipboard(context),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.25),
+                    end: Offset.zero,
+                  ).animate(
+                      CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+                  child: child,
+                ),
               ),
-            ),
-            child: Align(
-              key: displayKey,
-              alignment: Alignment.centerRight,
-              child: AutoSizeText(
-                formattedCurrent,
-                style: mainStyle,
-                maxLines: 1,
-                textAlign: TextAlign.right,
-                minFontSize: 24,
+              child: Align(
+                key: displayKey,
+                alignment: Alignment.centerRight,
+                child: AutoSizeText(
+                  formattedCurrent,
+                  style: mainStyle,
+                  maxLines: 1,
+                  textAlign: TextAlign.right,
+                  minFontSize: 24,
+                ),
               ),
             ),
           ),

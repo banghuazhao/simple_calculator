@@ -17,11 +17,29 @@ class CalcState {
   });
 }
 
+/// A single completed calculation kept in the history log.
+class HistoryEntry {
+  final String equation; // e.g. "3 + 4 ="
+  final String result;   // raw value without formatting
+  const HistoryEntry({required this.equation, required this.result});
+}
+
+class _Snapshot {
+  final String valA;
+  final String? valB;
+  final KeySymbol? op;
+  final String? result;
+  const _Snapshot(this.valA, this.valB, this.op, this.result);
+}
+
 abstract class Processor {
   static KeySymbol? _operator;
   static String _valA = '0';
   static String? _valB;
   static String? _result;
+
+  static final List<HistoryEntry> _history = [];
+  static final List<_Snapshot> _undoStack = [];
 
   static final StreamController<CalcState> _controller =
       StreamController<CalcState>.broadcast();
@@ -30,6 +48,9 @@ abstract class Processor {
       _controller.stream.listen(handler);
 
   static void refresh() => _controller.add(_calcState);
+
+  /// All completed calculations, newest first.
+  static List<HistoryEntry> get historyLog => List.unmodifiable(_history);
 
   static CalcState get _calcState {
     if (_result != null) {
@@ -53,7 +74,39 @@ abstract class Processor {
 
   static void dispose() => _controller.close();
 
+  // ── Undo ─────────────────────────────────────────────────────────────────
+
+  static void _pushUndo() {
+    _undoStack.add(_Snapshot(_valA, _valB, _operator, _result));
+    if (_undoStack.length > 30) _undoStack.removeAt(0);
+  }
+
+  static void undo() {
+    if (_undoStack.isEmpty) return;
+    final s = _undoStack.removeLast();
+    _valA = s.valA;
+    _valB = s.valB;
+    _operator = s.op;
+    _result = s.result;
+    refresh();
+  }
+
+  // ── History ───────────────────────────────────────────────────────────────
+
+  static void clearHistory() => _history.clear();
+
+  /// Load a history result back into the calculator as the current value.
+  static void setFromHistory(String result) {
+    _pushUndo();
+    _clear();
+    _valA = result;
+    refresh();
+  }
+
+  // ── Key processing ────────────────────────────────────────────────────────
+
   static void process(dynamic event) {
+    _pushUndo();
     final CalculatorKey key = (event as KeyEvent).key;
     switch (key.symbol.type) {
       case KeyType.FUNCTION:
@@ -86,13 +139,11 @@ abstract class Processor {
   }
 
   static void _handleOperator(CalculatorKey key) {
-    // Don't operate on a bare decimal input
     if (_valA == '0.' || (_valB != null && _valB == '0.')) return;
 
     if (key.symbol == Keys.equals) {
       return _calculate();
     }
-    // Chain operations: evaluate pending before setting next operator
     if (_valB != null) _calculate();
     if (_result != null) _condense();
 
@@ -108,7 +159,7 @@ abstract class Processor {
       if (val == '.') {
         if (!_valA.contains('.')) _valA += '.';
       } else {
-        if (_countDigits(_valA) >= 9) return; // digit limit
+        if (_countDigits(_valA) >= 9) return;
         _valA = (_valA == '0') ? val : _valA + val;
       }
     } else {
@@ -118,7 +169,7 @@ abstract class Processor {
         if (val == '.') {
           if (!_valB!.contains('.')) _valB = _valB! + '.';
         } else {
-          if (_countDigits(_valB!) >= 9) return; // digit limit
+          if (_countDigits(_valB!) >= 9) return;
           _valB = (_valB == '0') ? val : _valB! + val;
         }
       }
@@ -189,12 +240,18 @@ abstract class Processor {
     }
 
     _result = _formatResult(result);
+
+    _history.insert(0, HistoryEntry(
+      equation: '$_valA ${_operator!.value} $_valB =',
+      result: _result!,
+    ));
+    if (_history.length > 100) _history.removeLast();
+
     refresh();
   }
 
   static String _formatResult(double value) {
     String str = value.toString();
-    // Remove trailing zeros after decimal point
     if (str.contains('.')) {
       str = str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
     }
