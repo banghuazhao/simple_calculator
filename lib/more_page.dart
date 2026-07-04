@@ -25,7 +25,7 @@ class _MorePageState extends State<MorePage> {
   void _createInterstitialAd() {
     InterstitialAd.load(
         adUnitId: AdsManager.interstitialAdUnitId,
-        request: AdRequest(),
+        request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (InterstitialAd ad) {
           _interstitialAd = ad;
           _interstitialLoadAttempts = 0;
@@ -56,7 +56,7 @@ class _MorePageState extends State<MorePage> {
         _createInterstitialAd();
       });
       _interstitialAd?.show();
-    } else {}
+    }
   }
 
   @override
@@ -69,6 +69,7 @@ class _MorePageState extends State<MorePage> {
 
   @override
   Widget build(BuildContext context) {
+    const interstitialDuration = Duration(milliseconds: 500);
     List<MoreAppItem> items = [];
 
     var classicMemoryGame = MoreAppItem(
@@ -222,18 +223,18 @@ class _MorePageState extends State<MorePage> {
         body: ListView(
           children: [
             Container(
-                padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                 child: Text(
                   S.of(context).theme,
                   style: TextStyle(fontSize: 21, color: model.textColor1),
                 )),
             Container(
-              padding: EdgeInsets.fromLTRB(0, 24, 0, 0),
+              padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
               height: 210,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  ...[
+                  ...const [
                     "assets/theme/theme1.png",
                     "assets/theme/theme2.png",
                     "assets/theme/theme3.png",
@@ -259,9 +260,9 @@ class _MorePageState extends State<MorePage> {
                       margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                       decoration: BoxDecoration(
                         border: index == model.themeColor
-                            ? Border.all(color: Color(0xff4ACE5F), width: 2)
+                            ? Border.all(color: const Color(0xff4ACE5F), width: 2)
                             : null,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
                         image: DecorationImage(
                           image: AssetImage(themeImage),
                           fit: BoxFit.cover,
@@ -273,12 +274,12 @@ class _MorePageState extends State<MorePage> {
                           model.switchTheme(index);
                           setState(() {});
                           if (!Platform.isMacOS) {
-                            Future.delayed(const Duration(milliseconds: 500), () {
+                            Future.delayed(interstitialDuration, () {
                               _showInterstitialAd();
                             });
                           }
                         },
-                        child: Container(
+                        child: const SizedBox(
                           width: 90,
                         ),
                       ),
@@ -289,7 +290,7 @@ class _MorePageState extends State<MorePage> {
             ),
             if (!Platform.isMacOS)
               Container(
-                  padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: Text(
                     S.of(context).MoreApps,
                     style: TextStyle(fontSize: 21, color: model.textColor1),
@@ -303,7 +304,7 @@ class _MorePageState extends State<MorePage> {
                   return MoreAppsRow.factory(items[index]);
                 },
               ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             )
           ],
@@ -312,11 +313,11 @@ class _MorePageState extends State<MorePage> {
 }
 
 class MoreAppItem {
-  Image appIcon;
-  String title;
-  void Function() onTap;
+  final Image appIcon;
+  final String title;
+  final void Function() onTap;
 
-  MoreAppItem(this.appIcon, this.title, this.onTap);
+  const MoreAppItem(this.appIcon, this.title, this.onTap);
 }
 
 class MoreAppsRow extends StatelessWidget {
@@ -333,29 +334,30 @@ class MoreAppsRow extends StatelessWidget {
       required this.onTap})
       : super(key: key);
 
-  MoreAppsRow.factory(MoreAppItem moreAppItem) 
+  MoreAppsRow.factory(MoreAppItem moreAppItem, {Key? key}) 
       : appIcon = moreAppItem.appIcon,
         trailingIcon = Icons.chevron_right_rounded,
         title = moreAppItem.title,
-        onTap = moreAppItem.onTap;
+        onTap = moreAppItem.onTap,
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(20, 16, 20, 0),
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: const BoxDecoration(
         color: Colors.white60,
         borderRadius: BorderRadius.all(Radius.circular(24)),
       ),
       child: InkWell(
-        customBorder: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+        customBorder: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(24)),
         ),
         onTap: onTap,
         child: ListTile(
-          visualDensity: VisualDensity(vertical: 4), // to compact
+          visualDensity: const VisualDensity(vertical: 4), // to compact
           leading: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
             child: SizedBox(
               height: 50,
               width: 50,

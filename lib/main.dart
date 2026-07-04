@@ -63,7 +63,7 @@ class CalculatorApp extends StatelessWidget {
         child: Consumer<ThemeModel>(builder: (context, themeModel, child) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            localizationsDelegates: [
+            localizationsDelegates: const [
               S.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
