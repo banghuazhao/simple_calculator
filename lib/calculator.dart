@@ -6,18 +6,18 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:simple_calculator/display.dart';
-import 'package:simple_calculator/key-controller.dart';
-import 'package:simple_calculator/key-pad.dart';
+import 'package:simple_calculator/key_controller.dart';
+import 'package:simple_calculator/key_pad.dart';
 import 'package:simple_calculator/more_page.dart';
 import 'package:simple_calculator/processor.dart';
-import 'package:simple_calculator/util/ThemeModel.dart';
+import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 
 class Calculator extends StatefulWidget {
   const Calculator({Key? key}) : super(key: key);
 
   @override
-  _CalculatorState createState() => _CalculatorState();
+  State<Calculator> createState() => _CalculatorState();
 }
 
 class _CalculatorState extends State<Calculator> {
@@ -295,7 +295,7 @@ class _CalculatorState extends State<Calculator> {
                     isResult: _calcState.isResult,
                   ),
                 ),
-                KeyPad(),
+                const KeyPad(),
                 SizedBox(height: screenHeight <= 740 ? 8 : 24),
                 // Banner ad
                 if (!Platform.isMacOS)

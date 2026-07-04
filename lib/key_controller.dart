@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:simple_calculator/calculator-key.dart';
+import 'package:simple_calculator/calculator_key.dart';
 
 class KeyEvent {
   KeyEvent(this.key);
@@ -8,7 +8,7 @@ class KeyEvent {
 }
 
 abstract class KeyController {
-  static StreamController _controller = StreamController();
+  static final StreamController _controller = StreamController();
   static Stream get _stream => _controller.stream;
 
   static StreamSubscription listen(Function handler) =>

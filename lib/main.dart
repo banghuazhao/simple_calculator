@@ -7,8 +7,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/calculator.dart';
-import 'package:simple_calculator/util/StorageManager.dart';
-import 'package:simple_calculator/util/ThemeModel.dart';
+import 'package:simple_calculator/util/storage_manager.dart';
+import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/in_app_reviewer_helper.dart';
 import 'package:simple_calculator/util/local_storage.dart';
@@ -34,7 +34,7 @@ void main() async {
     final appOpenAdManager = AppOpenAdManager()..loadAd();
     AppLifecycleReactor(appOpenAdManager: appOpenAdManager).listen();
   } else {
-    await DesktopWindow.setWindowSize(Size(350,700));
+    await DesktopWindow.setWindowSize(const Size(350, 700));
   }
 
 
@@ -42,14 +42,16 @@ void main() async {
 
   await SharedPreferencesHelper.init();
 
-  StorageManager.init();
+  await StorageManager.init();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((_) {
-    runApp(new CalculatorApp());
+    runApp(const CalculatorApp());
   });
 }
 
 class CalculatorApp extends StatelessWidget {
+  const CalculatorApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -69,7 +71,7 @@ class CalculatorApp extends StatelessWidget {
             ],
             supportedLocales: S.delegate.supportedLocales,
             localeResolutionCallback: (locale, supportLocales) {
-              print(locale);
+              // print(locale);
               // 中文 简繁体处理
               if (locale?.languageCode == 'zh') {
                 if (locale?.scriptCode == 'Hant') {
@@ -78,9 +80,9 @@ class CalculatorApp extends StatelessWidget {
                   return const Locale('zh', ''); //简体
                 }
               }
-              return Locale('en', '');
+              return const Locale('en', '');
             },
-            home: Calculator(),
+            home: const Calculator(),
           );
         }));
   }

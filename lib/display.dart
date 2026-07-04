@@ -2,7 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_calculator/util/ThemeModel.dart';
+import 'package:simple_calculator/util/theme_model.dart';
 
 class Display extends StatelessWidget {
   const Display({

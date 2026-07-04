@@ -22,7 +22,7 @@ class InAppReviewHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int? count = prefs.getInt(openCount);
 
-    print("App open count: $count");
+    // print("App open count: $count");
     if (count == 3 || count == 15 || count == 100) {
       if (await inAppReview.isAvailable()) {
         inAppReview.requestReview();

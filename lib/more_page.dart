@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_calculator/util/ThemeModel.dart';
+import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 
 import 'generated/l10n.dart';
@@ -69,132 +69,132 @@ class _MorePageState extends State<MorePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<MoreAppItem> _items = [];
+    List<MoreAppItem> items = [];
 
-    var Classic_Memory_Game = MoreAppItem(
+    var classicMemoryGame = MoreAppItem(
         Image.asset("assets/app_icons/classic_memory_game.png"), S.of(context).Classic_Memory_Game,
         () {
       OpenStore.instance
           .open(appStoreId: "1617593078", androidAppBundleId: "com.appsbay.classic_memory_game");
     });
 
-    var Image_Guru =
+    var imageGuru =
         MoreAppItem(Image.asset("assets/app_icons/image_guru.png"), S.of(context).Image_Guru, () {
       OpenStore.instance.open(appStoreId: "1625021625", androidAppBundleId: "");
     });
 
-    var Yes_Habit =
+    var yesHabit =
         MoreAppItem(Image.asset("assets/app_icons/yes_habit.png"), S.of(context).Yes_Habit, () {
       OpenStore.instance.open(appStoreId: "1637643734", androidAppBundleId: "");
     });
 
-    var TripMark = MoreAppItem(
+    var tripMark = MoreAppItem(
         Image.asset("assets/app_icons/tripmark.png"), S.of(context).TripMark, () {
       OpenStore.instance
           .open(appStoreId: "6464474080", androidAppBundleId: "");
     });
 
-    var Shows = MoreAppItem(Image.asset("assets/app_icons/shows.png"), S.of(context).Shows, () {
+    var shows = MoreAppItem(Image.asset("assets/app_icons/shows.png"), S.of(context).Shows, () {
       OpenStore.instance.open(appStoreId: "1624910011", androidAppBundleId: "com.appsbay.shows");
     });
 
-    var Relaxing_Up =
+    var relaxingUp =
         MoreAppItem(Image.asset("assets/app_icons/relaxing_up.png"), S.of(context).Relaxing_Up, () {
       OpenStore.instance
           .open(appStoreId: "1618712178", androidAppBundleId: "com.appsbay.relaxing_up");
     });
 
-    var Easy_Unit =
+    var easyUnit =
         MoreAppItem(Image.asset("assets/app_icons/easy_unit.png"), S.of(context).Easy_Unit, () {
       OpenStore.instance.open(appStoreId: "1643640909", androidAppBundleId: "");
     });
 
-    var Falling_Block_Puzzle = MoreAppItem(
+    var fallingBlockPuzzle = MoreAppItem(
         Image.asset("assets/app_icons/falling_block_puzzle.png"), S.of(context).Falling_Block_Puzzle, () {
       OpenStore.instance.open(appStoreId: "1609440799", androidAppBundleId: "");
     });
 
-    var Simple_English_Dictionary = MoreAppItem(
+    var simpleEnglishDictionary = MoreAppItem(
         Image.asset("assets/app_icons/simple_english_dictionary.png"),
         S.of(context).Simple_English_Dictionary, () {
       OpenStore.instance.open(
           appStoreId: "1611258200", androidAppBundleId: "com.appsbay.simple_english_dictionary");
     });
 
-    var Classic_Reversi = MoreAppItem(
+    var classicReversi = MoreAppItem(
         Image.asset("assets/app_icons/classic_reversi.png"), S.of(context).Classic_Reversi, () {
       OpenStore.instance
           .open(appStoreId: "1616580829", androidAppBundleId: "com.appsbay.classic_reversi");
     });
 
-    var Onlynote =
+    var onlynote =
         MoreAppItem(Image.asset("assets/app_icons/onlynote.png"), S.of(context).Onlynote, () {
       OpenStore.instance.open(appStoreId: "1616516732", androidAppBundleId: "com.appsbay.onlynote");
     });
 
-    var World_Weather_Live = MoreAppItem(
+    var worldWeatherLive = MoreAppItem(
         Image.asset("assets/app_icons/world_weather_live.png"), S.of(context).World_Weather_Live,
         () {
       OpenStore.instance
           .open(appStoreId: "1612773646", androidAppBundleId: "com.appsbay.world_weather_live");
     });
 
-    var We_Play_Piano = MoreAppItem(
+    var wePlayPiano = MoreAppItem(
         Image.asset("assets/app_icons/we_play_piano.png"), S.of(context).We_Play_Piano, () {
       OpenStore.instance
           .open(appStoreId: "1625018611", androidAppBundleId: "com.appsbay.we_play_piano");
     });
 
-    var sudoku_lovers = MoreAppItem(
+    var sudokuLovers = MoreAppItem(
         Image.asset("assets/app_icons/sudoku_lovers.png"), S.of(context).Sudoku_Lovers, () {
       OpenStore.instance
           .open(appStoreId: "1620749798", androidAppBundleId: "com.appsbay.sudoku_lovers");
     });
 
-    var Instant_Face = MoreAppItem(
+    var instantFace = MoreAppItem(
         Image.asset("assets/app_icons/instant_face.png"), S.of(context).Instant_Face, () {
       OpenStore.instance
           .open(appStoreId: "1638563222", androidAppBundleId: "com.appsbay.instant_face");
     });
 
-    var minesweeper_go = MoreAppItem(
+    var minesweeperGo = MoreAppItem(
         Image.asset("assets/app_icons/minesweeper_go.png"), S.of(context).Minesweeper_Go, () {
       OpenStore.instance
           .open(appStoreId: "1621899572", androidAppBundleId: "com.appsbay.classic_minesweeper");
     });
 
     if (Platform.isIOS) {
-      _items = [
-        TripMark,
-        Falling_Block_Puzzle,
-        Yes_Habit,
-        Relaxing_Up,
-        Easy_Unit,
-        Classic_Memory_Game,
-        sudoku_lovers,
-        Image_Guru,
-        We_Play_Piano,
-        minesweeper_go,
-        Shows,
-        Simple_English_Dictionary,
-        Onlynote,
-        Instant_Face,
-        World_Weather_Live,
-        Classic_Reversi
+      items = [
+        tripMark,
+        fallingBlockPuzzle,
+        yesHabit,
+        relaxingUp,
+        easyUnit,
+        classicMemoryGame,
+        sudokuLovers,
+        imageGuru,
+        wePlayPiano,
+        minesweeperGo,
+        shows,
+        simpleEnglishDictionary,
+        onlynote,
+        instantFace,
+        worldWeatherLive,
+        classicReversi
       ];
     } else {
-      _items = [
-        sudoku_lovers,
-        Relaxing_Up,
-        Instant_Face,
-        minesweeper_go,
-        Classic_Memory_Game,
-        We_Play_Piano,
-        Shows,
-        Simple_English_Dictionary,
-        Onlynote,
-        World_Weather_Live,
-        Classic_Reversi
+      items = [
+        sudokuLovers,
+        relaxingUp,
+        instantFace,
+        minesweeperGo,
+        classicMemoryGame,
+        wePlayPiano,
+        shows,
+        simpleEnglishDictionary,
+        onlynote,
+        worldWeatherLive,
+        classicReversi
       ];
     }
     var model = Provider.of<ThemeModel>(context, listen: false);
@@ -283,7 +283,7 @@ class _MorePageState extends State<MorePage> {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -298,9 +298,9 @@ class _MorePageState extends State<MorePage> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: _items.length,
+                itemCount: items.length,
                 itemBuilder: (context, index) {
-                  return MoreAppsRow.factory(_items[index]);
+                  return MoreAppsRow.factory(items[index]);
                 },
               ),
             SizedBox(
@@ -320,12 +320,12 @@ class MoreAppItem {
 }
 
 class MoreAppsRow extends StatelessWidget {
-  Image appIcon;
-  IconData trailingIcon;
-  String title;
-  void Function() onTap;
+  final Image appIcon;
+  final IconData trailingIcon;
+  final String title;
+  final void Function() onTap;
 
-  MoreAppsRow(
+  const MoreAppsRow(
       {Key? key,
       this.trailingIcon = Icons.chevron_right_rounded,
       required this.appIcon,
@@ -356,7 +356,7 @@ class MoreAppsRow extends StatelessWidget {
           visualDensity: VisualDensity(vertical: 4), // to compact
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Container(
+            child: SizedBox(
               height: 50,
               width: 50,
               child: appIcon,
@@ -373,12 +373,12 @@ class MoreAppsRow extends StatelessWidget {
 }
 
 class MoreRow extends StatelessWidget {
-  IconData leadingIcon;
-  IconData trailingIcon;
-  String title;
-  void Function() onTap;
+  final IconData leadingIcon;
+  final IconData trailingIcon;
+  final String title;
+  final void Function() onTap;
 
-  MoreRow(
+  const MoreRow(
       {Key? key,
       this.trailingIcon = Icons.chevron_right_rounded,
       required this.leadingIcon,

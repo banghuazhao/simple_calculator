@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:simple_calculator/calculator-key.dart';
-import 'package:simple_calculator/key-controller.dart';
-import 'package:simple_calculator/key-symbol.dart';
+import 'package:simple_calculator/calculator_key.dart';
+import 'package:simple_calculator/key_controller.dart';
+import 'package:simple_calculator/key_symbol.dart';
 
 /// Structured output emitted on every state change.
 class CalcState {
@@ -118,11 +118,11 @@ abstract class Processor {
     _pushUndo();
     final CalculatorKey key = (event as KeyEvent).key;
     switch (key.symbol.type) {
-      case KeyType.FUNCTION:
+      case KeyType.function:
         return _handleFunction(key);
-      case KeyType.OPERATOR:
+      case KeyType.operator:
         return _handleOperator(key);
-      case KeyType.INTEGER:
+      case KeyType.integer:
         return _handleInteger(key);
     }
   }
@@ -166,20 +166,20 @@ abstract class Processor {
 
     if (_operator == null) {
       if (val == '.') {
-        if (!_valA.contains('.')) _valA += '.';
+        if (!_valA.contains('.')) _valA = '$_valA.';
       } else {
         if (_countDigits(_valA) >= 9) return;
-        _valA = (_valA == '0') ? val : _valA + val;
+        _valA = (_valA == '0') ? val : '$_valA$val';
       }
     } else {
       if (_valB == null) {
         _valB = val == '.' ? '0.' : val;
       } else {
         if (val == '.') {
-          if (!_valB!.contains('.')) _valB = _valB! + '.';
+          if (!_valB!.contains('.')) _valB = '${_valB!}.';
         } else {
           if (_countDigits(_valB!) >= 9) return;
-          _valB = (_valB == '0') ? val : _valB! + val;
+          _valB = (_valB == '0') ? val : '${_valB!}$val';
         }
       }
     }

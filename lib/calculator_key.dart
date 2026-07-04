@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_calculator/key-controller.dart' as keycontroller;
-import 'package:simple_calculator/key-symbol.dart';
-import 'package:simple_calculator/util/ThemeModel.dart';
+import 'package:simple_calculator/key_controller.dart' as keycontroller;
+import 'package:simple_calculator/key_symbol.dart';
+import 'package:simple_calculator/util/theme_model.dart';
 
 abstract class Keys {
   static const KeySymbol clear = KeySymbol('C');
@@ -81,13 +81,13 @@ class _CalculatorKeyState extends State<CalculatorKey>
 
     final Color color;
     switch (widget.symbol.type) {
-      case KeyType.FUNCTION:
+      case KeyType.function:
         color = model.buttonColor3;
         break;
-      case KeyType.OPERATOR:
+      case KeyType.operator:
         color = model.buttonColor2;
         break;
-      case KeyType.INTEGER:
+      case KeyType.integer:
       default:
         color = model.buttonColor1;
     }

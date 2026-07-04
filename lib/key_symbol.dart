@@ -1,6 +1,6 @@
-import 'package:simple_calculator/calculator-key.dart';
+import 'package:simple_calculator/calculator_key.dart';
 
-enum KeyType { FUNCTION, OPERATOR, INTEGER }
+enum KeyType { function, operator, integer }
 
 class KeySymbol {
   const KeySymbol(this.value);
@@ -28,5 +28,5 @@ class KeySymbol {
   bool get isInteger => !isOperator && !isFunction;
 
   KeyType get type =>
-      isFunction ? KeyType.FUNCTION : (isOperator ? KeyType.OPERATOR : KeyType.INTEGER);
+      isFunction ? KeyType.function : (isOperator ? KeyType.operator : KeyType.integer);
 }

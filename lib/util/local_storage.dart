@@ -8,18 +8,18 @@ class SharedPreferencesHelper {
 }
 
 class BgmHelper {
-  final String KEY = "BgmHelper_Key";
+  final String key = "BgmHelper_Key";
 
-  BgmHelper._privateConstructor() {}
+  BgmHelper._privateConstructor();
 
   static final BgmHelper instance = BgmHelper._privateConstructor();
 
   bool get playBgm {
-    bool temp = SharedPreferencesHelper.localStorage?.getBool(KEY) ?? true;
+    bool temp = SharedPreferencesHelper.localStorage?.getBool(key) ?? true;
     return temp;
   }
 
   set(bool playBGM) {
-    SharedPreferencesHelper.localStorage?.setBool(KEY, playBGM);
+    SharedPreferencesHelper.localStorage?.setBool(key, playBGM);
   }
 }

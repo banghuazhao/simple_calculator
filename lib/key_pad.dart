@@ -1,11 +1,13 @@
 import 'package:flutter/widgets.dart';
-import 'package:simple_calculator/calculator-key.dart';
+import 'package:simple_calculator/calculator_key.dart';
 
 class KeyPad extends StatelessWidget {
+  const KeyPad({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Column(children: [
         Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
           CalculatorKey(symbol: Keys.clear),
