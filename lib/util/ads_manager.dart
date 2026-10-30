@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -31,28 +32,67 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 class AdsManager {
   AdsManager._();
 
+  static Future<bool>? _initialization;
+
+  /// Ad services are optional and never gate the calculator's first frame.
+  static Future<bool> initialize() => _initialization ??= _initialize();
+
+  static Future<bool> _initialize() async {
+    if (disableAllAdsForScreenshot ||
+        (!Platform.isAndroid && !Platform.isIOS)) {
+      return false;
+    }
+    try {
+      await MobileAds.instance
+          .initialize()
+          .timeout(const Duration(seconds: 15));
+      return true;
+    } catch (error) {
+      debugPrint('Ads unavailable: $error');
+      return false;
+    }
+  }
+
+  static Future<void> disposeAd(Ad? ad) async {
+    try {
+      await ad?.dispose();
+    } catch (error) {
+      debugPrint('Ad cleanup unavailable: $error');
+    }
+  }
+
   /// Set to true before capturing App Store / Play Store screenshots so no
   /// ads are loaded or displayed.
   static bool disableAllAdsForScreenshot = false;
 
   // --- Google official sample/"test" unit IDs (safe to commit) -------------
   // https://developers.google.com/admob/flutter/test-ads
-  static const String _testBannerAndroid = 'ca-app-pub-3940256099942544/6300978111';
+  static const String _testBannerAndroid =
+      'ca-app-pub-3940256099942544/6300978111';
   static const String _testBannerIOS = 'ca-app-pub-3940256099942544/2934735716';
-  static const String _testInterstitialAndroid = 'ca-app-pub-3940256099942544/1033173712';
-  static const String _testInterstitialIOS = 'ca-app-pub-3940256099942544/4411468910';
-  static const String _testAppOpenAndroid = 'ca-app-pub-3940256099942544/9257395921';
-  static const String _testAppOpenIOS = 'ca-app-pub-3940256099942544/5575463023';
+  static const String _testInterstitialAndroid =
+      'ca-app-pub-3940256099942544/1033173712';
+  static const String _testInterstitialIOS =
+      'ca-app-pub-3940256099942544/4411468910';
+  static const String _testAppOpenAndroid =
+      'ca-app-pub-3940256099942544/9257395921';
+  static const String _testAppOpenIOS =
+      'ca-app-pub-3940256099942544/5575463023';
 
   // --- Production unit IDs, injected from the git-ignored release file ------
   // Empty by default so the app still compiles without the file; an empty ad
   // unit simply fails to load instead of showing a (test) ad in production.
-  static const String _releaseBannerAndroid = String.fromEnvironment('BANNER_ANDROID');
+  static const String _releaseBannerAndroid =
+      String.fromEnvironment('BANNER_ANDROID');
   static const String _releaseBannerIOS = String.fromEnvironment('BANNER_IOS');
-  static const String _releaseInterstitialAndroid = String.fromEnvironment('INTERSTITIAL_ANDROID');
-  static const String _releaseInterstitialIOS = String.fromEnvironment('INTERSTITIAL_IOS');
-  static const String _releaseAppOpenAndroid = String.fromEnvironment('APP_OPEN_ANDROID');
-  static const String _releaseAppOpenIOS = String.fromEnvironment('APP_OPEN_IOS');
+  static const String _releaseInterstitialAndroid =
+      String.fromEnvironment('INTERSTITIAL_ANDROID');
+  static const String _releaseInterstitialIOS =
+      String.fromEnvironment('INTERSTITIAL_IOS');
+  static const String _releaseAppOpenAndroid =
+      String.fromEnvironment('APP_OPEN_ANDROID');
+  static const String _releaseAppOpenIOS =
+      String.fromEnvironment('APP_OPEN_IOS');
 
   static String _resolve({
     required String testAndroid,
@@ -149,34 +189,39 @@ class AppOpenAdManager {
 
   bool get _isExpired {
     final loaded = _appOpenLoadTime;
-    return loaded == null || DateTime.now().subtract(maxCacheDuration).isAfter(loaded);
+    return loaded == null ||
+        DateTime.now().subtract(maxCacheDuration).isAfter(loaded);
   }
 
-  void loadAd() {
+  Future<void> loadAd() async {
     if (AdsManager.disableAllAdsForScreenshot) return;
-    AppOpenAd.load(
-      adUnitId: AdsManager.appOpenAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: AppOpenAdLoadCallback(
-        onAdLoaded: (ad) {
-          _appOpenLoadTime = DateTime.now();
-          _appOpenAd = ad;
-        },
-        onAdFailedToLoad: (error) {
-          debugPrint('AppOpenAd failed to load: $error');
-        },
-      ),
-    );
+    try {
+      await AppOpenAd.load(
+        adUnitId: AdsManager.appOpenAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: AppOpenAdLoadCallback(
+          onAdLoaded: (ad) {
+            _appOpenLoadTime = DateTime.now();
+            _appOpenAd = ad;
+          },
+          onAdFailedToLoad: (error) {
+            debugPrint('AppOpenAd failed to load: $error');
+          },
+        ),
+      );
+    } catch (error) {
+      debugPrint('App open ad unavailable: $error');
+    }
   }
 
   /// Shows the ad if one is ready, not on cooldown, and nothing else is on
   /// screen. Otherwise (re)loads one for next time.
-  void showAdIfAvailable() {
+  Future<void> showAdIfAvailable() async {
     if (AdsManager.disableAllAdsForScreenshot) return;
     if (_isShowingAd || AdState.isShowingFullScreenAd) return;
 
     if (!isAdAvailable || _isExpired) {
-      _appOpenAd?.dispose();
+      unawaited(AdsManager.disposeAd(_appOpenAd));
       _appOpenAd = null;
       loadAd();
       return;
@@ -196,19 +241,32 @@ class AppOpenAdManager {
       onAdFailedToShowFullScreenContent: (ad, error) {
         _isShowingAd = false;
         AdState.isShowingFullScreenAd = false;
-        ad.dispose();
+        unawaited(AdsManager.disposeAd(ad));
         _appOpenAd = null;
         loadAd();
       },
       onAdDismissedFullScreenContent: (ad) {
         _isShowingAd = false;
         AdState.isShowingFullScreenAd = false;
-        ad.dispose();
+        unawaited(AdsManager.disposeAd(ad));
         _appOpenAd = null;
         loadAd();
       },
     );
-    _appOpenAd!.show();
+    // Reserve the full-screen slot before the asynchronous platform call, so
+    // another foreground event cannot try to show the same ad twice.
+    _isShowingAd = true;
+    AdState.isShowingFullScreenAd = true;
+    final ad = _appOpenAd!;
+    try {
+      await ad.show();
+    } catch (error) {
+      _isShowingAd = false;
+      AdState.isShowingFullScreenAd = false;
+      if (identical(_appOpenAd, ad)) _appOpenAd = null;
+      unawaited(AdsManager.disposeAd(ad));
+      debugPrint('App open ad could not be shown: $error');
+    }
   }
 }
 
@@ -224,7 +282,7 @@ class AppLifecycleReactor with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      appOpenAdManager.showAdIfAvailable();
+      unawaited(appOpenAdManager.showAdIfAvailable());
     }
   }
 }

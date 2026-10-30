@@ -44,6 +44,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/.kotlin/
 
 # AdMob production ad unit IDs — injected at release build time only.
 # Keep real IDs out of source; ad_ids.release.example.json is the committed template.

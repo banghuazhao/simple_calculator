@@ -74,10 +74,12 @@ class _CalculatorKeyState extends State<CalculatorKey>
 
     double size = (screenSize.width - 40) / 4;
     if (size > 150) size = 150;
-    if (screenSize.height > 740) {
-      final heightBased = (screenSize.height * 0.60 - 40) / 5;
-      size = min(size, heightBased);
-    }
+    // Landscape tablets and resizable windows can be wide but short. Android
+    // 16 may ignore portrait locks, so height must cap the keypad at every size.
+    final availableHeight =
+        screenSize.height - MediaQuery.paddingOf(context).vertical;
+    final heightBased = max(0.0, (availableHeight * 0.60 - 40) / 5);
+    size = min(size, heightBased);
 
     final Color color;
     switch (widget.symbol.type) {

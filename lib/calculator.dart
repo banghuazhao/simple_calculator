@@ -12,6 +12,7 @@ import 'package:simple_calculator/more_page.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
+import 'package:simple_calculator/util/shake_listener.dart';
 
 class Calculator extends StatefulWidget {
   const Calculator({Key? key}) : super(key: key);
@@ -27,9 +28,7 @@ class _CalculatorState extends State<Calculator> {
   bool _isAdLoaded = false;
 
   // Shake detection
-  StreamSubscription<AccelerometerEvent>? _accelSub;
-  double _lastX = 0, _lastY = 9.8, _lastZ = 0;
-  DateTime? _lastShake;
+  ShakeListener? _shakeListener;
 
   @override
   void initState() {
@@ -38,18 +37,45 @@ class _CalculatorState extends State<Calculator> {
     Processor.listen((state) => setState(() => _calcState = state));
     Processor.refresh();
 
-    if (!Platform.isMacOS) {
-      _ad = BannerAd(
+    if (Platform.isAndroid || Platform.isIOS) {
+      // Plugin and sensor failures must not prevent the first calculator frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_loadBanner());
+      });
+      try {
+        _shakeListener = ShakeListener(onShake: () {
+          Processor.undo();
+          HapticFeedback.mediumImpact();
+        })
+          ..listen(accelerometerEventStream());
+      } catch (error) {
+        debugPrint('Shake-to-undo unavailable: $error');
+      }
+    }
+  }
+
+  Future<void> _loadBanner() async {
+    if (!await AdsManager.initialize() || !mounted) return;
+    try {
+      final ad = BannerAd(
         adUnitId: AdsManager.bannerAdUnitId,
         size: AdSize.banner,
         request: const AdRequest(),
         listener: BannerAdListener(
-          onAdLoaded: (_) => setState(() => _isAdLoaded = true),
-          onAdFailedToLoad: (ad, error) => ad.dispose(),
+          onAdLoaded: (ad) {
+            if (mounted) {
+              setState(() => _isAdLoaded = true);
+            } else {
+              unawaited(AdsManager.disposeAd(ad));
+            }
+          },
+          onAdFailedToLoad: (ad, error) => unawaited(AdsManager.disposeAd(ad)),
         ),
-      )..load();
-
-      _accelSub = accelerometerEventStream().listen(_onAccelerometer);
+      );
+      _ad = ad;
+      await ad.load();
+    } catch (error) {
+      debugPrint('Banner unavailable: $error');
     }
   }
 
@@ -57,30 +83,9 @@ class _CalculatorState extends State<Calculator> {
   void dispose() {
     KeyController.dispose();
     Processor.dispose();
-    _ad?.dispose();
-    _accelSub?.cancel();
+    unawaited(AdsManager.disposeAd(_ad));
+    unawaited(_shakeListener?.dispose());
     super.dispose();
-  }
-
-  void _onAccelerometer(AccelerometerEvent e) {
-    final dx = e.x - _lastX;
-    final dy = e.y - _lastY;
-    final dz = e.z - _lastZ;
-    _lastX = e.x;
-    _lastY = e.y;
-    _lastZ = e.z;
-
-    // Squared magnitude of delta — threshold ~sqrt(350) ≈ 18 m/s²
-    final delta = dx * dx + dy * dy + dz * dz;
-    if (delta > 350) {
-      final now = DateTime.now();
-      if (_lastShake == null ||
-          now.difference(_lastShake!) > const Duration(milliseconds: 900)) {
-        _lastShake = now;
-        Processor.undo();
-        HapticFeedback.mediumImpact();
-      }
-    }
   }
 
   void _showHistory() {
@@ -186,9 +191,11 @@ class _CalculatorState extends State<Calculator> {
                         : ListView.separated(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             itemCount: entries.length,
-                            separatorBuilder: (_, __) =>
-                                Divider(height: 1, indent: 20, endIndent: 20,
-                                    color: textColor.withValues(alpha: 0.08)),
+                            separatorBuilder: (_, __) => Divider(
+                                height: 1,
+                                indent: 20,
+                                endIndent: 20,
+                                color: textColor.withValues(alpha: 0.08)),
                             itemBuilder: (_, i) {
                               final entry = entries[i];
                               return Dismissible(

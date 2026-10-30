@@ -10,9 +10,9 @@ class InAppReviewHelper {
     int? count = prefs.getInt(openCount);
     if (count != null) {
       count += 1;
-      prefs.setInt(openCount, count);
+      await prefs.setInt(openCount, count);
     } else {
-      prefs.setInt(openCount, 1);
+      await prefs.setInt(openCount, 1);
     }
   }
 
@@ -25,7 +25,7 @@ class InAppReviewHelper {
     // print("App open count: $count");
     if (count == 3 || count == 15 || count == 100) {
       if (await inAppReview.isAvailable()) {
-        inAppReview.requestReview();
+        await inAppReview.requestReview();
       }
     }
   }
