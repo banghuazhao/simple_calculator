@@ -55,5 +55,11 @@
   "copyResult": "Copy result",
   "error": "Error",
   "reuseResult": "Use this result",
-  "deleteCalculation": "Delete calculation"
+  "deleteCalculation": "Delete calculation",
+  "copyCalculation": "Copy calculation",
+  "inputSettings": "Input settings",
+  "hapticFeedback": "Haptic feedback",
+  "hapticFeedbackDescription": "Vibrate when using calculator controls",
+  "shakeToUndo": "Shake to undo",
+  "shakeToUndoDescription": "Undo the last input by shaking your phone"
 }

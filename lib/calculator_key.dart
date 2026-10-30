@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/key_controller.dart' as keycontroller;
 import 'package:simple_calculator/key_symbol.dart';
+import 'package:simple_calculator/util/input_feedback.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
 abstract class Keys {
@@ -60,16 +60,8 @@ class _CalculatorKeyState extends State<CalculatorKey>
   }
 
   void _onTapDown(TapDownDetails _) {
-    unawaited(_lightImpact());
+    unawaited(InputFeedback.lightImpact());
     _controller.forward();
-  }
-
-  Future<void> _lightImpact() async {
-    try {
-      await HapticFeedback.lightImpact();
-    } catch (error) {
-      debugPrint('Key feedback unavailable: $error');
-    }
   }
 
   void _onTapUp(TapUpDetails _) {
@@ -82,7 +74,7 @@ class _CalculatorKeyState extends State<CalculatorKey>
   }
 
   void _onSemanticTap() {
-    unawaited(_lightImpact());
+    unawaited(InputFeedback.lightImpact());
     _activate();
   }
 

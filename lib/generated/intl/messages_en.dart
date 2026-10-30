@@ -92,6 +92,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearHistoryTitle": MessageLookupByLibrary.simpleMessage("Clear history?"),
     "clearInput": MessageLookupByLibrary.simpleMessage("Clear input"),
     "copied": MessageLookupByLibrary.simpleMessage("Copied"),
+    "copyCalculation": MessageLookupByLibrary.simpleMessage("Copy calculation"),
     "copyResult": MessageLookupByLibrary.simpleMessage("Copy result"),
     "decimalPoint": MessageLookupByLibrary.simpleMessage("Decimal point"),
     "deleteCalculation": MessageLookupByLibrary.simpleMessage(
@@ -100,7 +101,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "divide": MessageLookupByLibrary.simpleMessage("Divide"),
     "equals": MessageLookupByLibrary.simpleMessage("Equals"),
     "error": MessageLookupByLibrary.simpleMessage("Error"),
+    "hapticFeedback": MessageLookupByLibrary.simpleMessage("Haptic feedback"),
+    "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage(
+      "Vibrate when using calculator controls",
+    ),
     "history": MessageLookupByLibrary.simpleMessage("History"),
+    "inputSettings": MessageLookupByLibrary.simpleMessage("Input settings"),
     "multiply": MessageLookupByLibrary.simpleMessage("Multiply"),
     "noCalculationsYet": MessageLookupByLibrary.simpleMessage(
       "No calculations yet",
@@ -108,6 +114,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "percent": MessageLookupByLibrary.simpleMessage("Percent"),
     "reuseResult": MessageLookupByLibrary.simpleMessage("Use this result"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
+    "shakeToUndo": MessageLookupByLibrary.simpleMessage("Shake to undo"),
+    "shakeToUndoDescription": MessageLookupByLibrary.simpleMessage(
+      "Undo the last input by shaking your phone",
+    ),
     "subtract": MessageLookupByLibrary.simpleMessage("Subtract"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "undo": MessageLookupByLibrary.simpleMessage("Undo"),

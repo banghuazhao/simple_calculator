@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/calculator.dart';
+import 'package:simple_calculator/processor.dart';
+import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
@@ -21,6 +23,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageManager.init();
   SharedPreferencesHelper.localStorage = StorageManager.sharedPreferences;
+  InputSettings.instance.load();
+  Processor.restoreHistory();
   runApp(const CalculatorApp());
 
   WidgetsBinding.instance.addPostFrameCallback((_) {

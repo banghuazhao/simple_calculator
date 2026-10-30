@@ -51,5 +51,11 @@
   "copyResult": "複製結果",
   "error": "錯誤",
   "reuseResult": "使用此結果",
-  "deleteCalculation": "刪除計算記錄"
+  "deleteCalculation": "刪除計算記錄",
+  "copyCalculation": "複製計算過程",
+  "inputSettings": "輸入設定",
+  "hapticFeedback": "觸覺回饋",
+  "hapticFeedbackDescription": "操作計算器時震動",
+  "shakeToUndo": "搖動復原",
+  "shakeToUndoDescription": "搖動手機以復原上一步輸入"
 }

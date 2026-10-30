@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:simple_calculator/calculator_key.dart';
 import 'package:simple_calculator/key_controller.dart';
 import 'package:simple_calculator/key_symbol.dart';
+import 'package:simple_calculator/util/history_storage.dart';
 
 /// Structured output emitted on every state change.
 class CalcState {
@@ -21,7 +22,7 @@ class CalcState {
 class HistoryEntry {
   final int id;
   final String equation; // e.g. "3 + 4 ="
-  final String result;   // raw value without formatting
+  final String result; // raw value without formatting
   const HistoryEntry({
     required this.id,
     required this.equation,
@@ -50,7 +51,8 @@ abstract class Processor {
   static final StreamController<CalcState> _controller =
       StreamController<CalcState>.broadcast();
 
-  static StreamSubscription<CalcState> listen(void Function(CalcState) handler) =>
+  static StreamSubscription<CalcState> listen(
+          void Function(CalcState) handler) =>
       _controller.stream.listen(handler);
 
   static void refresh() => _controller.add(_calcState);
@@ -101,13 +103,54 @@ abstract class Processor {
 
   // ── History ───────────────────────────────────────────────────────────────
 
-  static void clearHistory() => _history.clear();
+  /// Restore completed calculations without changing current input or undo.
+  static void restoreHistory() {
+    final entries = HistoryStorage.instance.load();
+    _history
+      ..clear()
+      ..addAll(entries.map((entry) => HistoryEntry(
+            id: entry.id,
+            equation: entry.equation,
+            result: entry.result,
+          )));
+    _historyIdSeq = 0;
+    for (final entry in _history) {
+      if (entry.id >= _historyIdSeq) _historyIdSeq = entry.id + 1;
+    }
+    if (_historyIdSeq > HistoryStorage.maxId) _historyIdSeq = 0;
+  }
 
-  static void removeHistoryEntry(int id) =>
-      _history.removeWhere((e) => e.id == id);
+  static void _saveHistory() {
+    unawaited(
+        HistoryStorage.instance.save(_history.map((entry) => StoredCalculation(
+              id: entry.id,
+              equation: entry.equation,
+              result: entry.result,
+            ))));
+  }
+
+  static int _nextHistoryId() {
+    while (_history.any((entry) => entry.id == _historyIdSeq)) {
+      _historyIdSeq = (_historyIdSeq + 1) % (HistoryStorage.maxId + 1);
+    }
+    final id = _historyIdSeq;
+    _historyIdSeq = (_historyIdSeq + 1) % (HistoryStorage.maxId + 1);
+    return id;
+  }
+
+  static void clearHistory() {
+    _history.clear();
+    _saveHistory();
+  }
+
+  static void removeHistoryEntry(int id) {
+    _history.removeWhere((e) => e.id == id);
+    _saveHistory();
+  }
 
   /// Load a history result back into the calculator as the current value.
   static void setFromHistory(String result) {
+    if (!HistoryStorage.isValidNumber(result)) return;
     _pushUndo();
     _clear();
     _valA = result;
@@ -230,18 +273,29 @@ abstract class Processor {
   }
 
   static void _percent() {
+    final value = double.tryParse(_valB ?? _valA);
+    if (value == null || !value.isFinite) {
+      _result = 'Error';
+      return;
+    }
     if (_valB != null) {
-      _valB = _formatResult(double.parse(_valB!) / 100);
+      _valB = _formatResult(value / 100);
     } else if (_valA != '0') {
-      _valA = _formatResult(double.parse(_valA) / 100);
+      _valA = _formatResult(value / 100);
     }
   }
 
   static void _calculate() {
     if (_operator == null || _valB == null) return;
 
-    final double a = double.parse(_valA);
-    final double b = double.parse(_valB!);
+    final a = double.tryParse(_valA);
+    final b = double.tryParse(_valB!);
+
+    if (a == null || b == null || !a.isFinite || !b.isFinite) {
+      _result = 'Error';
+      refresh();
+      return;
+    }
 
     if (_operator == Keys.divide && b == 0) {
       _result = 'Error';
@@ -260,14 +314,23 @@ abstract class Processor {
       result = a + b;
     }
 
+    if (!result.isFinite) {
+      _result = 'Error';
+      refresh();
+      return;
+    }
+
     _result = _formatResult(result);
 
-    _history.insert(0, HistoryEntry(
-      id: _historyIdSeq++,
-      equation: '$_valA ${_operator!.value} $_valB =',
-      result: _result!,
-    ));
-    if (_history.length > 100) _history.removeLast();
+    _history.insert(
+        0,
+        HistoryEntry(
+          id: _nextHistoryId(),
+          equation: '$_valA ${_operator!.value} $_valB =',
+          result: _result!,
+        ));
+    if (_history.length > HistoryStorage.maxEntries) _history.removeLast();
+    _saveHistory();
 
     refresh();
   }

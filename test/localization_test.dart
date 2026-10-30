@@ -28,6 +28,12 @@ Map<String, String> calculatorMessages(S strings) => {
   'error': strings.error,
   'reuseResult': strings.reuseResult,
   'deleteCalculation': strings.deleteCalculation,
+  'copyCalculation': strings.copyCalculation,
+  'inputSettings': strings.inputSettings,
+  'hapticFeedback': strings.hapticFeedback,
+  'hapticFeedbackDescription': strings.hapticFeedbackDescription,
+  'shakeToUndo': strings.shakeToUndo,
+  'shakeToUndoDescription': strings.shakeToUndoDescription,
 };
 
 void main() {

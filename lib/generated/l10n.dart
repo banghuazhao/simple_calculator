@@ -479,6 +479,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Copy calculation`
+  String get copyCalculation {
+    return Intl.message(
+      'Copy calculation',
+      name: 'copyCalculation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Input settings`
+  String get inputSettings {
+    return Intl.message(
+      'Input settings',
+      name: 'inputSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Haptic feedback`
+  String get hapticFeedback {
+    return Intl.message(
+      'Haptic feedback',
+      name: 'hapticFeedback',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Vibrate when using calculator controls`
+  String get hapticFeedbackDescription {
+    return Intl.message(
+      'Vibrate when using calculator controls',
+      name: 'hapticFeedbackDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shake to undo`
+  String get shakeToUndo {
+    return Intl.message(
+      'Shake to undo',
+      name: 'shakeToUndo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Undo the last input by shaking your phone`
+  String get shakeToUndoDescription {
+    return Intl.message(
+      'Undo the last input by shaking your phone',
+      name: 'shakeToUndoDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

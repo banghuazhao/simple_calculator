@@ -6,6 +6,7 @@ import 'package:open_store/open_store.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
+import 'package:simple_calculator/util/input_settings.dart';
 
 import 'generated/l10n.dart';
 
@@ -208,6 +209,7 @@ class _MorePageState extends State<MorePage> {
             style: TextStyle(color: model.textColor1),
           ),
           leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             icon: Icon(
               Icons.arrow_back_rounded,
               color: model.textColor1,
@@ -222,6 +224,7 @@ class _MorePageState extends State<MorePage> {
         backgroundColor: model.backgroundColor,
         body: ListView(
           children: [
+            const InputSettingsSection(),
             Container(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                 child: Text(
@@ -309,6 +312,51 @@ class _MorePageState extends State<MorePage> {
             )
           ],
         ));
+  }
+}
+
+class InputSettingsSection extends StatelessWidget {
+  const InputSettingsSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final model = Provider.of<ThemeModel>(context);
+    final strings = S.of(context);
+    final settings = InputSettings.instance;
+    return AnimatedBuilder(
+      animation: settings,
+      builder: (context, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(strings.inputSettings,
+                style: TextStyle(fontSize: 21, color: model.textColor1)),
+          ),
+          SwitchListTile.adaptive(
+            key: const ValueKey('haptics-setting'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            title: Text(strings.hapticFeedback,
+                style: TextStyle(color: model.textColor1)),
+            subtitle: Text(strings.hapticFeedbackDescription,
+                style: TextStyle(color: model.textColor1)),
+            value: settings.hapticsEnabled,
+            onChanged: settings.setHapticsEnabled,
+          ),
+          SwitchListTile.adaptive(
+            key: const ValueKey('shake-setting'),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            title: Text(strings.shakeToUndo,
+                style: TextStyle(color: model.textColor1)),
+            subtitle: Text(strings.shakeToUndoDescription,
+                style: TextStyle(color: model.textColor1)),
+            value: settings.shakeToUndoEnabled,
+            onChanged: settings.setShakeToUndoEnabled,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
   }
 }
 

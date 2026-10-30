@@ -54,5 +54,11 @@
   "copyResult": "复制结果",
   "error": "错误",
   "reuseResult": "使用此结果",
-  "deleteCalculation": "删除计算记录"
+  "deleteCalculation": "删除计算记录",
+  "copyCalculation": "复制计算过程",
+  "inputSettings": "输入设置",
+  "hapticFeedback": "触感反馈",
+  "hapticFeedbackDescription": "操作计算器时振动",
+  "shakeToUndo": "摇动撤销",
+  "shakeToUndoDescription": "摇动手机以撤销上一步输入"
 }

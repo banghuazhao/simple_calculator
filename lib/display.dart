@@ -1,8 +1,8 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
+import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
 class Display extends StatelessWidget {
@@ -38,36 +38,7 @@ class Display extends StatelessWidget {
 
   Future<void> _copyToClipboard(BuildContext context) async {
     if (current == 'Error') return;
-    try {
-      await Clipboard.setData(ClipboardData(text: current));
-    } catch (error) {
-      debugPrint('Clipboard unavailable: $error');
-      return;
-    }
-    try {
-      await HapticFeedback.mediumImpact();
-    } catch (error) {
-      debugPrint('Copy feedback unavailable: $error');
-    }
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            S.of(context).copied,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          duration: const Duration(milliseconds: 1200),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          elevation: 4,
-        ),
-      );
+    await ClipboardHelper.copy(context, current);
   }
 
   @override
