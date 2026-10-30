@@ -88,7 +88,10 @@ class CalculatorApp extends StatelessWidget {
               // print(locale);
               // 中文 简繁体处理
               if (locale?.languageCode == 'zh') {
-                if (locale?.scriptCode == 'Hant') {
+                final traditional = locale?.scriptCode == 'Hant' ||
+                    ((locale?.scriptCode?.isEmpty ?? true) &&
+                        const ['HK', 'TW', 'MO'].contains(locale?.countryCode));
+                if (traditional) {
                   return const Locale('zh', 'HK'); //繁体
                 } else {
                   return const Locale('zh', ''); //简体

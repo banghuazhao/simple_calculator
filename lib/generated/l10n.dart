@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -332,6 +333,151 @@ class S {
   /// `Theme`
   String get theme {
     return Intl.message('Theme', name: 'theme', desc: '', args: []);
+  }
+
+  /// `History`
+  String get history {
+    return Intl.message('History', name: 'history', desc: '', args: []);
+  }
+
+  /// `Clear history?`
+  String get clearHistoryTitle {
+    return Intl.message(
+      'Clear history?',
+      name: 'clearHistoryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will remove all saved calculations.`
+  String get clearHistoryMessage {
+    return Intl.message(
+      'This will remove all saved calculations.',
+      name: 'clearHistoryMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel`
+  String get cancel {
+    return Intl.message('Cancel', name: 'cancel', desc: '', args: []);
+  }
+
+  /// `Clear`
+  String get clear {
+    return Intl.message('Clear', name: 'clear', desc: '', args: []);
+  }
+
+  /// `No calculations yet`
+  String get noCalculationsYet {
+    return Intl.message(
+      'No calculations yet',
+      name: 'noCalculationsYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copied`
+  String get copied {
+    return Intl.message('Copied', name: 'copied', desc: '', args: []);
+  }
+
+  /// `Settings`
+  String get settings {
+    return Intl.message('Settings', name: 'settings', desc: '', args: []);
+  }
+
+  /// `Undo`
+  String get undo {
+    return Intl.message('Undo', name: 'undo', desc: '', args: []);
+  }
+
+  /// `Clear input`
+  String get clearInput {
+    return Intl.message('Clear input', name: 'clearInput', desc: '', args: []);
+  }
+
+  /// `Change sign`
+  String get changeSign {
+    return Intl.message('Change sign', name: 'changeSign', desc: '', args: []);
+  }
+
+  /// `Percent`
+  String get percent {
+    return Intl.message('Percent', name: 'percent', desc: '', args: []);
+  }
+
+  /// `Divide`
+  String get divide {
+    return Intl.message('Divide', name: 'divide', desc: '', args: []);
+  }
+
+  /// `Multiply`
+  String get multiply {
+    return Intl.message('Multiply', name: 'multiply', desc: '', args: []);
+  }
+
+  /// `Subtract`
+  String get subtract {
+    return Intl.message('Subtract', name: 'subtract', desc: '', args: []);
+  }
+
+  /// `Add`
+  String get add {
+    return Intl.message('Add', name: 'add', desc: '', args: []);
+  }
+
+  /// `Equals`
+  String get equals {
+    return Intl.message('Equals', name: 'equals', desc: '', args: []);
+  }
+
+  /// `Decimal point`
+  String get decimalPoint {
+    return Intl.message(
+      'Decimal point',
+      name: 'decimalPoint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backspace`
+  String get backspace {
+    return Intl.message('Backspace', name: 'backspace', desc: '', args: []);
+  }
+
+  /// `Copy result`
+  String get copyResult {
+    return Intl.message('Copy result', name: 'copyResult', desc: '', args: []);
+  }
+
+  /// `Error`
+  String get error {
+    return Intl.message('Error', name: 'error', desc: '', args: []);
+  }
+
+  /// `Use this result`
+  String get reuseResult {
+    return Intl.message(
+      'Use this result',
+      name: 'reuseResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete calculation`
+  String get deleteCalculation {
+    return Intl.message(
+      'Delete calculation',
+      name: 'deleteCalculation',
+      desc: '',
+      args: [],
+    );
   }
 }
 

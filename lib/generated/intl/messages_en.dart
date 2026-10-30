@@ -78,9 +78,38 @@ class MessageLookup extends MessageLookupByLibrary {
       "World Weather Live",
     ),
     "Yes_Habit": MessageLookupByLibrary.simpleMessage("Yes Habit"),
+    "add": MessageLookupByLibrary.simpleMessage("Add"),
     "background_music": MessageLookupByLibrary.simpleMessage(
       "Background Music",
     ),
+    "backspace": MessageLookupByLibrary.simpleMessage("Backspace"),
+    "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+    "changeSign": MessageLookupByLibrary.simpleMessage("Change sign"),
+    "clear": MessageLookupByLibrary.simpleMessage("Clear"),
+    "clearHistoryMessage": MessageLookupByLibrary.simpleMessage(
+      "This will remove all saved calculations.",
+    ),
+    "clearHistoryTitle": MessageLookupByLibrary.simpleMessage("Clear history?"),
+    "clearInput": MessageLookupByLibrary.simpleMessage("Clear input"),
+    "copied": MessageLookupByLibrary.simpleMessage("Copied"),
+    "copyResult": MessageLookupByLibrary.simpleMessage("Copy result"),
+    "decimalPoint": MessageLookupByLibrary.simpleMessage("Decimal point"),
+    "deleteCalculation": MessageLookupByLibrary.simpleMessage(
+      "Delete calculation",
+    ),
+    "divide": MessageLookupByLibrary.simpleMessage("Divide"),
+    "equals": MessageLookupByLibrary.simpleMessage("Equals"),
+    "error": MessageLookupByLibrary.simpleMessage("Error"),
+    "history": MessageLookupByLibrary.simpleMessage("History"),
+    "multiply": MessageLookupByLibrary.simpleMessage("Multiply"),
+    "noCalculationsYet": MessageLookupByLibrary.simpleMessage(
+      "No calculations yet",
+    ),
+    "percent": MessageLookupByLibrary.simpleMessage("Percent"),
+    "reuseResult": MessageLookupByLibrary.simpleMessage("Use this result"),
+    "settings": MessageLookupByLibrary.simpleMessage("Settings"),
+    "subtract": MessageLookupByLibrary.simpleMessage("Subtract"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
+    "undo": MessageLookupByLibrary.simpleMessage("Undo"),
   };
 }

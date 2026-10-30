@@ -58,6 +58,8 @@ abstract class Processor {
   /// All completed calculations, newest first.
   static List<HistoryEntry> get historyLog => List.unmodifiable(_history);
 
+  static bool get canUndo => _undoStack.isNotEmpty;
+
   static CalcState get _calcState {
     if (_result != null) {
       if (_result == 'Error') {
@@ -195,12 +197,22 @@ abstract class Processor {
       return;
     }
     if (_valB != null) {
-      _valB = _valB!.length == 1 ? null : _valB!.substring(0, _valB!.length - 1);
+      _valB = _backspaceValue(_valB!);
     } else if (_operator != null) {
       _operator = null;
     } else if (_valA != '0') {
-      _valA = _valA.length == 1 ? '0' : _valA.substring(0, _valA.length - 1);
+      _valA = _backspaceValue(_valA) ?? '0';
     }
+  }
+
+  static String? _backspaceValue(String value) {
+    var remaining = value.substring(0, value.length - 1);
+    // Never leave an unparseable sign or partial scientific exponent in an
+    // operand. Percent and arithmetic must always receive a valid number.
+    while (remaining.isNotEmpty && double.tryParse(remaining) == null) {
+      remaining = remaining.substring(0, remaining.length - 1);
+    }
+    return remaining.isEmpty ? null : remaining;
   }
 
   static void _clear() {
@@ -261,11 +273,16 @@ abstract class Processor {
   }
 
   static String _formatResult(double value) {
-    String str = value.toString();
-    if (str.contains('.')) {
-      str = str.replaceAll(RegExp(r'0+$'), '').replaceAll(RegExp(r'\.$'), '');
+    final str = value.toString();
+    final exponentIndex = str.indexOf('e');
+    var mantissa = exponentIndex < 0 ? str : str.substring(0, exponentIndex);
+    final exponent = exponentIndex < 0 ? '' : str.substring(exponentIndex);
+    if (mantissa.contains('.')) {
+      mantissa = mantissa
+          .replaceAll(RegExp(r'0+$'), '')
+          .replaceAll(RegExp(r'\.$'), '');
     }
-    return str.isEmpty ? '0' : str;
+    return mantissa.isEmpty ? '0' : '$mantissa$exponent';
   }
 
   static void _condense() {

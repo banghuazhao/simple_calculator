@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/key_controller.dart' as keycontroller;
 import 'package:simple_calculator/key_symbol.dart';
 import 'package:simple_calculator/util/theme_model.dart';
@@ -46,8 +48,10 @@ class _CalculatorKeyState extends State<CalculatorKey>
     duration: const Duration(milliseconds: 70),
     reverseDuration: const Duration(milliseconds: 130),
   );
-  late final Animation<double> _scale = Tween<double>(begin: 1.0, end: 0.88)
-      .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+  late final Animation<double> _scale = Tween<double>(
+    begin: 1.0,
+    end: 0.88,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
   @override
   void dispose() {
@@ -56,16 +60,60 @@ class _CalculatorKeyState extends State<CalculatorKey>
   }
 
   void _onTapDown(TapDownDetails _) {
-    HapticFeedback.lightImpact();
+    unawaited(_lightImpact());
     _controller.forward();
   }
 
+  Future<void> _lightImpact() async {
+    try {
+      await HapticFeedback.lightImpact();
+    } catch (error) {
+      debugPrint('Key feedback unavailable: $error');
+    }
+  }
+
   void _onTapUp(TapUpDetails _) {
+    _activate();
+  }
+
+  void _activate() {
     _controller.reverse();
     keycontroller.KeyController.fire(keycontroller.KeyEvent(widget));
   }
 
+  void _onSemanticTap() {
+    unawaited(_lightImpact());
+    _activate();
+  }
+
   void _onTapCancel() => _controller.reverse();
+
+  String _accessibilityLabel(S strings) {
+    switch (widget.symbol) {
+      case Keys.clear:
+        return strings.clearInput;
+      case Keys.sign:
+        return strings.changeSign;
+      case Keys.percent:
+        return strings.percent;
+      case Keys.divide:
+        return strings.divide;
+      case Keys.multiply:
+        return strings.multiply;
+      case Keys.subtract:
+        return strings.subtract;
+      case Keys.add:
+        return strings.add;
+      case Keys.equals:
+        return strings.equals;
+      case Keys.decimal:
+        return strings.decimalPoint;
+      case Keys.back:
+        return strings.backspace;
+      default:
+        return widget.symbol.value;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,41 +138,46 @@ class _CalculatorKeyState extends State<CalculatorKey>
         color = model.buttonColor2;
         break;
       case KeyType.integer:
-      default:
         color = model.buttonColor1;
     }
 
-    final style = Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: model.textColor2,
-              fontWeight: FontWeight.w500,
-            ) ??
+    final style =
+        Theme.of(context).textTheme.headlineSmall?.copyWith(
+          color: model.textColor2,
+          fontWeight: FontWeight.w500,
+        ) ??
         const TextStyle();
 
-    return GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
-      child: ScaleTransition(
-        scale: _scale,
-        child: Padding(
-          padding: const EdgeInsets.all(5),
-          child: SizedBox(
-            width: size - 10,
-            height: size - 10,
-            child: Container(
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(widget.symbol.value, style: style),
+    return Semantics(
+      label: _accessibilityLabel(S.of(context)),
+      button: true,
+      onTap: _onSemanticTap,
+      excludeSemantics: true,
+      child: GestureDetector(
+        excludeFromSemantics: true,
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTapCancel: _onTapCancel,
+        child: ScaleTransition(
+          scale: _scale,
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: SizedBox(
+              width: size - 10,
+              height: size - 10,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(child: Text(widget.symbol.value, style: style)),
               ),
             ),
           ),
