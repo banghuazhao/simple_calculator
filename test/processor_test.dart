@@ -78,7 +78,7 @@ void main() {
     (Keys.add, '11'),
     (Keys.subtract, '5'),
     (Keys.multiply, '24'),
-    (Keys.divide, '2.6666666666666665'),
+    (Keys.divide, '2.66666666666667'),
   ]) {
     test(
       'basic ${example.$1.value} arithmetic and history remain correct',

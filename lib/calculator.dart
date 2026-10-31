@@ -8,6 +8,7 @@ import 'package:simple_calculator/calculator_key.dart';
 import 'package:simple_calculator/calculator_shortcuts.dart';
 import 'package:simple_calculator/display.dart';
 import 'package:simple_calculator/generated/l10n.dart';
+import 'package:simple_calculator/history_sheet.dart';
 import 'package:simple_calculator/key_controller.dart' as input;
 import 'package:simple_calculator/key_pad.dart';
 import 'package:simple_calculator/more_page.dart';
@@ -106,246 +107,21 @@ class _CalculatorState extends State<Calculator> {
 
   void _showHistory() {
     final model = Provider.of<ThemeModel>(context, listen: false);
-    final textColor = model.textColor1;
-    final bgColor = model.backgroundColor;
-
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       clipBehavior: Clip.antiAlias,
-      backgroundColor: bgColor,
+      backgroundColor: model.backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setSheetState) {
-            final entries = Processor.historyLog;
-            final strings = S.of(ctx);
-            return SizedBox(
-              height: MediaQuery.of(context).size.height * 0.65,
-              child: ScaffoldMessenger(
-                child: Scaffold(
-                  backgroundColor: bgColor,
-                  body: SafeArea(
-                    top: false,
-                    child: Column(
-                      children: [
-                        // Drag handle
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12, bottom: 4),
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: textColor.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        // Header
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  strings.history,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              if (entries.isNotEmpty)
-                                TextButton(
-                                  onPressed: () async {
-                                    final confirmed = await showDialog<bool>(
-                                      context: ctx,
-                                      builder: (dialogCtx) => AlertDialog(
-                                        scrollable: true,
-                                        title: Text(strings.clearHistoryTitle),
-                                        content: Text(
-                                          strings.clearHistoryMessage,
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(dialogCtx, false),
-                                            child: Text(strings.cancel),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(dialogCtx, true),
-                                            child: Text(strings.clear),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                    if (confirmed == true && ctx.mounted) {
-                                      Processor.clearHistory();
-                                      unawaited(InputFeedback.mediumImpact());
-                                      setSheetState(() {});
-                                    }
-                                  },
-                                  child: Text(
-                                    strings.clear,
-                                    style: TextStyle(
-                                      color: textColor.withValues(alpha: 0.5),
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        const Divider(height: 1),
-                        // List
-                        Expanded(
-                          child: entries.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    strings.noCalculationsYet,
-                                    style: TextStyle(
-                                      color: textColor.withValues(alpha: 0.4),
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                )
-                              : ListView.separated(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  itemCount: entries.length,
-                                  separatorBuilder: (_, __) => Divider(
-                                    height: 1,
-                                    indent: 20,
-                                    endIndent: 20,
-                                    color: textColor.withValues(alpha: 0.08),
-                                  ),
-                                  itemBuilder: (_, i) {
-                                    final entry = entries[i];
-                                    return Dismissible(
-                                      key: ValueKey(entry.id),
-                                      direction: DismissDirection.endToStart,
-                                      background: Container(
-                                        alignment: Alignment.centerRight,
-                                        padding: const EdgeInsets.only(
-                                          right: 24,
-                                        ),
-                                        color: Colors.red,
-                                        child: Icon(
-                                          Icons.delete_outline,
-                                          semanticLabel:
-                                              strings.deleteCalculation,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      onDismissed: (_) {
-                                        Processor.removeHistoryEntry(entry.id);
-                                        unawaited(InputFeedback.lightImpact());
-                                        setSheetState(() {});
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Semantics(
-                                              button: true,
-                                              hint: strings.reuseResult,
-                                              child: InkWell(
-                                                onTap: () {
-                                                  Processor.setFromHistory(
-                                                    entry.result,
-                                                  );
-                                                  Navigator.pop(ctx);
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 24,
-                                                        vertical: 12,
-                                                      ),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    children: [
-                                                      Text(
-                                                        entry.equation,
-                                                        style: TextStyle(
-                                                          color: textColor
-                                                              .withValues(
-                                                                alpha: 0.5,
-                                                              ),
-                                                          fontSize: 14,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.right,
-                                                      ),
-                                                      const SizedBox(height: 2),
-                                                      Text(
-                                                        entry.result,
-                                                        style: TextStyle(
-                                                          color: textColor,
-                                                          fontSize: 26,
-                                                          fontWeight:
-                                                              FontWeight.w300,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.right,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              right: 12,
-                                            ),
-                                            child: Builder(
-                                              builder: (copyContext) => IconButton(
-                                                tooltip:
-                                                    strings.copyCalculation,
-                                                onPressed: () =>
-                                                    ClipboardHelper.copy(
-                                                      copyContext,
-                                                      '${entry.equation} ${entry.result}',
-                                                    ),
-                                                icon: Icon(
-                                                  Icons.copy_outlined,
-                                                  color: textColor,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
+      builder: (_) => const HistorySheet(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final model = Provider.of<ThemeModel>(context, listen: false);
+    final model = Provider.of<ThemeModel>(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final strings = S.of(context);
 
@@ -354,6 +130,7 @@ class _CalculatorState extends State<Calculator> {
         input.KeyEvent(CalculatorKey(symbol: symbol)),
       ),
       onUndo: Processor.undo,
+      onPaste: () => ClipboardHelper.paste(context),
       child: Scaffold(
         backgroundColor: model.backgroundColor,
         body: SafeArea(
@@ -386,6 +163,14 @@ class _CalculatorState extends State<Calculator> {
                             alpha: 0.35,
                           ),
                           icon: const Icon(Icons.undo),
+                        ),
+                        IconButton(
+                          tooltip: strings.pasteNumber,
+                          onPressed: () => ClipboardHelper.paste(context),
+                          icon: Icon(
+                            Icons.content_paste,
+                            color: model.textColor1,
+                          ),
                         ),
                         IconButton(
                           tooltip: strings.history,

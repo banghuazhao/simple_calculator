@@ -109,7 +109,7 @@ class _CalculatorKeyState extends State<CalculatorKey>
 
   @override
   Widget build(BuildContext context) {
-    final model = Provider.of<ThemeModel>(context, listen: false);
+    final model = Provider.of<ThemeModel>(context);
     final screenSize = MediaQuery.of(context).size;
 
     double size = (screenSize.width - 40) / 4;

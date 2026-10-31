@@ -539,6 +539,226 @@ class S {
       args: [],
     );
   }
+
+  /// `Tips and shortcuts`
+  String get helpAndShortcuts {
+    return Intl.message(
+      'Tips and shortcuts',
+      name: 'helpAndShortcuts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Using the calculator`
+  String get helpBasics {
+    return Intl.message(
+      'Using the calculator',
+      name: 'helpBasics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap the result to copy the number. Use the copy button in history to copy a full calculation.`
+  String get helpCopy {
+    return Intl.message(
+      'Tap the result to copy the number. Use the copy button in history to copy a full calculation.',
+      name: 'helpCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.`
+  String get helpUndo {
+    return Intl.message(
+      'Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.',
+      name: 'helpUndo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.`
+  String get helpHistory {
+    return Intl.message(
+      'History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.',
+      name: 'helpHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keyboard shortcuts`
+  String get helpKeyboard {
+    return Intl.message(
+      'Keyboard shortcuts',
+      name: 'helpKeyboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Numbers and numeric keypad`
+  String get shortcutNumbers {
+    return Intl.message(
+      'Numbers and numeric keypad',
+      name: 'shortcutNumbers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add, subtract, multiply, divide, percent, and decimal point`
+  String get shortcutOperators {
+    return Intl.message(
+      'Add, subtract, multiply, divide, percent, and decimal point',
+      name: 'shortcutOperators',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculate`
+  String get shortcutEquals {
+    return Intl.message(
+      'Calculate',
+      name: 'shortcutEquals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete the last digit`
+  String get shortcutBackspace {
+    return Intl.message(
+      'Delete the last digit',
+      name: 'shortcutBackspace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear input`
+  String get shortcutClear {
+    return Intl.message(
+      'Clear input',
+      name: 'shortcutClear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Undo input`
+  String get shortcutUndo {
+    return Intl.message('Undo input', name: 'shortcutUndo', desc: '', args: []);
+  }
+
+  /// `Paste a number`
+  String get shortcutPaste {
+    return Intl.message(
+      'Paste a number',
+      name: 'shortcutPaste',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.`
+  String get helpPaste {
+    return Intl.message(
+      'Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.',
+      name: 'helpPaste',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search history`
+  String get searchHistory {
+    return Intl.message(
+      'Search history',
+      name: 'searchHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear search`
+  String get clearSearch {
+    return Intl.message(
+      'Clear search',
+      name: 'clearSearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No matching calculations`
+  String get noHistoryMatches {
+    return Intl.message(
+      'No matching calculations',
+      name: 'noHistoryMatches',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear all`
+  String get clearAllHistory {
+    return Intl.message(
+      'Clear all',
+      name: 'clearAllHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculation deleted`
+  String get historyDeleted {
+    return Intl.message(
+      'Calculation deleted',
+      name: 'historyDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste number`
+  String get pasteNumber {
+    return Intl.message(
+      'Paste number',
+      name: 'pasteNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Number pasted`
+  String get pasted {
+    return Intl.message('Number pasted', name: 'pasted', desc: '', args: []);
+  }
+
+  /// `Copy a valid number to paste.`
+  String get invalidPaste {
+    return Intl.message(
+      'Copy a valid number to paste.',
+      name: 'invalidPaste',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clipboard is unavailable. Please try again.`
+  String get clipboardUnavailable {
+    return Intl.message(
+      'Clipboard is unavailable. Please try again.',
+      name: 'clipboardUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

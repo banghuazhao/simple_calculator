@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_calculator/help_page.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/input_settings.dart';
@@ -225,6 +226,16 @@ class _MorePageState extends State<MorePage> {
         body: ListView(
           children: [
             const InputSettingsSection(),
+            ListTile(
+              leading: Icon(Icons.help_outline, color: model.textColor1),
+              title: Text(S.of(context).helpAndShortcuts,
+                  style: TextStyle(color: model.textColor1)),
+              trailing: Icon(Icons.chevron_right, color: model.textColor1),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HelpPage()),
+              ),
+            ),
             Container(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                 child: Text(

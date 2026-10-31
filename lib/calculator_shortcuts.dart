@@ -12,6 +12,10 @@ class _CalculatorUndoIntent extends Intent {
   const _CalculatorUndoIntent();
 }
 
+class _CalculatorPasteIntent extends Intent {
+  const _CalculatorPasteIntent();
+}
+
 class _CalculatorAction<T extends Intent> extends Action<T> {
   _CalculatorAction({required this.isAvailable, required this.callback});
 
@@ -35,11 +39,13 @@ class CalculatorShortcuts extends StatefulWidget {
     required this.child,
     required this.onKey,
     required this.onUndo,
+    this.onPaste,
   });
 
   final Widget child;
   final ValueChanged<KeySymbol> onKey;
   final VoidCallback onUndo;
+  final VoidCallback? onPaste;
 
   @override
   State<CalculatorShortcuts> createState() => _CalculatorShortcutsState();
@@ -135,6 +141,14 @@ class CalculatorShortcuts extends StatefulWidget {
           includeRepeats: false,
         )] =
         const _CalculatorUndoIntent();
+    for (final control in [true, false]) {
+      bindings[SingleActivator(
+        LogicalKeyboardKey.keyV,
+        control: control,
+        meta: !control,
+        includeRepeats: false,
+      )] = const _CalculatorPasteIntent();
+    }
     return bindings;
   }
 }
@@ -176,6 +190,13 @@ class _CalculatorShortcutsState extends State<CalculatorShortcuts> {
             callback: (_) {
               _inputFocus.requestFocus();
               widget.onUndo();
+            },
+          ),
+          _CalculatorPasteIntent: _CalculatorAction<_CalculatorPasteIntent>(
+            isAvailable: () => widget.onPaste != null && canHandle(),
+            callback: (_) {
+              _inputFocus.requestFocus();
+              widget.onPaste!();
             },
           ),
         },

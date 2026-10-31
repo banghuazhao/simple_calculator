@@ -86,11 +86,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "changeSign": MessageLookupByLibrary.simpleMessage("Change sign"),
     "clear": MessageLookupByLibrary.simpleMessage("Clear"),
+    "clearAllHistory": MessageLookupByLibrary.simpleMessage("Clear all"),
     "clearHistoryMessage": MessageLookupByLibrary.simpleMessage(
       "This will remove all saved calculations.",
     ),
     "clearHistoryTitle": MessageLookupByLibrary.simpleMessage("Clear history?"),
     "clearInput": MessageLookupByLibrary.simpleMessage("Clear input"),
+    "clearSearch": MessageLookupByLibrary.simpleMessage("Clear search"),
+    "clipboardUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Clipboard is unavailable. Please try again.",
+    ),
     "copied": MessageLookupByLibrary.simpleMessage("Copied"),
     "copyCalculation": MessageLookupByLibrary.simpleMessage("Copy calculation"),
     "copyResult": MessageLookupByLibrary.simpleMessage("Copy result"),
@@ -105,19 +110,61 @@ class MessageLookup extends MessageLookupByLibrary {
     "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage(
       "Vibrate when using calculator controls",
     ),
+    "helpAndShortcuts": MessageLookupByLibrary.simpleMessage(
+      "Tips and shortcuts",
+    ),
+    "helpBasics": MessageLookupByLibrary.simpleMessage("Using the calculator"),
+    "helpCopy": MessageLookupByLibrary.simpleMessage(
+      "Tap the result to copy the number. Use the copy button in history to copy a full calculation.",
+    ),
+    "helpHistory": MessageLookupByLibrary.simpleMessage(
+      "History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.",
+    ),
+    "helpKeyboard": MessageLookupByLibrary.simpleMessage("Keyboard shortcuts"),
+    "helpPaste": MessageLookupByLibrary.simpleMessage(
+      "Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.",
+    ),
+    "helpUndo": MessageLookupByLibrary.simpleMessage(
+      "Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.",
+    ),
     "history": MessageLookupByLibrary.simpleMessage("History"),
+    "historyDeleted": MessageLookupByLibrary.simpleMessage(
+      "Calculation deleted",
+    ),
     "inputSettings": MessageLookupByLibrary.simpleMessage("Input settings"),
+    "invalidPaste": MessageLookupByLibrary.simpleMessage(
+      "Copy a valid number to paste.",
+    ),
     "multiply": MessageLookupByLibrary.simpleMessage("Multiply"),
     "noCalculationsYet": MessageLookupByLibrary.simpleMessage(
       "No calculations yet",
     ),
+    "noHistoryMatches": MessageLookupByLibrary.simpleMessage(
+      "No matching calculations",
+    ),
+    "pasteNumber": MessageLookupByLibrary.simpleMessage("Paste number"),
+    "pasted": MessageLookupByLibrary.simpleMessage("Number pasted"),
     "percent": MessageLookupByLibrary.simpleMessage("Percent"),
     "reuseResult": MessageLookupByLibrary.simpleMessage("Use this result"),
+    "searchHistory": MessageLookupByLibrary.simpleMessage("Search history"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "shakeToUndo": MessageLookupByLibrary.simpleMessage("Shake to undo"),
     "shakeToUndoDescription": MessageLookupByLibrary.simpleMessage(
       "Undo the last input by shaking your phone",
     ),
+    "shortcutBackspace": MessageLookupByLibrary.simpleMessage(
+      "Delete the last digit",
+    ),
+    "shortcutClear": MessageLookupByLibrary.simpleMessage("Clear input"),
+    "shortcutEquals": MessageLookupByLibrary.simpleMessage("Calculate"),
+    "shortcutNumbers": MessageLookupByLibrary.simpleMessage(
+      "Numbers and numeric keypad",
+    ),
+    "shortcutOperators": MessageLookupByLibrary.simpleMessage(
+      "Add, subtract, multiply, divide, percent, and decimal point",
+    ),
+    "shortcutPaste": MessageLookupByLibrary.simpleMessage("Paste a number"),
+    "shortcutUndo": MessageLookupByLibrary.simpleMessage("Undo input"),
     "subtract": MessageLookupByLibrary.simpleMessage("Subtract"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "undo": MessageLookupByLibrary.simpleMessage("Undo"),

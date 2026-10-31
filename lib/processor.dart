@@ -30,12 +30,25 @@ class HistoryEntry {
   });
 }
 
+/// A removed history entry and where it was, so deletion can be undone.
+class HistoryDeletion {
+  final HistoryEntry entry;
+  final int index;
+  const HistoryDeletion._(this.entry, this.index);
+}
+
 class _Snapshot {
   final String valA;
   final String? valB;
   final KeySymbol? op;
   final String? result;
   const _Snapshot(this.valA, this.valB, this.op, this.result);
+
+  bool matches(_Snapshot other) =>
+      valA == other.valA &&
+      valB == other.valB &&
+      op == other.op &&
+      result == other.result;
 }
 
 abstract class Processor {
@@ -52,8 +65,8 @@ abstract class Processor {
       StreamController<CalcState>.broadcast();
 
   static StreamSubscription<CalcState> listen(
-          void Function(CalcState) handler) =>
-      _controller.stream.listen(handler);
+    void Function(CalcState) handler,
+  ) => _controller.stream.listen(handler);
 
   static void refresh() => _controller.add(_calcState);
 
@@ -86,9 +99,17 @@ abstract class Processor {
 
   // ── Undo ─────────────────────────────────────────────────────────────────
 
-  static void _pushUndo() {
-    _undoStack.add(_Snapshot(_valA, _valB, _operator, _result));
+  static _Snapshot get _snapshot => _Snapshot(_valA, _valB, _operator, _result);
+
+  static void _pushUndo([_Snapshot? snapshot]) {
+    _undoStack.add(snapshot ?? _snapshot);
     if (_undoStack.length > 30) _undoStack.removeAt(0);
+  }
+
+  /// Records [before] only when input actually changed, so Undo never spends
+  /// a step on a rejected key press (extra digits, duplicate decimal, etc.).
+  static void _pushUndoIfChanged(_Snapshot before) {
+    if (!before.matches(_snapshot)) _pushUndo(before);
   }
 
   static void undo() {
@@ -108,11 +129,15 @@ abstract class Processor {
     final entries = HistoryStorage.instance.load();
     _history
       ..clear()
-      ..addAll(entries.map((entry) => HistoryEntry(
+      ..addAll(
+        entries.map(
+          (entry) => HistoryEntry(
             id: entry.id,
             equation: entry.equation,
             result: entry.result,
-          )));
+          ),
+        ),
+      );
     _historyIdSeq = 0;
     for (final entry in _history) {
       if (entry.id >= _historyIdSeq) _historyIdSeq = entry.id + 1;
@@ -122,11 +147,16 @@ abstract class Processor {
 
   static void _saveHistory() {
     unawaited(
-        HistoryStorage.instance.save(_history.map((entry) => StoredCalculation(
-              id: entry.id,
-              equation: entry.equation,
-              result: entry.result,
-            ))));
+      HistoryStorage.instance.save(
+        _history.map(
+          (entry) => StoredCalculation(
+            id: entry.id,
+            equation: entry.equation,
+            result: entry.result,
+          ),
+        ),
+      ),
+    );
   }
 
   static int _nextHistoryId() {
@@ -143,33 +173,86 @@ abstract class Processor {
     _saveHistory();
   }
 
-  static void removeHistoryEntry(int id) {
-    _history.removeWhere((e) => e.id == id);
+  static HistoryDeletion? removeHistoryEntry(int id) {
+    final index = _history.indexWhere((e) => e.id == id);
+    if (index < 0) return null;
+    final entry = _history.removeAt(index);
     _saveHistory();
+    return HistoryDeletion._(entry, index);
+  }
+
+  /// Puts a deleted entry back in its original position.
+  static bool restoreHistoryEntry(HistoryDeletion deletion) {
+    if (_history.any((e) => e.id == deletion.entry.id)) return false;
+    final index = deletion.index < _history.length
+        ? deletion.index
+        : _history.length;
+    _history.insert(index, deletion.entry);
+    if (_history.length > HistoryStorage.maxEntries) _history.removeLast();
+    _saveHistory();
+    return true;
+  }
+
+  /// Parses clipboard text as one finite number. Accepts surrounding
+  /// whitespace, a leading + or Unicode minus, correctly grouped thousands
+  /// ("1,234.5") and scientific notation. Returns null for anything else.
+  static String? parsePastedNumber(String text) {
+    var value = text.trim().replaceAll('\u2212', '-');
+    if (value.startsWith('+')) value = value.substring(1);
+    if (value.contains(',')) {
+      if (!RegExp(r'^-?[0-9]{1,3}(,[0-9]{3})+(\.[0-9]*)?$').hasMatch(value)) {
+        return null;
+      }
+      value = value.replaceAll(',', '');
+    }
+    if (!HistoryStorage.isValidNumber(value)) return null;
+    return _formatResult(double.parse(value));
+  }
+
+  /// Enters a pasted number as the current operand. Returns false (and leaves
+  /// the calculator unchanged) when [text] is not a single finite number.
+  static bool paste(String text) {
+    final value = parsePastedNumber(text);
+    if (value == null) return false;
+    final before = _snapshot;
+    if (_result != null) _clear();
+    if (_operator == null) {
+      _valA = value;
+    } else {
+      _valB = value;
+    }
+    _pushUndoIfChanged(before);
+    refresh();
+    return true;
   }
 
   /// Load a history result back into the calculator as the current value.
   static void setFromHistory(String result) {
     if (!HistoryStorage.isValidNumber(result)) return;
-    _pushUndo();
+    final before = _snapshot;
     _clear();
     _valA = result;
+    _pushUndoIfChanged(before);
     refresh();
   }
 
   // ── Key processing ────────────────────────────────────────────────────────
 
   static void process(dynamic event) {
-    _pushUndo();
+    final before = _snapshot;
     final CalculatorKey key = (event as KeyEvent).key;
     switch (key.symbol.type) {
       case KeyType.function:
-        return _handleFunction(key);
+        _handleFunction(key);
+        break;
       case KeyType.operator:
-        return _handleOperator(key);
+        _handleOperator(key);
+        break;
       case KeyType.integer:
-        return _handleInteger(key);
+        _handleInteger(key);
+        break;
     }
+    _pushUndoIfChanged(before);
   }
 
   static void _handleFunction(CalculatorKey key) {
@@ -193,10 +276,16 @@ abstract class Processor {
   }
 
   static void _handleOperator(CalculatorKey key) {
-    if (_valA == '0.' || (_valB != null && _valB == '0.')) return;
+    // "5." is complete input; tidy it so equations read "5 + 3 =".
+    _valA = _trimTrailingDecimal(_valA);
+    if (_valB != null) _valB = _trimTrailingDecimal(_valB!);
 
     if (key.symbol == Keys.equals) {
-      return _calculate();
+      // Pressing "=" again on a shown result must not log a duplicate entry.
+      if (_result != null) return;
+      _calculate();
+      refresh();
+      return;
     }
     if (_valB != null) _calculate();
     if (_result != null) _condense();
@@ -205,9 +294,19 @@ abstract class Processor {
     refresh();
   }
 
+  static String _trimTrailingDecimal(String value) {
+    if (!value.endsWith('.')) return value;
+    final trimmed = value.substring(0, value.length - 1);
+    return (trimmed.isEmpty || trimmed == '-' || trimmed == '-0')
+        ? '0'
+        : trimmed;
+  }
+
   static void _handleInteger(CalculatorKey key) {
     final String val = key.symbol.value;
-    if (_result != null) _condense();
+    // Typing after "=" starts a new number, as on standard calculators.
+    // Operators, % and ± still continue from the result.
+    if (_result != null) _clear();
 
     if (_operator == null) {
       if (val == '.') {
@@ -323,12 +422,13 @@ abstract class Processor {
     _result = _formatResult(result);
 
     _history.insert(
-        0,
-        HistoryEntry(
-          id: _nextHistoryId(),
-          equation: '$_valA ${_operator!.value} $_valB =',
-          result: _result!,
-        ));
+      0,
+      HistoryEntry(
+        id: _nextHistoryId(),
+        equation: '$_valA ${_operator!.value} $_valB =',
+        result: _result!,
+      ),
+    );
     if (_history.length > HistoryStorage.maxEntries) _history.removeLast();
     _saveHistory();
 
@@ -336,7 +436,11 @@ abstract class Processor {
   }
 
   static String _formatResult(double value) {
-    final str = value.toString();
+    // Round away binary floating-point noise (0.1 + 0.2 = 0.3, not
+    // 0.30000000000000004) while keeping 15 significant digits.
+    final rounded = double.parse(value.toStringAsPrecision(15));
+    if (rounded == 0) return '0';
+    final str = rounded.toString();
     final exponentIndex = str.indexOf('e');
     var mantissa = exponentIndex < 0 ? str : str.substring(0, exponentIndex);
     final exponent = exponentIndex < 0 ? '' : str.substring(exponentIndex);

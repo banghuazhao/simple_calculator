@@ -44,7 +44,7 @@ class Display extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = S.of(context);
-    final model = Provider.of<ThemeModel>(context, listen: false);
+    final model = Provider.of<ThemeModel>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
