@@ -19,7 +19,7 @@ class BgmHelper {
     return temp;
   }
 
-  set(bool playBGM) {
+  void set(bool playBGM) {
     SharedPreferencesHelper.localStorage?.setBool(key, playBGM);
   }
 }

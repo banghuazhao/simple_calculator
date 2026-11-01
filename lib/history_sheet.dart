@@ -290,7 +290,7 @@ class _HistorySheetState extends State<HistorySheet> {
               itemCount: filtered.length,
               itemBuilder: (_, index) =>
                   _entry(context, filtered[index], model),
-              separatorBuilder: (_, __) => Divider(
+              separatorBuilder: (_, _) => Divider(
                 height: 1,
                 indent: 20,
                 endIndent: 20,

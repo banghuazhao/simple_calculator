@@ -15,5 +15,5 @@ abstract class KeyController {
       _controller.stream.listen(handler);
   static void fire(KeyEvent event) => _controller.add(event);
 
-  static dispose() => _controller.close();
+  static Future<void> dispose() => _controller.close();
 }

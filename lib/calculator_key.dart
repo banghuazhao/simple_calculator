@@ -34,7 +34,7 @@ abstract class Keys {
 }
 
 class CalculatorKey extends StatefulWidget {
-  const CalculatorKey({Key? key, required this.symbol}) : super(key: key);
+  const CalculatorKey({super.key, required this.symbol});
   final KeySymbol symbol;
 
   @override

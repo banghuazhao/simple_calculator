@@ -14,7 +14,7 @@ import 'generated/l10n.dart';
 const int maxFailedLoadAttempts = 3;
 
 class MorePage extends StatefulWidget {
-  const MorePage({Key? key}) : super(key: key);
+  const MorePage({super.key});
 
   @override
   State<MorePage> createState() => _MorePageState();
@@ -23,42 +23,58 @@ class MorePage extends StatefulWidget {
 class _MorePageState extends State<MorePage> {
   InterstitialAd? _interstitialAd;
   int _interstitialLoadAttempts = 0;
+  bool _themeChanged = false;
 
   void _createInterstitialAd() {
     InterstitialAd.load(
-        adUnitId: AdsManager.interstitialAdUnitId,
-        request: const AdRequest(),
-        adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (InterstitialAd ad) {
+      adUnitId: AdsManager.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          if (!mounted) {
+            ad.dispose();
+            return;
+          }
           _interstitialAd = ad;
           _interstitialLoadAttempts = 0;
-        }, onAdFailedToLoad: (LoadAdError error) {
+        },
+        onAdFailedToLoad: (LoadAdError error) {
           _interstitialLoadAttempts += 1;
           _interstitialAd = null;
-          if (_interstitialLoadAttempts <= maxFailedLoadAttempts) {
+          if (mounted && _interstitialLoadAttempts <= maxFailedLoadAttempts) {
             _createInterstitialAd();
           }
-        }));
+        },
+      ),
+    );
   }
 
+  /// Shown once when leaving Settings after a theme change, never while the
+  /// user is still browsing themes.
   void _showInterstitialAd() {
-    // Respect the frequency cap so rapid theme switching doesn't spam ads.
-    if (!AdsManager.canShowInterstitial) return;
-    if (_interstitialAd != null) {
-      _interstitialAd?.fullScreenContentCallback =
-          FullScreenContentCallback(onAdShowedFullScreenContent: (InterstitialAd ad) {
+    final ad = _interstitialAd;
+    if (ad == null ||
+        AdState.isShowingFullScreenAd ||
+        !AdsManager.canShowInterstitial) {
+      return;
+    }
+    // The ad now owns its own disposal; this page may already be gone.
+    _interstitialAd = null;
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (InterstitialAd ad) {
         AdState.isShowingFullScreenAd = true;
         AdsManager.markInterstitialShown();
-      }, onAdDismissedFullScreenContent: (InterstitialAd ad) {
+      },
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
         AdState.isShowingFullScreenAd = false;
         ad.dispose();
-        _createInterstitialAd();
-      }, onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
         AdState.isShowingFullScreenAd = false;
         ad.dispose();
-        _createInterstitialAd();
-      });
-      _interstitialAd?.show();
-    }
+      },
+    );
+    ad.show();
   }
 
   @override
@@ -70,101 +86,190 @@ class _MorePageState extends State<MorePage> {
   }
 
   @override
+  void dispose() {
+    _interstitialAd?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const interstitialDuration = Duration(milliseconds: 500);
     List<MoreAppItem> items = [];
 
     var classicMemoryGame = MoreAppItem(
-        Image.asset("assets/app_icons/classic_memory_game.png"), S.of(context).Classic_Memory_Game,
-        () {
-      OpenStore.instance
-          .open(appStoreId: "1617593078", androidAppBundleId: "com.appsbay.classic_memory_game");
-    });
+      Image.asset("assets/app_icons/classic_memory_game.png"),
+      S.of(context).Classic_Memory_Game,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1617593078",
+          androidAppBundleId: "com.appsbay.classic_memory_game",
+        );
+      },
+    );
 
-    var imageGuru =
-        MoreAppItem(Image.asset("assets/app_icons/image_guru.png"), S.of(context).Image_Guru, () {
-      OpenStore.instance.open(appStoreId: "1625021625", androidAppBundleId: "");
-    });
+    var imageGuru = MoreAppItem(
+      Image.asset("assets/app_icons/image_guru.png"),
+      S.of(context).Image_Guru,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1625021625",
+          androidAppBundleId: "",
+        );
+      },
+    );
 
-    var yesHabit =
-        MoreAppItem(Image.asset("assets/app_icons/yes_habit.png"), S.of(context).Yes_Habit, () {
-      OpenStore.instance.open(appStoreId: "1637643734", androidAppBundleId: "");
-    });
+    var yesHabit = MoreAppItem(
+      Image.asset("assets/app_icons/yes_habit.png"),
+      S.of(context).Yes_Habit,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1637643734",
+          androidAppBundleId: "",
+        );
+      },
+    );
 
     var tripMark = MoreAppItem(
-        Image.asset("assets/app_icons/tripmark.png"), S.of(context).TripMark, () {
-      OpenStore.instance
-          .open(appStoreId: "6464474080", androidAppBundleId: "");
-    });
+      Image.asset("assets/app_icons/tripmark.png"),
+      S.of(context).TripMark,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "6464474080",
+          androidAppBundleId: "",
+        );
+      },
+    );
 
-    var shows = MoreAppItem(Image.asset("assets/app_icons/shows.png"), S.of(context).Shows, () {
-      OpenStore.instance.open(appStoreId: "1624910011", androidAppBundleId: "com.appsbay.shows");
-    });
+    var shows = MoreAppItem(
+      Image.asset("assets/app_icons/shows.png"),
+      S.of(context).Shows,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1624910011",
+          androidAppBundleId: "com.appsbay.shows",
+        );
+      },
+    );
 
-    var relaxingUp =
-        MoreAppItem(Image.asset("assets/app_icons/relaxing_up.png"), S.of(context).Relaxing_Up, () {
-      OpenStore.instance
-          .open(appStoreId: "1618712178", androidAppBundleId: "com.appsbay.relaxing_up");
-    });
+    var relaxingUp = MoreAppItem(
+      Image.asset("assets/app_icons/relaxing_up.png"),
+      S.of(context).Relaxing_Up,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1618712178",
+          androidAppBundleId: "com.appsbay.relaxing_up",
+        );
+      },
+    );
 
-    var easyUnit =
-        MoreAppItem(Image.asset("assets/app_icons/easy_unit.png"), S.of(context).Easy_Unit, () {
-      OpenStore.instance.open(appStoreId: "1643640909", androidAppBundleId: "");
-    });
+    var easyUnit = MoreAppItem(
+      Image.asset("assets/app_icons/easy_unit.png"),
+      S.of(context).Easy_Unit,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1643640909",
+          androidAppBundleId: "",
+        );
+      },
+    );
 
     var fallingBlockPuzzle = MoreAppItem(
-        Image.asset("assets/app_icons/falling_block_puzzle.png"), S.of(context).Falling_Block_Puzzle, () {
-      OpenStore.instance.open(appStoreId: "1609440799", androidAppBundleId: "");
-    });
+      Image.asset("assets/app_icons/falling_block_puzzle.png"),
+      S.of(context).Falling_Block_Puzzle,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1609440799",
+          androidAppBundleId: "",
+        );
+      },
+    );
 
     var simpleEnglishDictionary = MoreAppItem(
-        Image.asset("assets/app_icons/simple_english_dictionary.png"),
-        S.of(context).Simple_English_Dictionary, () {
-      OpenStore.instance.open(
-          appStoreId: "1611258200", androidAppBundleId: "com.appsbay.simple_english_dictionary");
-    });
+      Image.asset("assets/app_icons/simple_english_dictionary.png"),
+      S.of(context).Simple_English_Dictionary,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1611258200",
+          androidAppBundleId: "com.appsbay.simple_english_dictionary",
+        );
+      },
+    );
 
     var classicReversi = MoreAppItem(
-        Image.asset("assets/app_icons/classic_reversi.png"), S.of(context).Classic_Reversi, () {
-      OpenStore.instance
-          .open(appStoreId: "1616580829", androidAppBundleId: "com.appsbay.classic_reversi");
-    });
+      Image.asset("assets/app_icons/classic_reversi.png"),
+      S.of(context).Classic_Reversi,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1616580829",
+          androidAppBundleId: "com.appsbay.classic_reversi",
+        );
+      },
+    );
 
-    var onlynote =
-        MoreAppItem(Image.asset("assets/app_icons/onlynote.png"), S.of(context).Onlynote, () {
-      OpenStore.instance.open(appStoreId: "1616516732", androidAppBundleId: "com.appsbay.onlynote");
-    });
+    var onlynote = MoreAppItem(
+      Image.asset("assets/app_icons/onlynote.png"),
+      S.of(context).Onlynote,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1616516732",
+          androidAppBundleId: "com.appsbay.onlynote",
+        );
+      },
+    );
 
     var worldWeatherLive = MoreAppItem(
-        Image.asset("assets/app_icons/world_weather_live.png"), S.of(context).World_Weather_Live,
-        () {
-      OpenStore.instance
-          .open(appStoreId: "1612773646", androidAppBundleId: "com.appsbay.world_weather_live");
-    });
+      Image.asset("assets/app_icons/world_weather_live.png"),
+      S.of(context).World_Weather_Live,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1612773646",
+          androidAppBundleId: "com.appsbay.world_weather_live",
+        );
+      },
+    );
 
     var wePlayPiano = MoreAppItem(
-        Image.asset("assets/app_icons/we_play_piano.png"), S.of(context).We_Play_Piano, () {
-      OpenStore.instance
-          .open(appStoreId: "1625018611", androidAppBundleId: "com.appsbay.we_play_piano");
-    });
+      Image.asset("assets/app_icons/we_play_piano.png"),
+      S.of(context).We_Play_Piano,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1625018611",
+          androidAppBundleId: "com.appsbay.we_play_piano",
+        );
+      },
+    );
 
     var sudokuLovers = MoreAppItem(
-        Image.asset("assets/app_icons/sudoku_lovers.png"), S.of(context).Sudoku_Lovers, () {
-      OpenStore.instance
-          .open(appStoreId: "1620749798", androidAppBundleId: "com.appsbay.sudoku_lovers");
-    });
+      Image.asset("assets/app_icons/sudoku_lovers.png"),
+      S.of(context).Sudoku_Lovers,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1620749798",
+          androidAppBundleId: "com.appsbay.sudoku_lovers",
+        );
+      },
+    );
 
     var instantFace = MoreAppItem(
-        Image.asset("assets/app_icons/instant_face.png"), S.of(context).Instant_Face, () {
-      OpenStore.instance
-          .open(appStoreId: "1638563222", androidAppBundleId: "com.appsbay.instant_face");
-    });
+      Image.asset("assets/app_icons/instant_face.png"),
+      S.of(context).Instant_Face,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1638563222",
+          androidAppBundleId: "com.appsbay.instant_face",
+        );
+      },
+    );
 
     var minesweeperGo = MoreAppItem(
-        Image.asset("assets/app_icons/minesweeper_go.png"), S.of(context).Minesweeper_Go, () {
-      OpenStore.instance
-          .open(appStoreId: "1621899572", androidAppBundleId: "com.appsbay.classic_minesweeper");
-    });
+      Image.asset("assets/app_icons/minesweeper_go.png"),
+      S.of(context).Minesweeper_Go,
+      () {
+        OpenStore.instance.open(
+          appStoreId: "1621899572",
+          androidAppBundleId: "com.appsbay.classic_minesweeper",
+        );
+      },
+    );
 
     if (Platform.isIOS) {
       items = [
@@ -183,7 +288,7 @@ class _MorePageState extends State<MorePage> {
         onlynote,
         instantFace,
         worldWeatherLive,
-        classicReversi
+        classicReversi,
       ];
     } else {
       items = [
@@ -197,12 +302,18 @@ class _MorePageState extends State<MorePage> {
         simpleEnglishDictionary,
         onlynote,
         worldWeatherLive,
-        classicReversi
+        classicReversi,
       ];
     }
     var model = Provider.of<ThemeModel>(context, listen: false);
 
-    return Scaffold(
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop && _themeChanged && !Platform.isMacOS) {
+          _showInterstitialAd();
+        }
+      },
+      child: Scaffold(
         appBar: AppBar(
           elevation: 0,
           title: Text(
@@ -211,10 +322,7 @@ class _MorePageState extends State<MorePage> {
           ),
           leading: IconButton(
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: model.textColor1,
-            ),
+            icon: Icon(Icons.arrow_back_rounded, color: model.textColor1),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -228,8 +336,10 @@ class _MorePageState extends State<MorePage> {
             const InputSettingsSection(),
             ListTile(
               leading: Icon(Icons.help_outline, color: model.textColor1),
-              title: Text(S.of(context).helpAndShortcuts,
-                  style: TextStyle(color: model.textColor1)),
+              title: Text(
+                S.of(context).helpAndShortcuts,
+                style: TextStyle(color: model.textColor1),
+              ),
               trailing: Icon(Icons.chevron_right, color: model.textColor1),
               onTap: () => Navigator.push(
                 context,
@@ -237,11 +347,12 @@ class _MorePageState extends State<MorePage> {
               ),
             ),
             Container(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                child: Text(
-                  S.of(context).theme,
-                  style: TextStyle(fontSize: 21, color: model.textColor1),
-                )),
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              child: Text(
+                S.of(context).theme,
+                style: TextStyle(fontSize: 21, color: model.textColor1),
+              ),
+            ),
             Container(
               padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
               height: 210,
@@ -266,35 +377,41 @@ class _MorePageState extends State<MorePage> {
                     "assets/theme/theme15.png",
                     "assets/theme/theme16.png",
                     "assets/theme/theme17.png",
-                    "assets/theme/theme18.png"
+                    "assets/theme/theme18.png",
                   ].asMap().entries.map((entry) {
                     String themeImage = entry.value;
                     int index = entry.key;
-                    return Container(
-                      margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      decoration: BoxDecoration(
-                        border: index == model.themeColor
-                            ? Border.all(color: const Color(0xff4ACE5F), width: 2)
-                            : null,
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
-                        image: DecorationImage(
-                          image: AssetImage(themeImage),
-                          fit: BoxFit.cover,
+                    final selected = index == model.themeColor;
+                    return Semantics(
+                      label: '${S.of(context).theme} ${index + 1}',
+                      selected: selected,
+                      button: true,
+                      excludeSemantics: true,
+                      child: Container(
+                        margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        decoration: BoxDecoration(
+                          border: selected
+                              ? Border.all(
+                                  color: const Color(0xff4ACE5F),
+                                  width: 2,
+                                )
+                              : null,
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(10),
+                          ),
+                          image: DecorationImage(
+                            image: AssetImage(themeImage),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                      // color: color,
-                      child: InkWell(
-                        onTap: () {
-                          model.switchTheme(index);
-                          setState(() {});
-                          if (!Platform.isMacOS) {
-                            Future.delayed(interstitialDuration, () {
-                              _showInterstitialAd();
-                            });
-                          }
-                        },
-                        child: const SizedBox(
-                          width: 90,
+                        // color: color,
+                        child: InkWell(
+                          onTap: () {
+                            if (selected) return;
+                            model.switchTheme(index);
+                            setState(() => _themeChanged = true);
+                          },
+                          child: const SizedBox(width: 90),
                         ),
                       ),
                     );
@@ -304,11 +421,12 @@ class _MorePageState extends State<MorePage> {
             ),
             if (!Platform.isMacOS)
               Container(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                  child: Text(
-                    S.of(context).MoreApps,
-                    style: TextStyle(fontSize: 21, color: model.textColor1),
-                  )),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                child: Text(
+                  S.of(context).MoreApps,
+                  style: TextStyle(fontSize: 21, color: model.textColor1),
+                ),
+              ),
             if (!Platform.isMacOS)
               ListView.builder(
                 shrinkWrap: true,
@@ -318,11 +436,11 @@ class _MorePageState extends State<MorePage> {
                   return MoreAppsRow.factory(items[index]);
                 },
               ),
-            const SizedBox(
-              height: 50,
-            )
+            const SizedBox(height: 50),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
 
@@ -341,26 +459,36 @@ class InputSettingsSection extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Text(strings.inputSettings,
-                style: TextStyle(fontSize: 21, color: model.textColor1)),
+            child: Text(
+              strings.inputSettings,
+              style: TextStyle(fontSize: 21, color: model.textColor1),
+            ),
           ),
           SwitchListTile.adaptive(
             key: const ValueKey('haptics-setting'),
             contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-            title: Text(strings.hapticFeedback,
-                style: TextStyle(color: model.textColor1)),
-            subtitle: Text(strings.hapticFeedbackDescription,
-                style: TextStyle(color: model.textColor1)),
+            title: Text(
+              strings.hapticFeedback,
+              style: TextStyle(color: model.textColor1),
+            ),
+            subtitle: Text(
+              strings.hapticFeedbackDescription,
+              style: TextStyle(color: model.textColor1),
+            ),
             value: settings.hapticsEnabled,
             onChanged: settings.setHapticsEnabled,
           ),
           SwitchListTile.adaptive(
             key: const ValueKey('shake-setting'),
             contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-            title: Text(strings.shakeToUndo,
-                style: TextStyle(color: model.textColor1)),
-            subtitle: Text(strings.shakeToUndoDescription,
-                style: TextStyle(color: model.textColor1)),
+            title: Text(
+              strings.shakeToUndo,
+              style: TextStyle(color: model.textColor1),
+            ),
+            subtitle: Text(
+              strings.shakeToUndoDescription,
+              style: TextStyle(color: model.textColor1),
+            ),
             value: settings.shakeToUndoEnabled,
             onChanged: settings.setShakeToUndoEnabled,
           ),
@@ -385,20 +513,19 @@ class MoreAppsRow extends StatelessWidget {
   final String title;
   final void Function() onTap;
 
-  const MoreAppsRow(
-      {Key? key,
-      this.trailingIcon = Icons.chevron_right_rounded,
-      required this.appIcon,
-      required this.title,
-      required this.onTap})
-      : super(key: key);
+  const MoreAppsRow({
+    super.key,
+    this.trailingIcon = Icons.chevron_right_rounded,
+    required this.appIcon,
+    required this.title,
+    required this.onTap,
+  });
 
-  MoreAppsRow.factory(MoreAppItem moreAppItem, {Key? key}) 
-      : appIcon = moreAppItem.appIcon,
-        trailingIcon = Icons.chevron_right_rounded,
-        title = moreAppItem.title,
-        onTap = moreAppItem.onTap,
-        super(key: key);
+  MoreAppsRow.factory(MoreAppItem moreAppItem, {super.key})
+    : appIcon = moreAppItem.appIcon,
+      trailingIcon = Icons.chevron_right_rounded,
+      title = moreAppItem.title,
+      onTap = moreAppItem.onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -417,16 +544,10 @@ class MoreAppsRow extends StatelessWidget {
           visualDensity: const VisualDensity(vertical: 4), // to compact
           leading: ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(8)),
-            child: SizedBox(
-              height: 50,
-              width: 50,
-              child: appIcon,
-            ),
+            child: SizedBox(height: 50, width: 50, child: appIcon),
           ),
           trailing: Icon(trailingIcon),
-          title: Text(
-            title,
-          ),
+          title: Text(title),
         ),
       ),
     );
@@ -439,13 +560,13 @@ class MoreRow extends StatelessWidget {
   final String title;
   final void Function() onTap;
 
-  const MoreRow(
-      {Key? key,
-      this.trailingIcon = Icons.chevron_right_rounded,
-      required this.leadingIcon,
-      required this.title,
-      required this.onTap})
-      : super(key: key);
+  const MoreRow({
+    super.key,
+    this.trailingIcon = Icons.chevron_right_rounded,
+    required this.leadingIcon,
+    required this.title,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -454,9 +575,7 @@ class MoreRow extends StatelessWidget {
       child: ListTile(
         leading: Icon(leadingIcon),
         trailing: Icon(trailingIcon),
-        title: Text(
-          title,
-        ),
+        title: Text(title),
       ),
     );
   }

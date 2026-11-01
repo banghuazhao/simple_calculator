@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:simple_calculator/calculator_key.dart';
 
 class KeyPad extends StatelessWidget {
-  const KeyPad({Key? key}) : super(key: key);
+  const KeyPad({super.key});
 
   @override
   Widget build(BuildContext context) {

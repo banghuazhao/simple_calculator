@@ -21,7 +21,7 @@ import 'package:simple_calculator/util/input_feedback.dart';
 import 'package:simple_calculator/util/input_settings.dart';
 
 class Calculator extends StatefulWidget {
-  const Calculator({Key? key}) : super(key: key);
+  const Calculator({super.key});
 
   @override
   State<Calculator> createState() => _CalculatorState();

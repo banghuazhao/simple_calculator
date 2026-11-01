@@ -76,7 +76,7 @@ class InputSettings extends ChangeNotifier {
                 value != currentValue) {
               _save(key, currentValue);
             }
-          }, onError: (Object _, StackTrace __) {}),
+          }, onError: (Object _, StackTrace _) {}),
         );
         await write.timeout(
           const Duration(seconds: 3),

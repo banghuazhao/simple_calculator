@@ -170,11 +170,11 @@ void main() {
     test(
       'failed and declined writes do not escape or block a later save',
       () async {
-        preferences.write = (_, __) async {
+        preferences.write = (_, _) async {
           throw PlatformException(code: 'write_failed');
         };
         await storage.save([_entry(1)]);
-        preferences.write = (_, __) async => false;
+        preferences.write = (_, _) async => false;
         await storage.save([_entry(2)]);
         preferences.write = null;
         await storage.save([_entry(3)]);

@@ -12,6 +12,7 @@ import 'package:simple_calculator/history_sheet.dart';
 import 'package:simple_calculator/key_controller.dart' as input;
 import 'package:simple_calculator/key_symbol.dart';
 import 'package:simple_calculator/main.dart';
+import 'package:simple_calculator/more_page.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
@@ -250,6 +251,37 @@ void main() {
       await tester.pumpAndSettle();
       expect(inSheet('12 + 3 ='), findsOneWidget);
       expect(Processor.historyLog, hasLength(2));
+    });
+
+    testWidgets('theme tiles are labelled and announce the selection', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+      final model = Provider.of<ThemeModel>(
+        tester.element(find.byType(Calculator)),
+        listen: false,
+      );
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      expect(find.byType(MorePage), findsOneWidget);
+
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Theme 1')),
+        isSemantics(label: 'Theme 1', isButton: true, isSelected: true),
+      );
+      await tester.tap(find.bySemanticsLabel('Theme 2'));
+      await tester.pumpAndSettle();
+      expect(model.themeColor, 1);
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Theme 2')),
+        isSemantics(label: 'Theme 2', isButton: true, isSelected: true),
+      );
+
+      model.switchTheme(0);
+      await tester.pumpAndSettle();
+      semantics.dispose();
     });
   });
 }

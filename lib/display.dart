@@ -7,11 +7,11 @@ import 'package:simple_calculator/util/theme_model.dart';
 
 class Display extends StatelessWidget {
   const Display({
-    Key? key,
+    super.key,
     required this.current,
     required this.history,
     this.isResult = false,
-  }) : super(key: key);
+  });
 
   final String current;
   final String history;
