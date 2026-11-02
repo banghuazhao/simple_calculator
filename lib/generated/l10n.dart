@@ -759,6 +759,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Copy all history`
+  String get copyAllHistory {
+    return Intl.message(
+      'Copy all history',
+      name: 'copyAllHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy matching calculations`
+  String get copyMatchingHistory {
+    return Intl.message(
+      'Copy matching calculations',
+      name: 'copyMatchingHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `High contrast`
+  String get highContrast {
+    return Intl.message(
+      'High contrast',
+      name: 'highContrast',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use stronger contrast for numbers and controls. Your selected theme is kept.`
+  String get highContrastDescription {
+    return Intl.message(
+      'Use stronger contrast for numbers and controls. Your selected theme is kept.',
+      name: 'highContrastDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

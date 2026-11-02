@@ -9,10 +9,12 @@ A clean, themeable calculator app built with Flutter — available on iOS.
 ## Features
 
 - **18 themes** — switch between colour themes from the settings page
+- **High contrast** — a saved accessibility option improves number and control contrast while preserving your selected colour theme
 - **Localization** — English, Simplified Chinese, Traditional Chinese
 - **Undo** — restore recent input with the toolbar button or shake-to-undo on supported phones
 - **Calculation history** — retain up to 100 calculations across restarts, search them, reuse results, swipe to delete (with undo), or clear saved history
 - **Copy and paste** — tap the display to copy the unformatted number, copy a full calculation from history, or paste a number (plain, thousands-grouped, or scientific notation)
+- **Bulk history copying** — copy all saved calculations or just the current search matches as plain text
 - **Input settings** — independently enable or disable haptic feedback and shake-to-undo
 - **Keyboard support** — use number keys or the numeric keypad, operators, Enter for equals, Backspace to delete, Escape to clear, Ctrl/Cmd+Z to undo, and Ctrl/Cmd+V to paste
 - **Tips and shortcuts** — an in-app help page in settings explains gestures and keyboard shortcuts

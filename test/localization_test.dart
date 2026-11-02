@@ -57,6 +57,10 @@ Map<String, String> calculatorMessages(S strings) => {
   'pasted': strings.pasted,
   'invalidPaste': strings.invalidPaste,
   'clipboardUnavailable': strings.clipboardUnavailable,
+  'copyAllHistory': strings.copyAllHistory,
+  'copyMatchingHistory': strings.copyMatchingHistory,
+  'highContrast': strings.highContrast,
+  'highContrastDescription': strings.highContrastDescription,
 };
 
 void main() {

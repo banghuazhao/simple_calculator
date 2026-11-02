@@ -72,7 +72,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "剪贴板暂时不可用，请重试。",
     ),
     "copied": MessageLookupByLibrary.simpleMessage("已复制"),
+    "copyAllHistory": MessageLookupByLibrary.simpleMessage("复制全部历史记录"),
     "copyCalculation": MessageLookupByLibrary.simpleMessage("复制计算过程"),
+    "copyMatchingHistory": MessageLookupByLibrary.simpleMessage("复制匹配的计算记录"),
     "copyResult": MessageLookupByLibrary.simpleMessage("复制结果"),
     "decimalPoint": MessageLookupByLibrary.simpleMessage("小数点"),
     "deleteCalculation": MessageLookupByLibrary.simpleMessage("删除计算记录"),
@@ -97,6 +99,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "使用“撤销”恢复最近的输入。您可以在输入设置中调整摇动撤销和触感反馈。",
+    ),
+    "highContrast": MessageLookupByLibrary.simpleMessage("高对比度"),
+    "highContrastDescription": MessageLookupByLibrary.simpleMessage(
+      "增强数字和控件的对比度。您选择的主题将被保留。",
     ),
     "history": MessageLookupByLibrary.simpleMessage("历史记录"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage("已删除计算记录"),

@@ -83,5 +83,9 @@
   "pasteNumber": "粘贴数字",
   "pasted": "已粘贴数字",
   "invalidPaste": "请先复制有效数字再粘贴。",
-  "clipboardUnavailable": "剪贴板暂时不可用，请重试。"
+  "clipboardUnavailable": "剪贴板暂时不可用，请重试。",
+  "copyAllHistory": "复制全部历史记录",
+  "copyMatchingHistory": "复制匹配的计算记录",
+  "highContrast": "高对比度",
+  "highContrastDescription": "增强数字和控件的对比度。您选择的主题将被保留。"
 }

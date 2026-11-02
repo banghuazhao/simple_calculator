@@ -1,14 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 
 class ThemeModel with ChangeNotifier {
   static const kThemeColorIndex = 'kThemeColorIndex';
+  static const kHighContrastEnabled = 'kHighContrastEnabled';
 
   /// 当前主题颜色
   int _themeColor = 0;
   int get themeColor => _themeColor;
+  bool _highContrastEnabled = false;
+  bool get highContrastEnabled => _highContrastEnabled;
+  (SharedPreferences, bool)? _pendingContrastWrite;
+  Completer<void>? _contrastIdle;
+  bool _writingContrast = false;
   late Color backgroundColor;
   late Color buttonColor1;
   late Color buttonColor2;
@@ -16,24 +23,109 @@ class ThemeModel with ChangeNotifier {
   late Color textColor1;
   late Color textColor2;
 
+  Color get secondaryTextColor =>
+      highContrastEnabled ? Colors.white : textColor1.withValues(alpha: 0.5);
+  Color get mutedTextColor => highContrastEnabled
+      ? const Color(0xffDDDDDD)
+      : textColor1.withValues(alpha: 0.65);
+  Color get dividerColor => highContrastEnabled
+      ? const Color(0xff777777)
+      : textColor1.withValues(alpha: 0.08);
+  Color get handleColor => highContrastEnabled
+      ? const Color(0xffAAAAAA)
+      : textColor1.withValues(alpha: 0.2);
+
+  ThemeData? get accessibilityTheme => highContrastEnabled
+      ? ThemeData(
+          brightness: Brightness.dark,
+          colorScheme: const ColorScheme.highContrastDark().copyWith(
+            primary: Colors.white,
+            onPrimary: Colors.black,
+            surface: Colors.black,
+            onSurface: Colors.white,
+            outline: const Color(0xffAAAAAA),
+          ),
+          scaffoldBackgroundColor: Colors.black,
+          dividerColor: dividerColor,
+        )
+      : null;
+
   ThemeModel() {
     /// 获取主题色
-    final savedTheme = StorageManager.sharedPreferences?.get(kThemeColorIndex);
+    Object? savedTheme;
+    try {
+      savedTheme = StorageManager.sharedPreferences?.get(kThemeColorIndex);
+    } catch (error) {
+      debugPrint('Saved theme unavailable; using default: $error');
+    }
     _themeColor = savedTheme is int && savedTheme >= 0 && savedTheme <= 17
         ? savedTheme
         : 0;
+    try {
+      _highContrastEnabled =
+          StorageManager.sharedPreferences?.get(kHighContrastEnabled) == true;
+    } catch (error) {
+      debugPrint(
+        'Saved contrast preference unavailable; using default: $error',
+      );
+    }
     _changeTheme();
   }
 
   /// 切换指定色彩
   void switchTheme(int colorIndex) {
+    if (colorIndex < 0 || colorIndex > 17) return;
     _themeColor = colorIndex;
     _changeTheme();
     notifyListeners();
     unawaited(StorageManager.saveInt(kThemeColorIndex, colorIndex));
   }
 
+  void setHighContrastEnabled(bool enabled) {
+    if (_highContrastEnabled == enabled) return;
+    _highContrastEnabled = enabled;
+    _changeTheme();
+    notifyListeners();
+    final preferences = StorageManager.sharedPreferences;
+    if (preferences == null) return;
+    _pendingContrastWrite = (preferences, enabled);
+    _contrastIdle ??= Completer<void>();
+    if (!_writingContrast) unawaited(_drainContrastWrites());
+  }
+
+  /// Exposed for deterministic persistence tests; application input never waits.
+  @visibleForTesting
+  Future<void> get pendingHighContrastWrites =>
+      _contrastIdle?.future ?? Future<void>.value();
+
+  Future<void> _drainContrastWrites() async {
+    _writingContrast = true;
+    while (_pendingContrastWrite != null) {
+      final (preferences, enabled) = _pendingContrastWrite!;
+      _pendingContrastWrite = null;
+      try {
+        final saved = await preferences.setBool(kHighContrastEnabled, enabled);
+        if (!saved) debugPrint('Contrast preference could not be saved.');
+      } catch (error) {
+        debugPrint('Contrast preference could not be saved: $error');
+      }
+    }
+    _writingContrast = false;
+    final idle = _contrastIdle;
+    _contrastIdle = null;
+    idle?.complete();
+  }
+
   void _changeTheme() {
+    if (highContrastEnabled) {
+      backgroundColor = Colors.black;
+      buttonColor1 = const Color(0xff222222);
+      buttonColor2 = const Color(0xff004A80);
+      buttonColor3 = const Color(0xff3A3A3A);
+      textColor1 = Colors.white;
+      textColor2 = Colors.white;
+      return;
+    }
     if (_themeColor == 0) {
       backgroundColor = const Color(0xffEFE4DC);
       buttonColor1 = const Color(0xffA2917E);

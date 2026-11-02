@@ -80,5 +80,9 @@
   "pasteNumber": "貼上數字",
   "pasted": "已貼上數字",
   "invalidPaste": "請先複製有效數字再貼上。",
-  "clipboardUnavailable": "剪貼簿暫時無法使用，請重試。"
+  "clipboardUnavailable": "剪貼簿暫時無法使用，請重試。",
+  "copyAllHistory": "複製全部歷史記錄",
+  "copyMatchingHistory": "複製相符的計算記錄",
+  "highContrast": "高對比度",
+  "highContrastDescription": "增強數字和控制項的對比度。您選擇的主題將被保留。"
 }

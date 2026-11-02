@@ -80,6 +80,7 @@ class CalculatorApp extends StatelessWidget {
         ],
         child: Consumer<ThemeModel>(builder: (context, themeModel, child) {
           return MaterialApp(
+            theme: themeModel.accessibilityTheme,
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
               S.delegate,

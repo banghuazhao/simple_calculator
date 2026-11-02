@@ -135,7 +135,7 @@ class _HistorySheetState extends State<HistorySheet> {
                       Text(
                         entry.equation,
                         style: TextStyle(
-                          color: textColor.withValues(alpha: 0.5),
+                          color: model.secondaryTextColor,
                           fontSize: 14,
                         ),
                         textAlign: TextAlign.right,
@@ -197,7 +197,7 @@ class _HistorySheetState extends State<HistorySheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: textColor.withValues(alpha: 0.2),
+                  color: model.handleColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -207,29 +207,70 @@ class _HistorySheetState extends State<HistorySheet> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    strings.history,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final title = Text(
+                  strings.history,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
                   ),
-                ),
-                if (entries.isNotEmpty)
-                  TextButton(
-                    onPressed: () => _clearHistory(context),
-                    child: Text(
-                      query.isEmpty ? strings.clear : strings.clearAllHistory,
-                      style: TextStyle(color: textColor, fontSize: 15),
-                    ),
+                );
+                final actions = <Widget>[
+                  IconButton(
+                    key: const ValueKey('history-copy-bulk'),
+                    tooltip: query.isEmpty
+                        ? strings.copyAllHistory
+                        : strings.copyMatchingHistory,
+                    onPressed: filtered.isEmpty
+                        ? null
+                        : () => ClipboardHelper.copy(
+                            context,
+                            filtered
+                                .map(
+                                  (entry) =>
+                                      '${entry.equation} ${entry.result}',
+                                )
+                                .join('\n'),
+                          ),
+                    color: textColor,
+                    disabledColor: textColor.withValues(alpha: 0.35),
+                    icon: const Icon(Icons.copy_all_outlined),
                   ),
-              ],
+                  if (entries.isNotEmpty)
+                    TextButton(
+                      onPressed: () => _clearHistory(context),
+                      child: Text(
+                        query.isEmpty ? strings.clear : strings.clearAllHistory,
+                        style: TextStyle(color: textColor, fontSize: 15),
+                      ),
+                    ),
+                ];
+                if (MediaQuery.textScalerOf(context).scale(15) > 24 ||
+                    (constraints.maxWidth < 320 && query.isNotEmpty)) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      title,
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: actions,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: title),
+                    ...actions,
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -275,10 +316,7 @@ class _HistorySheetState extends State<HistorySheet> {
                       ? strings.noCalculationsYet
                       : strings.noHistoryMatches,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: textColor.withValues(alpha: 0.65),
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(color: model.mutedTextColor, fontSize: 16),
                 ),
               ),
             ),
@@ -294,7 +332,7 @@ class _HistorySheetState extends State<HistorySheet> {
                 height: 1,
                 indent: 20,
                 endIndent: 20,
-                color: textColor.withValues(alpha: 0.08),
+                color: model.dividerColor,
               ),
             ),
           ),

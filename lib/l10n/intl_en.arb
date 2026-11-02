@@ -84,5 +84,9 @@
   "pasteNumber": "Paste number",
   "pasted": "Number pasted",
   "invalidPaste": "Copy a valid number to paste.",
-  "clipboardUnavailable": "Clipboard is unavailable. Please try again."
+  "clipboardUnavailable": "Clipboard is unavailable. Please try again.",
+  "copyAllHistory": "Copy all history",
+  "copyMatchingHistory": "Copy matching calculations",
+  "highContrast": "High contrast",
+  "highContrastDescription": "Use stronger contrast for numbers and controls. Your selected theme is kept."
 }

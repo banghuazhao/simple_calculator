@@ -97,7 +97,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Clipboard is unavailable. Please try again.",
     ),
     "copied": MessageLookupByLibrary.simpleMessage("Copied"),
+    "copyAllHistory": MessageLookupByLibrary.simpleMessage("Copy all history"),
     "copyCalculation": MessageLookupByLibrary.simpleMessage("Copy calculation"),
+    "copyMatchingHistory": MessageLookupByLibrary.simpleMessage(
+      "Copy matching calculations",
+    ),
     "copyResult": MessageLookupByLibrary.simpleMessage("Copy result"),
     "decimalPoint": MessageLookupByLibrary.simpleMessage("Decimal point"),
     "deleteCalculation": MessageLookupByLibrary.simpleMessage(
@@ -126,6 +130,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.",
+    ),
+    "highContrast": MessageLookupByLibrary.simpleMessage("High contrast"),
+    "highContrastDescription": MessageLookupByLibrary.simpleMessage(
+      "Use stronger contrast for numbers and controls. Your selected theme is kept.",
     ),
     "history": MessageLookupByLibrary.simpleMessage("History"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage(

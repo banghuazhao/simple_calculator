@@ -305,7 +305,7 @@ class _MorePageState extends State<MorePage> {
         classicReversi,
       ];
     }
-    var model = Provider.of<ThemeModel>(context, listen: false);
+    var model = Provider.of<ThemeModel>(context);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
@@ -353,6 +353,7 @@ class _MorePageState extends State<MorePage> {
                 style: TextStyle(fontSize: 21, color: model.textColor1),
               ),
             ),
+            const HighContrastSetting(),
             Container(
               padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
               height: 210,
@@ -444,6 +445,36 @@ class _MorePageState extends State<MorePage> {
   }
 }
 
+class HighContrastSetting extends StatelessWidget {
+  const HighContrastSetting({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final model = Provider.of<ThemeModel>(context);
+    final strings = S.of(context);
+    return SwitchListTile.adaptive(
+      key: const ValueKey('high-contrast-setting'),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+      title: Text(
+        strings.highContrast,
+        style: TextStyle(color: model.textColor1),
+      ),
+      subtitle: Text(
+        strings.highContrastDescription,
+        style: TextStyle(color: model.textColor1),
+      ),
+      value: model.highContrastEnabled,
+      onChanged: model.setHighContrastEnabled,
+      activeThumbColor: model.highContrastEnabled ? Colors.black : null,
+      activeTrackColor: model.highContrastEnabled ? Colors.white : null,
+      inactiveThumbColor: model.highContrastEnabled ? Colors.white : null,
+      inactiveTrackColor: model.highContrastEnabled
+          ? const Color(0xff444444)
+          : null,
+    );
+  }
+}
+
 class InputSettingsSection extends StatelessWidget {
   const InputSettingsSection({super.key});
 
@@ -477,6 +508,12 @@ class InputSettingsSection extends StatelessWidget {
             ),
             value: settings.hapticsEnabled,
             onChanged: settings.setHapticsEnabled,
+            activeThumbColor: model.highContrastEnabled ? Colors.black : null,
+            activeTrackColor: model.highContrastEnabled ? Colors.white : null,
+            inactiveThumbColor: model.highContrastEnabled ? Colors.white : null,
+            inactiveTrackColor: model.highContrastEnabled
+                ? const Color(0xff444444)
+                : null,
           ),
           SwitchListTile.adaptive(
             key: const ValueKey('shake-setting'),
@@ -491,6 +528,12 @@ class InputSettingsSection extends StatelessWidget {
             ),
             value: settings.shakeToUndoEnabled,
             onChanged: settings.setShakeToUndoEnabled,
+            activeThumbColor: model.highContrastEnabled ? Colors.black : null,
+            activeTrackColor: model.highContrastEnabled ? Colors.white : null,
+            inactiveThumbColor: model.highContrastEnabled ? Colors.white : null,
+            inactiveTrackColor: model.highContrastEnabled
+                ? const Color(0xff444444)
+                : null,
           ),
           const SizedBox(height: 8),
         ],
@@ -529,11 +572,15 @@ class MoreAppsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final model = Provider.of<ThemeModel>(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      decoration: const BoxDecoration(
-        color: Colors.white60,
-        borderRadius: BorderRadius.all(Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: model.highContrastEnabled ? model.buttonColor1 : Colors.white60,
+        borderRadius: const BorderRadius.all(Radius.circular(24)),
+        border: model.highContrastEnabled
+            ? Border.all(color: Colors.white)
+            : null,
       ),
       child: InkWell(
         customBorder: const RoundedRectangleBorder(
@@ -546,8 +593,16 @@ class MoreAppsRow extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             child: SizedBox(height: 50, width: 50, child: appIcon),
           ),
-          trailing: Icon(trailingIcon),
-          title: Text(title),
+          trailing: Icon(
+            trailingIcon,
+            color: model.highContrastEnabled ? model.textColor1 : null,
+          ),
+          title: Text(
+            title,
+            style: model.highContrastEnabled
+                ? TextStyle(color: model.textColor1)
+                : null,
+          ),
         ),
       ),
     );

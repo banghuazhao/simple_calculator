@@ -52,7 +52,7 @@ class Display extends StatelessWidget {
     final bool compact = screenHeight <= 740;
 
     final Color textColor = model.textColor1;
-    final Color historyColor = textColor.withValues(alpha: 0.5);
+    final Color historyColor = model.secondaryTextColor;
 
     final mainStyle =
         Theme.of(context).textTheme.displayMedium?.copyWith(

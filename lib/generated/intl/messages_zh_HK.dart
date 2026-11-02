@@ -66,7 +66,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "剪貼簿暫時無法使用，請重試。",
     ),
     "copied": MessageLookupByLibrary.simpleMessage("已複製"),
+    "copyAllHistory": MessageLookupByLibrary.simpleMessage("複製全部歷史記錄"),
     "copyCalculation": MessageLookupByLibrary.simpleMessage("複製計算過程"),
+    "copyMatchingHistory": MessageLookupByLibrary.simpleMessage("複製相符的計算記錄"),
     "copyResult": MessageLookupByLibrary.simpleMessage("複製結果"),
     "decimalPoint": MessageLookupByLibrary.simpleMessage("小數點"),
     "deleteCalculation": MessageLookupByLibrary.simpleMessage("刪除計算記錄"),
@@ -91,6 +93,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "使用「復原」恢復最近的輸入。您可以在輸入設定中調整搖動復原和觸覺回饋。",
+    ),
+    "highContrast": MessageLookupByLibrary.simpleMessage("高對比度"),
+    "highContrastDescription": MessageLookupByLibrary.simpleMessage(
+      "增強數字和控制項的對比度。您選擇的主題將被保留。",
     ),
     "history": MessageLookupByLibrary.simpleMessage("歷史記錄"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage("已刪除計算記錄"),

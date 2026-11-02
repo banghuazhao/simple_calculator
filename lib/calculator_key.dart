@@ -160,6 +160,9 @@ class _CalculatorKeyState extends State<CalculatorKey>
               child: Container(
                 decoration: BoxDecoration(
                   color: color,
+                  border: model.highContrastEnabled
+                      ? Border.all(color: Colors.white, width: 1.5)
+                      : null,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
