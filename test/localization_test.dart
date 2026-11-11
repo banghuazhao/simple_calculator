@@ -37,6 +37,7 @@ Map<String, String> calculatorMessages(S strings) => {
   'helpAndShortcuts': strings.helpAndShortcuts,
   'helpBasics': strings.helpBasics,
   'helpCopy': strings.helpCopy,
+  'helpCopyHistory': strings.helpCopyHistory,
   'helpUndo': strings.helpUndo,
   'helpHistory': strings.helpHistory,
   'helpKeyboard': strings.helpKeyboard,

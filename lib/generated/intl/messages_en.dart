@@ -119,7 +119,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpBasics": MessageLookupByLibrary.simpleMessage("Using the calculator"),
     "helpCopy": MessageLookupByLibrary.simpleMessage(
-      "Tap the result to copy the number. Use the copy button in history to copy a full calculation.",
+      "Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.",
+    ),
+    "helpCopyHistory": MessageLookupByLibrary.simpleMessage(
+      "In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
       "History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.",

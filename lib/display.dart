@@ -76,6 +76,9 @@ class Display extends StatelessWidget {
     final displayKey = isResult
         ? ValueKey('result_$formattedCurrent')
         : const ValueKey('input');
+    final copyCalculation = isResult && !isError && history.isNotEmpty
+        ? () => ClipboardHelper.copy(context, '$history $current')
+        : null;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(inset, 0, inset, compact ? 8 : 16),
@@ -83,24 +86,34 @@ class Display extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // History / equation line
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            transitionBuilder: (child, anim) =>
-                FadeTransition(opacity: anim, child: child),
-            child: history.isNotEmpty
-                ? Align(
-                    key: ValueKey(history),
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      history,
-                      style: historyStyle,
-                      textAlign: TextAlign.right,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  )
-                : const SizedBox.shrink(key: ValueKey('no-history')),
+          Semantics(
+            label: copyCalculation == null ? history : strings.copyCalculation,
+            value: copyCalculation == null ? null : history,
+            button: copyCalculation != null,
+            onTap: copyCalculation,
+            excludeSemantics: true,
+            child: GestureDetector(
+              excludeFromSemantics: true,
+              onTap: copyCalculation,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                transitionBuilder: (child, anim) =>
+                    FadeTransition(opacity: anim, child: child),
+                child: history.isNotEmpty
+                    ? Align(
+                        key: ValueKey(history),
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          history,
+                          style: historyStyle,
+                          textAlign: TextAlign.right,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    : const SizedBox.shrink(key: ValueKey('no-history')),
+              ),
+            ),
           ),
           SizedBox(height: compact ? 2 : 4),
           // Main number — tap to copy

@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_calculator/calculator.dart';
 import 'package:simple_calculator/calculator_key.dart';
 import 'package:simple_calculator/display.dart';
+import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/history_sheet.dart';
 import 'package:simple_calculator/key_controller.dart' as input;
 import 'package:simple_calculator/key_symbol.dart';
@@ -223,6 +224,78 @@ void main() {
       expect(find.text('Copy a valid number to paste.'), findsOneWidget);
     });
 
+    testWidgets('the display copies an equation only while it is complete', (
+      tester,
+    ) async {
+      final clipboardWrites = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardWrites.add((call.arguments as Map)['text'] as String);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+
+      final copyEquation = find.bySemanticsLabel('Copy calculation');
+      for (final symbol in ['1', '2', '0', '0', '+', '3', '4']) {
+        await press(tester, symbol);
+      }
+      expect(copyEquation, findsNothing);
+      await tester.tap(find.text('1200 +'));
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, isEmpty);
+
+      await press(tester, '=');
+      final equation = find.text('1200 + 34 =');
+      final equationPosition = tester.getCenter(equation);
+      final history = Processor.historyLog;
+      await tester.tap(equation);
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, ['1200 + 34 = 1234']);
+      expect(find.text('Copied'), findsOneWidget);
+
+      final node = tester.getSemantics(copyEquation);
+      expect(
+        node,
+        isSemantics(value: '1200 + 34 =', isButton: true, hasTapAction: true),
+      );
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1,234'));
+      await tester.pumpAndSettle();
+      final expectedCopies = ['1200 + 34 = 1234', '1200 + 34 = 1234', '1234'];
+      expect(clipboardWrites, expectedCopies);
+      expect(Processor.historyLog, history);
+
+      await tester.tap(find.text('÷'));
+      await tester.pump();
+      expect(find.text('1234 ÷'), findsOneWidget);
+      expect(equation, findsOneWidget);
+      expect(copyEquation, findsNothing);
+      await tester.tapAt(equationPosition);
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, expectedCopies);
+
+      await press(tester, '0');
+      await press(tester, '=');
+      expect(find.text('Error'), findsOneWidget);
+      expect(copyEquation, findsNothing);
+      await tester.tap(find.text('Error'));
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, expectedCopies);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('history search, swipe delete, and undo', (tester) async {
       await tester.pumpWidget(const CalculatorApp());
       await tester.pumpAndSettle();
@@ -252,6 +325,22 @@ void main() {
       await tester.pumpAndSettle();
       expect(inSheet('12 + 3 ='), findsOneWidget);
       expect(Processor.historyLog, hasLength(2));
+    });
+
+    testWidgets('tips explain how to copy results, equations, and history', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+
+      final strings = S.of(tester.element(find.byType(MorePage)));
+      await tester.tap(find.text(strings.helpAndShortcuts));
+      await tester.pumpAndSettle();
+
+      expect(find.text(strings.helpCopy), findsOneWidget);
+      expect(find.text(strings.helpCopyHistory), findsOneWidget);
     });
 
     testWidgets('theme tiles support accessibility and pointer activation', (

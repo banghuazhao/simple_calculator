@@ -88,7 +88,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "helpAndShortcuts": MessageLookupByLibrary.simpleMessage("使用提示与快捷键"),
     "helpBasics": MessageLookupByLibrary.simpleMessage("计算器使用方法"),
     "helpCopy": MessageLookupByLibrary.simpleMessage(
-      "点按结果即可复制数字。使用历史记录中的复制按钮，可以复制完整的计算过程。",
+      "点按结果可复制数字。按下等号后，点按结果上方的算式可复制算式和结果。",
+    ),
+    "helpCopyHistory": MessageLookupByLibrary.simpleMessage(
+      "在历史记录中，点按记录旁的复制按钮可复制该条记录的算式和结果。选择“复制全部历史记录”可复制所有记录，搜索时则可选择“复制匹配的计算记录”。",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
       "历史记录最多保留100条计算。点按记录可使用其结果，滑动可删除记录，删除后可点按“撤销”恢复。",

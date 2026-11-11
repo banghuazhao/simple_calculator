@@ -72,6 +72,7 @@ class HelpPage extends StatelessWidget {
                   children: [
                     heading(strings.helpBasics),
                     paragraph(strings.helpCopy),
+                    paragraph(strings.helpCopyHistory),
                     paragraph(strings.helpUndo),
                     paragraph(strings.helpHistory),
                     paragraph(strings.helpPaste),

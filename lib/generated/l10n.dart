@@ -560,11 +560,21 @@ class S {
     );
   }
 
-  /// `Tap the result to copy the number. Use the copy button in history to copy a full calculation.`
+  /// `Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.`
   String get helpCopy {
     return Intl.message(
-      'Tap the result to copy the number. Use the copy button in history to copy a full calculation.',
+      'Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.',
       name: 'helpCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.`
+  String get helpCopyHistory {
+    return Intl.message(
+      'In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.',
+      name: 'helpCopyHistory',
       desc: '',
       args: [],
     );
