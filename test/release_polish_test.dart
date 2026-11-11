@@ -85,6 +85,34 @@ void main() {
       expect(Processor.historyLog, hasLength(1));
     });
 
+    test('continuing after equals records each calculation once', () async {
+      await press([Keys.two, Keys.add, Keys.three, Keys.equals]);
+      final original = Processor.historyLog.single;
+
+      await press([Keys.multiply]);
+      expect(state.current, '5');
+      expect(state.history, '5 ×');
+      expect(state.isResult, isFalse);
+      expect(Processor.historyLog, [original]);
+
+      await press([Keys.four, Keys.subtract]);
+      expect(state.current, '20');
+      expect(state.history, '20 -');
+      expect(Processor.historyLog.map((entry) => entry.equation), [
+        '5 × 4 =',
+        original.equation,
+      ]);
+
+      await press([Keys.one, Keys.equals]);
+      expect(state.current, '19');
+      expect(state.history, '20 - 1 =');
+      expect(
+        Processor.historyLog.map((entry) => (entry.equation, entry.result)),
+        [('20 - 1 =', '19'), ('5 × 4 =', '20'), ('2 + 3 =', '5')],
+      );
+      expect(Processor.historyLog.last.id, original.id);
+    });
+
     test('a trailing decimal point is accepted and tidied', () async {
       await press([Keys.decimal, Keys.add, Keys.five, Keys.decimal]);
       await press([Keys.equals]);
