@@ -383,10 +383,18 @@ class _MorePageState extends State<MorePage> {
                     String themeImage = entry.value;
                     int index = entry.key;
                     final selected = index == model.themeColor;
+
+                    void selectTheme() {
+                      if (selected) return;
+                      model.switchTheme(index);
+                      setState(() => _themeChanged = true);
+                    }
+
                     return Semantics(
                       label: '${S.of(context).theme} ${index + 1}',
                       selected: selected,
                       button: true,
+                      onTap: selectTheme,
                       excludeSemantics: true,
                       child: Container(
                         margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -407,11 +415,7 @@ class _MorePageState extends State<MorePage> {
                         ),
                         // color: color,
                         child: InkWell(
-                          onTap: () {
-                            if (selected) return;
-                            model.switchTheme(index);
-                            setState(() => _themeChanged = true);
-                          },
+                          onTap: selectTheme,
                           child: const SizedBox(width: 90),
                         ),
                       ),

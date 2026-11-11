@@ -176,6 +176,51 @@ void main() {
     expect(state.current, '77');
   });
 
+  testWidgets('history finds grouped numbers and copies the original text', (
+    tester,
+  ) async {
+    final copies = <String>[];
+    mockClipboard(tester, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copies.add((call.arguments as Map)['text'] as String);
+      }
+      return null;
+    });
+    Processor.setFromHistory('-1234567.5');
+    press([Keys.divide]);
+    expect(Processor.paste('1000'), isTrue);
+    press([Keys.equals]);
+    Processor.setFromHistory('77');
+    final history = Processor.historyLog;
+    await _open(tester);
+
+    final search = find.byKey(const ValueKey('history-search'));
+    const equation = '-1234567.5 ÷ 1000 =';
+    for (final query in ['-1234.5675', '−1,234.5675', '−1,234,567.5 / 1,000']) {
+      await tester.enterText(search, query);
+      await tester.pumpAndSettle();
+      expect(find.text(equation), findsOneWidget, reason: query);
+      expect(find.text('8 ÷ 2 ='), findsNothing, reason: query);
+    }
+
+    await tester.tap(find.byTooltip(S.current.copyMatchingHistory));
+    await tester.pumpAndSettle();
+    expect(copies, ['$equation -1234.5675']);
+
+    for (final query in ['−12,34.5675', '−1,234.5,675', ',']) {
+      await tester.enterText(search, query);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(S.current.noHistoryMatches),
+        findsOneWidget,
+        reason: query,
+      );
+      expect(tester.widget<IconButton>(find.byKey(_bulkKey)).onPressed, isNull);
+    }
+    expect(Processor.historyLog, history);
+    expect(state.current, '77');
+  });
+
   testWidgets('empty history and no matches disable bulk copying', (
     tester,
   ) async {

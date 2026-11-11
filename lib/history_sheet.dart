@@ -18,6 +18,10 @@ class HistorySheet extends StatefulWidget {
 }
 
 class _HistorySheetState extends State<HistorySheet> {
+  // Match the whole numeric token so malformed grouping stays literal.
+  static final _searchNumber = RegExp(r'[\d.,]+(?:e[+-]?[\d.,]*)?');
+  static final _groupedNumber = RegExp(r'^\d{1,3}(?:,\d{3})+(?:\.\d*)?$');
+
   final TextEditingController _search = TextEditingController();
   String _query = '';
   int _deletionRevision = 0;
@@ -175,7 +179,12 @@ class _HistorySheetState extends State<HistorySheet> {
   Widget _contents(BuildContext context, ThemeModel model) {
     final strings = S.of(context);
     final entries = Processor.historyLog;
-    final query = _searchable(_query);
+    final query = _searchable(_query).replaceAllMapped(_searchNumber, (match) {
+      final number = match[0]!;
+      return _groupedNumber.hasMatch(number)
+          ? number.replaceAll(',', '')
+          : number;
+    });
     final filtered = query.isEmpty
         ? entries
         : entries

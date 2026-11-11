@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -253,10 +254,9 @@ void main() {
       expect(Processor.historyLog, hasLength(2));
     });
 
-    testWidgets('theme tiles are labelled and announce the selection', (
+    testWidgets('theme tiles support accessibility and pointer activation', (
       tester,
     ) async {
-      final semantics = tester.ensureSemantics();
       await tester.pumpWidget(const CalculatorApp());
       await tester.pumpAndSettle();
       final model = Provider.of<ThemeModel>(
@@ -267,21 +267,36 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(MorePage), findsOneWidget);
 
+      final defaultTheme = find.bySemanticsLabel('Theme 1');
+      final alternateTheme = find.bySemanticsLabel('Theme 2');
       expect(
-        tester.getSemantics(find.bySemanticsLabel('Theme 1')),
+        tester.getSemantics(defaultTheme),
         isSemantics(label: 'Theme 1', isButton: true, isSelected: true),
       );
-      await tester.tap(find.bySemanticsLabel('Theme 2'));
+      final node = tester.getSemantics(alternateTheme);
+      expect(
+        node,
+        isSemantics(
+          label: 'Theme 2',
+          isButton: true,
+          isSelected: false,
+          hasTapAction: true,
+        ),
+      );
+      node.owner!.performAction(node.id, SemanticsAction.tap);
       await tester.pumpAndSettle();
       expect(model.themeColor, 1);
       expect(
-        tester.getSemantics(find.bySemanticsLabel('Theme 2')),
+        tester.getSemantics(alternateTheme),
         isSemantics(label: 'Theme 2', isButton: true, isSelected: true),
       );
+      final preferences = StorageManager.sharedPreferences!;
+      await preferences.reload();
+      expect(preferences.getInt(ThemeModel.kThemeColorIndex), 1);
 
-      model.switchTheme(0);
+      await tester.tap(defaultTheme);
       await tester.pumpAndSettle();
-      semantics.dispose();
+      expect(model.themeColor, 0);
     });
   });
 }
