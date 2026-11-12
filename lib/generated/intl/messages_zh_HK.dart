@@ -167,6 +167,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "找不到此 Apple 帳戶的進階版購買記錄。",
     ),
     "premiumOffer": MessageLookupByLibrary.simpleMessage("一次性購買即可解鎖兩款工具並移除廣告。"),
+    "premiumOfferToolsOnly": MessageLookupByLibrary.simpleMessage(
+      "一次性購買即可解鎖科學計算器和可重用公式。",
+    ),
     "premiumPending": MessageLookupByLibrary.simpleMessage("購買正在等候批准。"),
     "premiumRestore": MessageLookupByLibrary.simpleMessage("恢復購買"),
     "premiumRestored": MessageLookupByLibrary.simpleMessage("已恢復進階版購買。"),

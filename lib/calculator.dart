@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +37,7 @@ class _CalculatorState extends State<Calculator> {
   bool _isAdLoaded = false;
   bool _bannerLoading = false;
   PremiumController? _premium;
+  AppLifecycleListener? _premiumLifecycle;
 
   bool get _allowsAds => _premium?.allowsAds ?? true;
 
@@ -53,8 +55,15 @@ class _CalculatorState extends State<Calculator> {
     });
     Processor.refresh();
 
+    final premium = context.read<PremiumController?>();
+    if (defaultTargetPlatform == TargetPlatform.macOS && premium != null) {
+      _premiumLifecycle = AppLifecycleListener(
+        onResume: () => unawaited(premium.refreshEntitlement()),
+      );
+    }
+
     if (Platform.isAndroid || Platform.isIOS) {
-      _premium = context.read<PremiumController?>();
+      _premium = premium;
       _premium?.addListener(_syncBanner);
       // Plugin and sensor failures must not prevent the first calculator frame.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -132,6 +141,7 @@ class _CalculatorState extends State<Calculator> {
 
   @override
   void dispose() {
+    _premiumLifecycle?.dispose();
     _premium?.removeListener(_syncBanner);
     unawaited(_keySubscription?.cancel());
     unawaited(_processorSubscription?.cancel());

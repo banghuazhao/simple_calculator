@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_calculator/main.dart';
@@ -32,6 +33,67 @@ class _FakeStore implements PremiumStore {
 }
 
 void main() {
+  testWidgets('Mac restores the shared Premium purchase and stays ad-free', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await StorageManager.init();
+    const methods = MethodChannel('simple_calculator/premium');
+    const events = MethodChannel('simple_calculator/premium_entitlement');
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(methods, (call) async {
+      return switch (call.method) {
+        'currentEntitlement' => false,
+        'price' => _FakeStore.price,
+        'restore' => 'restored',
+        _ => throw MissingPluginException(),
+      };
+    });
+    messenger.setMockMethodCallHandler(events, (call) async => null);
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(methods, null);
+      messenger.setMockMethodCallHandler(events, null);
+    });
+    final controller = PremiumController();
+    addTearDown(controller.dispose);
+    await controller.initialize();
+    await controller.loadProduct();
+
+    expect(controller.isSupported, isTrue);
+    expect(controller.isPremium, isFalse);
+    expect(controller.allowsAds, isFalse);
+    await tester.pumpWidget(CalculatorApp(premiumController: controller));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('SwiftSum Premium'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'A one-time purchase unlocks the scientific calculator and reusable formulas.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Ad-free calculator'), findsNothing);
+    expect(find.text('Buy Premium · ${_FakeStore.price}'), findsOneWidget);
+    await tester.tap(find.text('Restore purchases'));
+    await tester.pumpAndSettle();
+
+    expect(controller.isPremium, isTrue);
+    expect(controller.allowsAds, isFalse);
+    expect(find.text('Premium purchase restored.'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ListTile, 'Scientific calculator'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ScientificPage), findsOneWidget);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(controller.isPremium, isFalse);
+    expect(find.byType(ScientificPage), findsNothing);
+  }, variant: const TargetPlatformVariant({TargetPlatform.macOS}));
+
   testWidgets('Premium purchase unlocks tools until entitlement is revoked', (
     tester,
   ) async {

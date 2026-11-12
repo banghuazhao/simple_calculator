@@ -16,6 +16,7 @@ import 'package:simple_calculator/key_controller.dart' as input;
 import 'package:simple_calculator/key_symbol.dart';
 import 'package:simple_calculator/main.dart';
 import 'package:simple_calculator/more_page.dart';
+import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
@@ -280,7 +281,9 @@ void main() {
           await tester.pumpAndSettle();
         }
 
-        await tester.pumpWidget(const CalculatorApp());
+        final premium = PremiumController(supported: false);
+        addTearDown(premium.dispose);
+        await tester.pumpWidget(CalculatorApp(premiumController: premium));
         await tester.pumpAndSettle();
         for (final symbol in ['1', '2', '3', '4']) {
           await press(tester, symbol);

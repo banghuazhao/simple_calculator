@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -30,11 +29,20 @@ class PremiumController extends ChangeNotifier {
     bool? supported,
     Duration lookupTimeout = const Duration(seconds: 5),
   }) : _store = store ?? const _StoreKitStore(),
-       _supported = supported ?? Platform.isIOS,
+       _supported =
+           supported ??
+           (!kIsWeb &&
+               (defaultTargetPlatform == TargetPlatform.iOS ||
+                   defaultTargetPlatform == TargetPlatform.macOS)),
+       offersAdRemoval =
+           !kIsWeb &&
+           (defaultTargetPlatform == TargetPlatform.iOS ||
+               defaultTargetPlatform == TargetPlatform.android),
        _lookupTimeout = lookupTimeout;
 
   static const productId = 'com.appsbay.simpleCalculator.premium';
 
+  final bool offersAdRemoval;
   final PremiumStore _store;
   final Duration _lookupTimeout;
   bool _supported;
@@ -56,7 +64,8 @@ class PremiumController extends ChangeNotifier {
   String? get price => _price;
 
   // Wait for a definitive StoreKit answer before serving ads on iOS.
-  bool get allowsAds => !isPremium && (!isSupported || _entitlement == false);
+  bool get allowsAds =>
+      offersAdRemoval && !isPremium && (!isSupported || _entitlement == false);
 
   Future<void> initialize() => _initialization ??= _initialize();
 

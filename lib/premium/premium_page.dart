@@ -182,7 +182,9 @@ class _PremiumPageState extends State<PremiumPage> {
                               child: Text(
                                 isPremium
                                     ? strings.premiumActive
-                                    : strings.premiumOffer,
+                                    : premium.offersAdRemoval
+                                    ? strings.premiumOffer
+                                    : strings.premiumOfferToolsOnly,
                                 style: textTheme.titleMedium?.copyWith(
                                   color: textColor,
                                 ),
@@ -190,22 +192,24 @@ class _PremiumPageState extends State<PremiumPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.block_outlined, color: textColor),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                strings.premiumAdFree,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: textColor,
+                        if (premium.offersAdRemoval) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.block_outlined, color: textColor),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  strings.premiumAdFree,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: textColor,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ],
                         if (!isPremium) ...[
                           const SizedBox(height: 16),
                           purchaseActions(textColor),

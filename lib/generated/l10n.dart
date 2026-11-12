@@ -890,6 +890,16 @@ class S {
     );
   }
 
+  /// `A one-time purchase unlocks the scientific calculator and reusable formulas.`
+  String get premiumOfferToolsOnly {
+    return Intl.message(
+      'A one-time purchase unlocks the scientific calculator and reusable formulas.',
+      name: 'premiumOfferToolsOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `What-if preview`
   String get premiumWhatIfPreview {
     return Intl.message(

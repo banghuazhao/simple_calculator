@@ -234,6 +234,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "premiumOffer": MessageLookupByLibrary.simpleMessage(
       "A one-time purchase unlocks both tools and removes ads.",
     ),
+    "premiumOfferToolsOnly": MessageLookupByLibrary.simpleMessage(
+      "A one-time purchase unlocks the scientific calculator and reusable formulas.",
+    ),
     "premiumPending": MessageLookupByLibrary.simpleMessage(
       "The purchase is waiting for approval.",
     ),
