@@ -77,6 +77,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "error": MessageLookupByLibrary.simpleMessage("錯誤"),
     "formulaAlternate": MessageLookupByLibrary.simpleMessage("替代方案"),
     "formulaBaseline": MessageLookupByLibrary.simpleMessage("基準方案"),
+    "formulaCopyComparison": MessageLookupByLibrary.simpleMessage("複製方案比較"),
     "formulaDelete": MessageLookupByLibrary.simpleMessage("刪除公式"),
     "formulaDeleteMessage": MessageLookupByLibrary.simpleMessage("刪除這個已儲存的公式？"),
     "formulaDifference": MessageLookupByLibrary.simpleMessage("差值（替代 − 基準）"),
@@ -124,6 +125,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("鍵盤快捷鍵"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
       "貼上僅接受單一有限數值，包括分組正確的千位分隔數字或科學記數法。計算運算式和其他文字將被拒絕。",
+    ),
+    "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage(
+      "在「可重用公式」中開啟一個範例，即可編輯輸入並比較兩個方案。",
+    ),
+    "helpPremiumScientific": MessageLookupByLibrary.simpleMessage(
+      "使用三角函數前，請在科學計算器中選擇「角度」或「弧度」。",
+    ),
+    "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage(
+      "點按計算器工具列中的「進階版工具」，即可開啟科學計算器或可重用公式。",
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "使用「復原」恢復最近的輸入。您可以在輸入設定中調整搖動復原和觸覺回饋。",

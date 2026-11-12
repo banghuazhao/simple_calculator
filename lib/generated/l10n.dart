@@ -610,6 +610,36 @@ class S {
     );
   }
 
+  /// `Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.`
+  String get helpPremiumShortcut {
+    return Intl.message(
+      'Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.',
+      name: 'helpPremiumShortcut',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose Degrees or Radians in the scientific calculator before using trigonometric functions.`
+  String get helpPremiumScientific {
+    return Intl.message(
+      'Choose Degrees or Radians in the scientific calculator before using trigonometric functions.',
+      name: 'helpPremiumScientific',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In Reusable formulas, open an example to edit its inputs and compare two scenarios.`
+  String get helpPremiumFormulas {
+    return Intl.message(
+      'In Reusable formulas, open an example to edit its inputs and compare two scenarios.',
+      name: 'helpPremiumFormulas',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Keyboard shortcuts`
   String get helpKeyboard {
     return Intl.message(
@@ -1180,6 +1210,16 @@ class S {
     return Intl.message(
       'Difference (alternate − baseline)',
       name: 'formulaDifference',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy comparison`
+  String get formulaCopyComparison {
+    return Intl.message(
+      'Copy comparison',
+      name: 'formulaCopyComparison',
       desc: '',
       args: [],
     );

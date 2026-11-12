@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/premium/expression_engine.dart';
 import 'package:simple_calculator/premium/formula_storage.dart';
+import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
 class FormulasPage extends StatefulWidget {
@@ -143,7 +144,12 @@ class _FormulasPageState extends State<FormulasPage> {
                   label: Text(strings.formulaNew),
                 ),
                 ExpansionTile(
-                  key: const PageStorageKey('formula-examples'),
+                  key: PageStorageKey(
+                    _formulas.isEmpty
+                        ? 'formula-examples-empty'
+                        : 'formula-examples',
+                  ),
+                  initiallyExpanded: _formulas.isEmpty,
                   tilePadding: EdgeInsets.zero,
                   leading: const Icon(Icons.auto_stories_outlined),
                   title: Text(strings.formulaExamples),
@@ -399,6 +405,9 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     final difference = baselineValue != null && alternateValue != null
         ? alternateValue - baselineValue
         : null;
+    final differenceText = difference != null && difference.isFinite
+        ? _resultText(difference)
+        : null;
     final baselineCard = _scenario(
       title: strings.formulaBaseline,
       keyPrefix: 'baseline',
@@ -441,11 +450,34 @@ class _FormulaEditorState extends State<_FormulaEditor> {
           const SizedBox(height: 16),
           Text(strings.formulaDifference),
           Text(
-            difference.isFinite ? _resultText(difference) : strings.error,
+            differenceText ?? strings.error,
             key: const ValueKey('formula-difference-result'),
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(color: model.textColor1),
+          ),
+        ],
+        if (baselineValue != null &&
+            alternateValue != null &&
+            differenceText != null) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                final name = _name.trim();
+                final comparison = [
+                  if (name.isNotEmpty) name,
+                  _expression.trim(),
+                  '${strings.formulaBaseline}: ${_resultText(baselineValue)}',
+                  '${strings.formulaAlternate}: ${_resultText(alternateValue)}',
+                  '${strings.formulaDifference}: $differenceText',
+                ].join('\n');
+                ClipboardHelper.copy(context, comparison);
+              },
+              icon: const Icon(Icons.copy_outlined),
+              label: Text(strings.formulaCopyComparison),
+            ),
           ),
         ],
       ],

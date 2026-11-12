@@ -83,6 +83,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "error": MessageLookupByLibrary.simpleMessage("错误"),
     "formulaAlternate": MessageLookupByLibrary.simpleMessage("备选方案"),
     "formulaBaseline": MessageLookupByLibrary.simpleMessage("基准方案"),
+    "formulaCopyComparison": MessageLookupByLibrary.simpleMessage("复制方案比较"),
     "formulaDelete": MessageLookupByLibrary.simpleMessage("删除公式"),
     "formulaDeleteMessage": MessageLookupByLibrary.simpleMessage("删除此已保存的公式吗？"),
     "formulaDifference": MessageLookupByLibrary.simpleMessage("差值（备选 − 基准）"),
@@ -130,6 +131,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("键盘快捷键"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
       "粘贴仅接受单个有限数值，包括分组正确的千位分隔数字或科学计数法。计算表达式和其他文本将被拒绝。",
+    ),
+    "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage(
+      "在“可重用公式”中打开一个示例，即可编辑输入并比较两个方案。",
+    ),
+    "helpPremiumScientific": MessageLookupByLibrary.simpleMessage(
+      "使用三角函数前，请在科学计算器中选择“角度”或“弧度”。",
+    ),
+    "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage(
+      "点按计算器工具栏中的“高级版工具”，即可打开科学计算器或可重用公式。",
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "使用“撤销”恢复最近的输入。您可以在输入设置中调整摇动撤销和触感反馈。",

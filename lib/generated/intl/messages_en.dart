@@ -112,6 +112,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "error": MessageLookupByLibrary.simpleMessage("Error"),
     "formulaAlternate": MessageLookupByLibrary.simpleMessage("Alternate"),
     "formulaBaseline": MessageLookupByLibrary.simpleMessage("Baseline"),
+    "formulaCopyComparison": MessageLookupByLibrary.simpleMessage(
+      "Copy comparison",
+    ),
     "formulaDelete": MessageLookupByLibrary.simpleMessage("Delete formula"),
     "formulaDeleteMessage": MessageLookupByLibrary.simpleMessage(
       "Delete this saved formula?",
@@ -177,6 +180,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("Keyboard shortcuts"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
       "Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.",
+    ),
+    "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage(
+      "In Reusable formulas, open an example to edit its inputs and compare two scenarios.",
+    ),
+    "helpPremiumScientific": MessageLookupByLibrary.simpleMessage(
+      "Choose Degrees or Radians in the scientific calculator before using trigonometric functions.",
+    ),
+    "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage(
+      "Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.",
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.",

@@ -41,6 +41,9 @@ Map<String, String> calculatorMessages(S strings) => {
   'helpCopyHistory': strings.helpCopyHistory,
   'helpUndo': strings.helpUndo,
   'helpHistory': strings.helpHistory,
+  'helpPremiumShortcut': strings.helpPremiumShortcut,
+  'helpPremiumScientific': strings.helpPremiumScientific,
+  'helpPremiumFormulas': strings.helpPremiumFormulas,
   'helpKeyboard': strings.helpKeyboard,
   'shortcutNumbers': strings.shortcutNumbers,
   'shortcutOperators': strings.shortcutOperators,
@@ -68,6 +71,7 @@ Map<String, String> calculatorMessages(S strings) => {
   'premiumWhatIfPrice': strings.premiumWhatIfPrice,
   'premiumWhatIfBaseline': strings.premiumWhatIfBaseline,
   'premiumWhatIfAlternate': strings.premiumWhatIfAlternate,
+  'formulaCopyComparison': strings.formulaCopyComparison,
 };
 
 void main() {

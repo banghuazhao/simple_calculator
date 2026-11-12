@@ -444,6 +444,42 @@ void main() {
       expect(find.text(strings.helpCopyHistory), findsOneWidget);
     });
 
+    testWidgets('tips explain how to open and use the Premium tools', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tips and shortcuts'));
+      await tester.pumpAndSettle();
+
+      final formulasTip = find.text(
+        'In Reusable formulas, open an example to edit its inputs and compare two scenarios.',
+      );
+      await tester.ensureVisible(formulasTip);
+      await tester.pumpAndSettle();
+
+      expect(find.text('SwiftSum Premium').hitTestable(), findsOneWidget);
+      expect(
+        find
+            .text(
+              'Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.',
+            )
+            .hitTestable(),
+        findsOneWidget,
+      );
+      expect(
+        find
+            .text(
+              'Choose Degrees or Radians in the scientific calculator before using trigonometric functions.',
+            )
+            .hitTestable(),
+        findsOneWidget,
+      );
+      expect(formulasTip.hitTestable(), findsOneWidget);
+    });
+
     testWidgets('theme tiles support accessibility and pointer activation', (
       tester,
     ) async {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -98,7 +99,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('New formula'));
     await tester.pumpAndSettle();
-    await tester.enterText(_field('name'), 'Order total');
+    await tester.enterText(_field('name'), 'My order total');
     await tester.enterText(_field('expression'), 'price * quantity');
     await tester.pumpAndSettle();
 
@@ -129,13 +130,14 @@ void main() {
     expect(_result(tester, 'alternate'), '87.5');
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect(find.text('Order total'), findsOneWidget);
+    expect(find.text('My order total'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await StorageManager.sharedPreferences!.reload();
     await tester.pumpWidget(_harness());
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Order total'));
+    expect(find.text('Discounted price'), findsNothing);
+    await tester.tap(find.text('My order total'));
     await tester.pumpAndSettle();
     expect(_result(tester, 'baseline'), '50');
     expect(_result(tester, 'alternate'), '87.5');
@@ -155,8 +157,74 @@ void main() {
     await tester.tap(find.text('Delete formula').last);
     await tester.pumpAndSettle();
     expect(FormulaStorage.instance.load(), isEmpty);
-    expect(find.text('Order total'), findsNothing);
+    expect(find.text('My order total'), findsNothing);
+    expect(find.text('Discounted price'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty formulas open examples that can be collapsed', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_harness());
+    await tester.pumpAndSettle();
+
+    final examples = find.text('Formula examples');
+    final discount = find.text('Discounted price');
+    expect(discount.hitTestable(), findsOneWidget);
+    await tester.tap(examples);
+    await tester.pumpAndSettle();
+    expect(discount, findsNothing);
+    await tester.tap(examples);
+    await tester.pumpAndSettle();
+    expect(discount.hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('copies the current valid comparison without saving', (
+    tester,
+  ) async {
+    final copies = <String>[];
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copies.add((call.arguments as Map)['text'] as String);
+      }
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+    await tester.binding.setSurfaceSize(const Size(800, 740));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(_harness());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Discounted price'));
+    await tester.pumpAndSettle();
+
+    final discount = _field('alternate-discount_percent');
+    final copy = find.widgetWithText(OutlinedButton, 'Copy comparison');
+    await tester.enterText(discount, '');
+    await tester.pumpAndSettle();
+    expect(copy, findsNothing);
+    await tester.enterText(discount, 'invalid');
+    await tester.pumpAndSettle();
+    expect(copy, findsNothing);
+
+    await tester.enterText(discount, '20');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(copy);
+    await tester.tap(copy);
+    await tester.pumpAndSettle();
+
+    expect(copies, [
+      'Discounted price\n'
+          'price × (1 - discount_percent / 100)\n'
+          'Baseline: 90\n'
+          'Alternate: 80\n'
+          'Difference (alternate − baseline): -10',
+    ]);
+    expect(find.text('Copied'), findsOneWidget);
+    expect(FormulaStorage.instance.load(), isEmpty);
   });
 
   testWidgets('invalid syntax and input keep the current draft editable', (
