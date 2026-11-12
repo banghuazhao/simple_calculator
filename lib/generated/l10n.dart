@@ -819,6 +819,426 @@ class S {
       args: [],
     );
   }
+
+  /// `SwiftSum Premium`
+  String get premium {
+    return Intl.message(
+      'SwiftSum Premium',
+      name: 'premium',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Premium is active.`
+  String get premiumActive {
+    return Intl.message(
+      'Premium is active.',
+      name: 'premiumActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A one-time purchase unlocks both tools and removes ads.`
+  String get premiumOffer {
+    return Intl.message(
+      'A one-time purchase unlocks both tools and removes ads.',
+      name: 'premiumOffer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ad-free calculator`
+  String get premiumAdFree {
+    return Intl.message(
+      'Ad-free calculator',
+      name: 'premiumAdFree',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Buy Premium`
+  String get premiumBuy {
+    return Intl.message('Buy Premium', name: 'premiumBuy', desc: '', args: []);
+  }
+
+  /// `Check App Store price`
+  String get premiumCheckPrice {
+    return Intl.message(
+      'Check App Store price',
+      name: 'premiumCheckPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore purchases`
+  String get premiumRestore {
+    return Intl.message(
+      'Restore purchases',
+      name: 'premiumRestore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Premium purchase restored.`
+  String get premiumRestored {
+    return Intl.message(
+      'Premium purchase restored.',
+      name: 'premiumRestored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The purchase is waiting for approval.`
+  String get premiumPending {
+    return Intl.message(
+      'The purchase is waiting for approval.',
+      name: 'premiumPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Premium purchase was found for this Apple Account.`
+  String get premiumNotPurchased {
+    return Intl.message(
+      'No Premium purchase was found for this Apple Account.',
+      name: 'premiumNotPurchased',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Premium is temporarily unavailable.`
+  String get premiumUnavailable {
+    return Intl.message(
+      'Premium is temporarily unavailable.',
+      name: 'premiumUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The App Store couldn’t complete the request. Try again.`
+  String get premiumFailed {
+    return Intl.message(
+      'The App Store couldn’t complete the request. Try again.',
+      name: 'premiumFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scientific calculator`
+  String get scientificCalculator {
+    return Intl.message(
+      'Scientific calculator',
+      name: 'scientificCalculator',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expression`
+  String get scientificExpression {
+    return Intl.message(
+      'Expression',
+      name: 'scientificExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use * for multiplication. Try 2 * sin(30) + sqrt(9).`
+  String get scientificExpressionHelp {
+    return Intl.message(
+      'Use * for multiplication. Try 2 * sin(30) + sqrt(9).',
+      name: 'scientificExpressionHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Degrees`
+  String get scientificDegrees {
+    return Intl.message(
+      'Degrees',
+      name: 'scientificDegrees',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Radians`
+  String get scientificRadians {
+    return Intl.message(
+      'Radians',
+      name: 'scientificRadians',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculate`
+  String get scientificEvaluate {
+    return Intl.message(
+      'Calculate',
+      name: 'scientificEvaluate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Result`
+  String get scientificResult {
+    return Intl.message('Result', name: 'scientificResult', desc: '', args: []);
+  }
+
+  /// `Enter a valid expression with a finite result.`
+  String get scientificInvalidExpression {
+    return Intl.message(
+      'Enter a valid expression with a finite result.',
+      name: 'scientificInvalidExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reusable formulas`
+  String get reusableFormulas {
+    return Intl.message(
+      'Reusable formulas',
+      name: 'reusableFormulas',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New formula`
+  String get formulaNew {
+    return Intl.message('New formula', name: 'formulaNew', desc: '', args: []);
+  }
+
+  /// `Formula examples`
+  String get formulaExamples {
+    return Intl.message(
+      'Formula examples',
+      name: 'formulaExamples',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Order total`
+  String get formulaExampleOrderTotal {
+    return Intl.message(
+      'Order total',
+      name: 'formulaExampleOrderTotal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discounted price`
+  String get formulaExampleDiscount {
+    return Intl.message(
+      'Discounted price',
+      name: 'formulaExampleDiscount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price with tax`
+  String get formulaExampleTax {
+    return Intl.message(
+      'Price with tax',
+      name: 'formulaExampleTax',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit formula`
+  String get formulaEdit {
+    return Intl.message(
+      'Edit formula',
+      name: 'formulaEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Formula name`
+  String get formulaName {
+    return Intl.message(
+      'Formula name',
+      name: 'formulaName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expression`
+  String get formulaExpression {
+    return Intl.message(
+      'Expression',
+      name: 'formulaExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Example: price * quantity`
+  String get formulaExpressionHint {
+    return Intl.message(
+      'Example: price * quantity',
+      name: 'formulaExpressionHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Baseline`
+  String get formulaBaseline {
+    return Intl.message(
+      'Baseline',
+      name: 'formulaBaseline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alternate`
+  String get formulaAlternate {
+    return Intl.message(
+      'Alternate',
+      name: 'formulaAlternate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Difference (alternate − baseline)`
+  String get formulaDifference {
+    return Intl.message(
+      'Difference (alternate − baseline)',
+      name: 'formulaDifference',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No formulas saved yet.`
+  String get formulaEmpty {
+    return Intl.message(
+      'No formulas saved yet.',
+      name: 'formulaEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid expression.`
+  String get formulaInvalidExpression {
+    return Intl.message(
+      'Enter a valid expression.',
+      name: 'formulaInvalidExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid number.`
+  String get formulaInvalidInput {
+    return Intl.message(
+      'Enter a valid number.',
+      name: 'formulaInvalidInput',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a formula name.`
+  String get formulaInvalidName {
+    return Intl.message(
+      'Enter a formula name.',
+      name: 'formulaInvalidName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No result`
+  String get formulaNoResult {
+    return Intl.message(
+      'No result',
+      name: 'formulaNoResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not save formulas.`
+  String get formulaSaveFailed {
+    return Intl.message(
+      'Could not save formulas.',
+      name: 'formulaSaveFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can save up to 30 formulas.`
+  String get formulaLimitReached {
+    return Intl.message(
+      'You can save up to 30 formulas.',
+      name: 'formulaLimitReached',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use at most 12 named inputs.`
+  String get formulaTooManyInputs {
+    return Intl.message(
+      'Use at most 12 named inputs.',
+      name: 'formulaTooManyInputs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete formula`
+  String get formulaDelete {
+    return Intl.message(
+      'Delete formula',
+      name: 'formulaDelete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete this saved formula?`
+  String get formulaDeleteMessage {
+    return Intl.message(
+      'Delete this saved formula?',
+      name: 'formulaDeleteMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save`
+  String get formulaSave {
+    return Intl.message('Save', name: 'formulaSave', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

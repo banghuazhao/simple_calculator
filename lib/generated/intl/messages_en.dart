@@ -110,6 +110,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "divide": MessageLookupByLibrary.simpleMessage("Divide"),
     "equals": MessageLookupByLibrary.simpleMessage("Equals"),
     "error": MessageLookupByLibrary.simpleMessage("Error"),
+    "formulaAlternate": MessageLookupByLibrary.simpleMessage("Alternate"),
+    "formulaBaseline": MessageLookupByLibrary.simpleMessage("Baseline"),
+    "formulaDelete": MessageLookupByLibrary.simpleMessage("Delete formula"),
+    "formulaDeleteMessage": MessageLookupByLibrary.simpleMessage(
+      "Delete this saved formula?",
+    ),
+    "formulaDifference": MessageLookupByLibrary.simpleMessage(
+      "Difference (alternate − baseline)",
+    ),
+    "formulaEdit": MessageLookupByLibrary.simpleMessage("Edit formula"),
+    "formulaEmpty": MessageLookupByLibrary.simpleMessage(
+      "No formulas saved yet.",
+    ),
+    "formulaExampleDiscount": MessageLookupByLibrary.simpleMessage(
+      "Discounted price",
+    ),
+    "formulaExampleOrderTotal": MessageLookupByLibrary.simpleMessage(
+      "Order total",
+    ),
+    "formulaExampleTax": MessageLookupByLibrary.simpleMessage("Price with tax"),
+    "formulaExamples": MessageLookupByLibrary.simpleMessage("Formula examples"),
+    "formulaExpression": MessageLookupByLibrary.simpleMessage("Expression"),
+    "formulaExpressionHint": MessageLookupByLibrary.simpleMessage(
+      "Example: price * quantity",
+    ),
+    "formulaInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "Enter a valid expression.",
+    ),
+    "formulaInvalidInput": MessageLookupByLibrary.simpleMessage(
+      "Enter a valid number.",
+    ),
+    "formulaInvalidName": MessageLookupByLibrary.simpleMessage(
+      "Enter a formula name.",
+    ),
+    "formulaLimitReached": MessageLookupByLibrary.simpleMessage(
+      "You can save up to 30 formulas.",
+    ),
+    "formulaName": MessageLookupByLibrary.simpleMessage("Formula name"),
+    "formulaNew": MessageLookupByLibrary.simpleMessage("New formula"),
+    "formulaNoResult": MessageLookupByLibrary.simpleMessage("No result"),
+    "formulaSave": MessageLookupByLibrary.simpleMessage("Save"),
+    "formulaSaveFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not save formulas.",
+    ),
+    "formulaTooManyInputs": MessageLookupByLibrary.simpleMessage(
+      "Use at most 12 named inputs.",
+    ),
     "hapticFeedback": MessageLookupByLibrary.simpleMessage("Haptic feedback"),
     "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage(
       "Vibrate when using calculator controls",
@@ -159,7 +206,50 @@ class MessageLookup extends MessageLookupByLibrary {
     "pasteNumber": MessageLookupByLibrary.simpleMessage("Paste number"),
     "pasted": MessageLookupByLibrary.simpleMessage("Number pasted"),
     "percent": MessageLookupByLibrary.simpleMessage("Percent"),
+    "premium": MessageLookupByLibrary.simpleMessage("SwiftSum Premium"),
+    "premiumActive": MessageLookupByLibrary.simpleMessage("Premium is active."),
+    "premiumAdFree": MessageLookupByLibrary.simpleMessage("Ad-free calculator"),
+    "premiumBuy": MessageLookupByLibrary.simpleMessage("Buy Premium"),
+    "premiumCheckPrice": MessageLookupByLibrary.simpleMessage(
+      "Check App Store price",
+    ),
+    "premiumFailed": MessageLookupByLibrary.simpleMessage(
+      "The App Store couldn’t complete the request. Try again.",
+    ),
+    "premiumNotPurchased": MessageLookupByLibrary.simpleMessage(
+      "No Premium purchase was found for this Apple Account.",
+    ),
+    "premiumOffer": MessageLookupByLibrary.simpleMessage(
+      "A one-time purchase unlocks both tools and removes ads.",
+    ),
+    "premiumPending": MessageLookupByLibrary.simpleMessage(
+      "The purchase is waiting for approval.",
+    ),
+    "premiumRestore": MessageLookupByLibrary.simpleMessage("Restore purchases"),
+    "premiumRestored": MessageLookupByLibrary.simpleMessage(
+      "Premium purchase restored.",
+    ),
+    "premiumUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Premium is temporarily unavailable.",
+    ),
+    "reusableFormulas": MessageLookupByLibrary.simpleMessage(
+      "Reusable formulas",
+    ),
     "reuseResult": MessageLookupByLibrary.simpleMessage("Use this result"),
+    "scientificCalculator": MessageLookupByLibrary.simpleMessage(
+      "Scientific calculator",
+    ),
+    "scientificDegrees": MessageLookupByLibrary.simpleMessage("Degrees"),
+    "scientificEvaluate": MessageLookupByLibrary.simpleMessage("Calculate"),
+    "scientificExpression": MessageLookupByLibrary.simpleMessage("Expression"),
+    "scientificExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "Use * for multiplication. Try 2 * sin(30) + sqrt(9).",
+    ),
+    "scientificInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "Enter a valid expression with a finite result.",
+    ),
+    "scientificRadians": MessageLookupByLibrary.simpleMessage("Radians"),
+    "scientificResult": MessageLookupByLibrary.simpleMessage("Result"),
     "searchHistory": MessageLookupByLibrary.simpleMessage("Search history"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "shakeToUndo": MessageLookupByLibrary.simpleMessage("Shake to undo"),

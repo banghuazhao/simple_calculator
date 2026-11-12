@@ -12,6 +12,7 @@ import 'package:simple_calculator/history_sheet.dart';
 import 'package:simple_calculator/key_controller.dart' as input;
 import 'package:simple_calculator/key_pad.dart';
 import 'package:simple_calculator/more_page.dart';
+import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
@@ -32,6 +33,10 @@ class _CalculatorState extends State<Calculator> {
 
   BannerAd? _ad;
   bool _isAdLoaded = false;
+  bool _bannerLoading = false;
+  PremiumController? _premium;
+
+  bool get _allowsAds => _premium?.allowsAds ?? true;
 
   // Shake detection
   ShakeListener? _shakeListener;
@@ -48,9 +53,11 @@ class _CalculatorState extends State<Calculator> {
     Processor.refresh();
 
     if (Platform.isAndroid || Platform.isIOS) {
+      _premium = context.read<PremiumController?>();
+      _premium?.addListener(_syncBanner);
       // Plugin and sensor failures must not prevent the first calculator frame.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) unawaited(_loadBanner());
+        _syncBanner();
       });
       try {
         _shakeListener = ShakeListener(
@@ -71,36 +78,65 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
+  void _syncBanner() {
+    if (!mounted) return;
+    if (_allowsAds) {
+      unawaited(_loadBanner());
+      return;
+    }
+    final ad = _ad;
+    if (ad == null) return;
+    setState(() {
+      _ad = null;
+      _isAdLoaded = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(AdsManager.disposeAd(ad));
+    });
+  }
+
   Future<void> _loadBanner() async {
-    if (!await AdsManager.initialize() || !mounted) return;
+    if (!_allowsAds || _bannerLoading || _ad != null) return;
+    _bannerLoading = true;
     try {
+      if (!await AdsManager.initialize() || !mounted || !_allowsAds) return;
       final ad = BannerAd(
         adUnitId: AdsManager.bannerAdUnitId,
         size: AdSize.banner,
         request: const AdRequest(),
         listener: BannerAdListener(
           onAdLoaded: (ad) {
-            if (mounted) {
+            if (mounted && _allowsAds && identical(_ad, ad)) {
               setState(() => _isAdLoaded = true);
-            } else {
-              unawaited(AdsManager.disposeAd(ad));
             }
           },
-          onAdFailedToLoad: (ad, error) => unawaited(AdsManager.disposeAd(ad)),
+          onAdFailedToLoad: (ad, _) {
+            if (!identical(_ad, ad)) return;
+            _ad = null;
+            unawaited(AdsManager.disposeAd(ad));
+          },
         ),
       );
       _ad = ad;
       await ad.load();
     } catch (error) {
       debugPrint('Banner unavailable: $error');
+      final ad = _ad;
+      _ad = null;
+      unawaited(AdsManager.disposeAd(ad));
+    } finally {
+      _bannerLoading = false;
     }
   }
 
   @override
   void dispose() {
+    _premium?.removeListener(_syncBanner);
     unawaited(_keySubscription?.cancel());
     unawaited(_processorSubscription?.cancel());
-    unawaited(AdsManager.disposeAd(_ad));
+    final ad = _ad;
+    _ad = null;
+    unawaited(AdsManager.disposeAd(ad));
     unawaited(_shakeListener?.dispose());
     super.dispose();
   }
@@ -122,6 +158,9 @@ class _CalculatorState extends State<Calculator> {
   @override
   Widget build(BuildContext context) {
     final model = Provider.of<ThemeModel>(context);
+    final allowsAds = context.select<PremiumController?, bool>(
+      (premium) => premium?.allowsAds ?? true,
+    );
     final screenHeight = MediaQuery.of(context).size.height;
     final strings = S.of(context);
 
@@ -192,14 +231,14 @@ class _CalculatorState extends State<Calculator> {
                   const KeyPad(),
                   SizedBox(height: screenHeight <= 740 ? 8 : 24),
                   // Banner ad
-                  if (!Platform.isMacOS)
+                  if (!Platform.isMacOS && allowsAds)
                     SizedBox(
                       height: 50,
                       child: _isAdLoaded && _ad != null
                           ? AdWidget(ad: _ad!)
                           : const SizedBox.shrink(),
                     )
-                  else
+                  else if (Platform.isMacOS)
                     const SizedBox(height: 20),
                   const SizedBox(height: 8),
                 ],

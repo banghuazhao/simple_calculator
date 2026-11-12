@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/help_page.dart';
+import 'package:simple_calculator/premium/premium_controller.dart';
+import 'package:simple_calculator/premium/premium_page.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/input_settings.dart';
@@ -23,30 +26,61 @@ class MorePage extends StatefulWidget {
 class _MorePageState extends State<MorePage> {
   InterstitialAd? _interstitialAd;
   int _interstitialLoadAttempts = 0;
+  bool _interstitialLoading = false;
   bool _themeChanged = false;
+  PremiumController? _premium;
 
-  void _createInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AdsManager.interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (InterstitialAd ad) {
-          if (!mounted) {
-            ad.dispose();
-            return;
-          }
-          _interstitialAd = ad;
-          _interstitialLoadAttempts = 0;
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          _interstitialLoadAttempts += 1;
-          _interstitialAd = null;
-          if (mounted && _interstitialLoadAttempts <= maxFailedLoadAttempts) {
-            _createInterstitialAd();
-          }
-        },
-      ),
-    );
+  bool get _allowsAds =>
+      (Platform.isIOS || Platform.isAndroid) && (_premium?.allowsAds ?? true);
+
+  void _syncInterstitial() {
+    if (_allowsAds) {
+      unawaited(_createInterstitialAd());
+      return;
+    }
+    final ad = _interstitialAd;
+    _interstitialAd = null;
+    unawaited(AdsManager.disposeAd(ad));
+  }
+
+  Future<void> _createInterstitialAd() async {
+    if (!mounted ||
+        !_allowsAds ||
+        _interstitialLoading ||
+        _interstitialAd != null ||
+        _interstitialLoadAttempts > maxFailedLoadAttempts) {
+      return;
+    }
+    _interstitialLoading = true;
+    try {
+      if (!await AdsManager.initialize() || !mounted || !_allowsAds) {
+        _interstitialLoading = false;
+        return;
+      }
+      await InterstitialAd.load(
+        adUnitId: AdsManager.interstitialAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _interstitialLoading = false;
+            if (!mounted || !_allowsAds) {
+              unawaited(AdsManager.disposeAd(ad));
+              return;
+            }
+            _interstitialAd = ad;
+            _interstitialLoadAttempts = 0;
+          },
+          onAdFailedToLoad: (_) {
+            _interstitialLoading = false;
+            _interstitialLoadAttempts++;
+            unawaited(_createInterstitialAd());
+          },
+        ),
+      );
+    } catch (error) {
+      _interstitialLoading = false;
+      debugPrint('Interstitial unavailable: $error');
+    }
   }
 
   /// Shown once when leaving Settings after a theme change, never while the
@@ -54,6 +88,8 @@ class _MorePageState extends State<MorePage> {
   void _showInterstitialAd() {
     final ad = _interstitialAd;
     if (ad == null ||
+        !_allowsAds ||
+        (_premium?.isBusy ?? false) ||
         AdState.isShowingFullScreenAd ||
         !AdsManager.canShowInterstitial) {
       return;
@@ -80,19 +116,27 @@ class _MorePageState extends State<MorePage> {
   @override
   void initState() {
     super.initState();
-    if (!Platform.isMacOS) {
-      _createInterstitialAd();
-    }
+    _premium = context.read<PremiumController?>();
+    _premium?.addListener(_syncInterstitial);
+    _syncInterstitial();
   }
 
   @override
   void dispose() {
-    _interstitialAd?.dispose();
+    _premium?.removeListener(_syncInterstitial);
+    unawaited(AdsManager.disposeAd(_interstitialAd));
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final premiumSupported = context.select<PremiumController?, bool>(
+      (premium) => premium?.isSupported ?? false,
+    );
+    final showMoreApps = !Platform.isMacOS &&
+        context.select<PremiumController?, bool>(
+          (premium) => premium?.allowsAds ?? true,
+        );
     List<MoreAppItem> items = [];
 
     var classicMemoryGame = MoreAppItem(
@@ -333,6 +377,18 @@ class _MorePageState extends State<MorePage> {
         backgroundColor: model.backgroundColor,
         body: ListView(
           children: [
+            if (premiumSupported)
+              ListTile(
+                iconColor: model.textColor1,
+                textColor: model.textColor1,
+                leading: const Icon(Icons.workspace_premium_outlined),
+                title: Text(S.of(context).premium),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push<void>(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PremiumPage()),
+                ),
+              ),
             const InputSettingsSection(),
             ListTile(
               leading: Icon(Icons.help_outline, color: model.textColor1),
@@ -424,7 +480,7 @@ class _MorePageState extends State<MorePage> {
                 ],
               ),
             ),
-            if (!Platform.isMacOS)
+            if (showMoreApps)
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                 child: Text(
@@ -432,7 +488,7 @@ class _MorePageState extends State<MorePage> {
                   style: TextStyle(fontSize: 21, color: model.textColor1),
                 ),
               ),
-            if (!Platform.isMacOS)
+            if (showMoreApps)
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/calculator.dart';
+import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
@@ -25,7 +26,9 @@ Future<void> main() async {
   SharedPreferencesHelper.localStorage = StorageManager.sharedPreferences;
   InputSettings.instance.load();
   Processor.restoreHistory();
-  runApp(const CalculatorApp());
+  final premium = PremiumController();
+  unawaited(premium.initialize());
+  runApp(CalculatorApp(premiumController: premium));
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
     // Preserve the existing phone orientation preference without making a
@@ -41,7 +44,7 @@ Future<void> main() async {
     if (Platform.isAndroid || Platform.isIOS) {
       unawaited(_runOptionalService(
           'review prompt', InAppReviewHelper.checkAndAskForReview));
-      unawaited(_runOptionalService('ads', _initializeAds));
+      unawaited(_runOptionalService('ads', () => _initializeAds(premium)));
     }
   });
 }
@@ -55,20 +58,33 @@ Future<void> _runOptionalService(
   }
 }
 
-Future<void> _initializeAds() async {
-  if (Platform.isIOS) {
+Future<void> _initializeAds(PremiumController premium) async {
+  await premium.initialize();
+  if (Platform.isIOS && premium.allowsAds) {
     await _runOptionalService('tracking authorization', () async {
       await AppTrackingTransparency.requestTrackingAuthorization();
     });
   }
-  if (!await AdsManager.initialize()) return;
-  AdsManager.debugPrintID();
-  final appOpenAdManager = AppOpenAdManager()..loadAd();
-  AppLifecycleReactor(appOpenAdManager: appOpenAdManager).listen();
+  final appOpenAdManager = AppOpenAdManager(
+    adsAllowed: () => premium.allowsAds && !premium.isBusy,
+  );
+  premium.addListener(() {
+    if (!premium.allowsAds) appOpenAdManager.discardCachedAd();
+  });
+  AppLifecycleReactor(
+    appOpenAdManager: appOpenAdManager,
+    refreshEntitlement: premium.refreshEntitlement,
+  ).listen();
+  if (premium.allowsAds && await AdsManager.initialize() && premium.allowsAds) {
+    AdsManager.debugPrintID();
+    await appOpenAdManager.loadAd();
+  }
 }
 
 class CalculatorApp extends StatelessWidget {
-  const CalculatorApp({super.key});
+  const CalculatorApp({super.key, this.premiumController});
+
+  final PremiumController? premiumController;
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +93,14 @@ class CalculatorApp extends StatelessWidget {
           ChangeNotifierProvider<ThemeModel>(
             create: (context) => ThemeModel(),
           ),
+          if (premiumController case final controller?)
+            ChangeNotifierProvider<PremiumController>.value(value: controller)
+          else
+            ChangeNotifierProvider<PremiumController>(create: (_) {
+              final controller = PremiumController();
+              unawaited(controller.initialize());
+              return controller;
+            }),
         ],
         child: Consumer<ThemeModel>(builder: (context, themeModel, child) {
           return MaterialApp(
