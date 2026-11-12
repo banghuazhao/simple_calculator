@@ -130,6 +130,7 @@ class _CalculatorState extends State<Calculator> {
         input.KeyEvent(CalculatorKey(symbol: symbol)),
       ),
       onUndo: Processor.undo,
+      onCopy: () => ClipboardHelper.copyNumber(context, _calcState.current),
       onPaste: () => ClipboardHelper.paste(context),
       child: Scaffold(
         backgroundColor: model.backgroundColor,

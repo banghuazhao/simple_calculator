@@ -94,7 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "在历史记录中，点按记录旁的复制按钮可复制该条记录的算式和结果。选择“复制全部历史记录”可复制所有记录，搜索时则可选择“复制匹配的计算记录”。",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
-      "历史记录最多保留100条计算。点按记录可使用其结果，滑动可删除记录，删除后可点按“撤销”恢复。",
+      "历史记录最多保留100条计算。点按记录可使用其结果。滑动可删除记录，也可在操作菜单中选择“删除计算记录”。删除后可点按“撤销”恢复。",
     ),
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("键盘快捷键"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
@@ -109,6 +109,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "history": MessageLookupByLibrary.simpleMessage("历史记录"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage("已删除计算记录"),
+    "historyEntryActions": MessageLookupByLibrary.simpleMessage("计算记录操作"),
     "inputSettings": MessageLookupByLibrary.simpleMessage("输入设置"),
     "invalidPaste": MessageLookupByLibrary.simpleMessage("请先复制有效数字再粘贴。"),
     "multiply": MessageLookupByLibrary.simpleMessage("乘以"),

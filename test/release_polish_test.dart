@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' show SemanticsAction;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -251,6 +252,78 @@ void main() {
       expect(current(tester), '1250');
       expect(find.text('Copy a valid number to paste.'), findsOneWidget);
     });
+
+    testWidgets(
+      'keyboard copy follows the calculator display and focused history search',
+      (tester) async {
+        final clipboardWrites = <String>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async {
+            if (call.method == 'Clipboard.setData') {
+              clipboardWrites.add((call.arguments as Map)['text'] as String);
+            }
+            return null;
+          },
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+
+        Future<void> copyWith(LogicalKeyboardKey modifier) async {
+          await tester.sendKeyDownEvent(modifier);
+          await tester.sendKeyEvent(LogicalKeyboardKey.keyC, character: 'c');
+          await tester.sendKeyUpEvent(modifier);
+          await tester.pumpAndSettle();
+        }
+
+        await tester.pumpWidget(const CalculatorApp());
+        await tester.pumpAndSettle();
+        for (final symbol in ['1', '2', '3', '4']) {
+          await press(tester, symbol);
+        }
+        expect(find.text('1,234'), findsOneWidget);
+        await copyWith(LogicalKeyboardKey.controlLeft);
+        await copyWith(LogicalKeyboardKey.metaLeft);
+        expect(clipboardWrites, ['1234', '1234']);
+
+        for (final symbol in ['÷', '0', '=']) {
+          await press(tester, symbol);
+        }
+        expect(find.text('Error'), findsOneWidget);
+        await copyWith(LogicalKeyboardKey.controlLeft);
+        await copyWith(LogicalKeyboardKey.metaLeft);
+        expect(clipboardWrites, ['1234', '1234']);
+
+        await press(tester, '7');
+        await tester.tap(find.byTooltip('History'));
+        await tester.pumpAndSettle();
+        final search = find.byKey(const ValueKey('history-search'));
+        await tester.enterText(search, 'history query');
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: 'history query',
+            selection: TextSelection(baseOffset: 0, extentOffset: 7),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await copyWith(
+          defaultTargetPlatform == TargetPlatform.macOS
+              ? LogicalKeyboardKey.metaLeft
+              : LogicalKeyboardKey.controlLeft,
+        );
+        expect(clipboardWrites, ['1234', '1234', 'history']);
+        expect(current(tester), '7');
+        expect(tester.takeException(), isNull);
+      },
+      variant: const TargetPlatformVariant({
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+      }),
+    );
 
     testWidgets('the display copies an equation only while it is complete', (
       tester,

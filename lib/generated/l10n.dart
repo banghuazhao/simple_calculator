@@ -490,6 +490,16 @@ class S {
     );
   }
 
+  /// `Calculation actions`
+  String get historyEntryActions {
+    return Intl.message(
+      'Calculation actions',
+      name: 'historyEntryActions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Input settings`
   String get inputSettings {
     return Intl.message(
@@ -590,10 +600,10 @@ class S {
     );
   }
 
-  /// `History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.`
+  /// `History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.`
   String get helpHistory {
     return Intl.message(
-      'History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.',
+      'History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.',
       name: 'helpHistory',
       desc: '',
       args: [],

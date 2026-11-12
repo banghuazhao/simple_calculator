@@ -125,7 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
-      "History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.",
+      "History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.",
     ),
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("Keyboard shortcuts"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
@@ -141,6 +141,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "history": MessageLookupByLibrary.simpleMessage("History"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage(
       "Calculation deleted",
+    ),
+    "historyEntryActions": MessageLookupByLibrary.simpleMessage(
+      "Calculation actions",
     ),
     "inputSettings": MessageLookupByLibrary.simpleMessage("Input settings"),
     "invalidPaste": MessageLookupByLibrary.simpleMessage(

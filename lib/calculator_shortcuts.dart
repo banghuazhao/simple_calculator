@@ -16,6 +16,10 @@ class _CalculatorPasteIntent extends Intent {
   const _CalculatorPasteIntent();
 }
 
+class _CalculatorCopyIntent extends Intent {
+  const _CalculatorCopyIntent();
+}
+
 class _CalculatorAction<T extends Intent> extends Action<T> {
   _CalculatorAction({required this.isAvailable, required this.callback});
 
@@ -39,12 +43,14 @@ class CalculatorShortcuts extends StatefulWidget {
     required this.child,
     required this.onKey,
     required this.onUndo,
+    this.onCopy,
     this.onPaste,
   });
 
   final Widget child;
   final ValueChanged<KeySymbol> onKey;
   final VoidCallback onUndo;
+  final VoidCallback? onCopy;
   final VoidCallback? onPaste;
 
   @override
@@ -143,6 +149,12 @@ class CalculatorShortcuts extends StatefulWidget {
         const _CalculatorUndoIntent();
     for (final control in [true, false]) {
       bindings[SingleActivator(
+        LogicalKeyboardKey.keyC,
+        control: control,
+        meta: !control,
+        includeRepeats: false,
+      )] = const _CalculatorCopyIntent();
+      bindings[SingleActivator(
         LogicalKeyboardKey.keyV,
         control: control,
         meta: !control,
@@ -191,6 +203,10 @@ class _CalculatorShortcutsState extends State<CalculatorShortcuts> {
               _inputFocus.requestFocus();
               widget.onUndo();
             },
+          ),
+          _CalculatorCopyIntent: _CalculatorAction<_CalculatorCopyIntent>(
+            isAvailable: () => widget.onCopy != null && canHandle(),
+            callback: (_) => widget.onCopy!(),
           ),
           _CalculatorPasteIntent: _CalculatorAction<_CalculatorPasteIntent>(
             isAvailable: () => widget.onPaste != null && canHandle(),

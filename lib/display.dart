@@ -36,11 +36,6 @@ class Display extends StatelessWidget {
     return (isNeg ? '-' : '') + buf.toString() + decStr;
   }
 
-  Future<void> _copyToClipboard(BuildContext context) async {
-    if (current == 'Error') return;
-    await ClipboardHelper.copy(context, current);
-  }
-
   @override
   Widget build(BuildContext context) {
     final strings = S.of(context);
@@ -76,6 +71,9 @@ class Display extends StatelessWidget {
     final displayKey = isResult
         ? ValueKey('result_$formattedCurrent')
         : const ValueKey('input');
+    final copyNumber = isError
+        ? null
+        : () => ClipboardHelper.copyNumber(context, current);
     final copyCalculation = isResult && !isError && history.isNotEmpty
         ? () => ClipboardHelper.copy(context, '$history $current')
         : null;
@@ -124,11 +122,11 @@ class Display extends StatelessWidget {
               label: isError ? strings.error : strings.copyResult,
               value: isError ? null : formattedCurrent,
               button: !isError,
-              onTap: isError ? null : () => _copyToClipboard(context),
+              onTap: copyNumber,
               excludeSemantics: true,
               child: GestureDetector(
                 excludeFromSemantics: true,
-                onTap: isError ? null : () => _copyToClipboard(context),
+                onTap: copyNumber,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 220),
                   transitionBuilder: (child, anim) => FadeTransition(

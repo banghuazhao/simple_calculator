@@ -84,6 +84,7 @@ class HelpPage extends StatelessWidget {
                     shortcut('Backspace', strings.shortcutBackspace),
                     shortcut('Escape', strings.shortcutClear),
                     shortcut('Ctrl / Cmd + Z', strings.shortcutUndo),
+                    shortcut('Ctrl / Cmd + C', strings.copyResult),
                     shortcut('Ctrl / Cmd + V', strings.shortcutPaste),
                   ],
                 ),

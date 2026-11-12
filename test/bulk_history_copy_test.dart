@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -217,6 +218,48 @@ void main() {
       );
       expect(tester.widget<IconButton>(find.byKey(_bulkKey)).onPressed, isNull);
     }
+    expect(Processor.historyLog, history);
+    expect(state.current, '77');
+  });
+
+  testWidgets('history actions delete a filtered row and Undo restores order', (
+    tester,
+  ) async {
+    final history = Processor.historyLog;
+    await _open(tester);
+    final strings = S.current;
+    final search = find.byKey(const ValueKey('history-search'));
+    const equation = '4 × 5 =';
+    await tester.enterText(search, '4*5');
+    await tester.pumpAndSettle();
+
+    void semanticTap(Finder finder, {String? value, String? tooltip}) {
+      final node = tester.getSemantics(finder);
+      expect(
+        node,
+        isSemantics(value: value, tooltip: tooltip, hasTapAction: true),
+      );
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+    }
+
+    expect(find.byTooltip(strings.copyCalculation), findsOneWidget);
+    semanticTap(
+      find.byTooltip(strings.historyEntryActions),
+      value: equation,
+      tooltip: strings.historyEntryActions,
+    );
+    await tester.pumpAndSettle();
+    semanticTap(find.text(strings.deleteCalculation));
+    await tester.pumpAndSettle();
+
+    expect(find.text(equation), findsNothing);
+    expect(find.text(strings.noHistoryMatches), findsOneWidget);
+    expect(Processor.historyLog, [history[0], history[2]]);
+
+    semanticTap(find.text(strings.undo));
+    await tester.pumpAndSettle();
+    expect(find.text(equation), findsOneWidget);
+    expect(find.text('8 ÷ 2 ='), findsNothing);
     expect(Processor.historyLog, history);
     expect(state.current, '77');
   });

@@ -10,6 +10,8 @@ import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/input_feedback.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
+enum _HistoryEntryAction { delete }
+
 class HistorySheet extends StatefulWidget {
   const HistorySheet({super.key});
 
@@ -160,15 +162,49 @@ class _HistorySheetState extends State<HistorySheet> {
               ),
             ),
           ),
+          IconButton(
+            tooltip: strings.copyCalculation,
+            onPressed: () => ClipboardHelper.copy(
+              context,
+              '${entry.equation} ${entry.result}',
+            ),
+            icon: Icon(Icons.copy_outlined, color: textColor),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: IconButton(
-              tooltip: strings.copyCalculation,
-              onPressed: () => ClipboardHelper.copy(
-                context,
-                '${entry.equation} ${entry.result}',
+            child: MergeSemantics(
+              child: Semantics(
+                value: entry.equation,
+                child: PopupMenuButton<_HistoryEntryAction>(
+                  tooltip: strings.historyEntryActions,
+                  iconColor: textColor,
+                  color: model.backgroundColor,
+                  surfaceTintColor: Colors.transparent,
+                  shape: model.highContrastEnabled
+                      ? RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          side: BorderSide(color: textColor),
+                        )
+                      : null,
+                  requestFocus: true,
+                  onSelected: (action) {
+                    if (!mounted || !context.mounted) return;
+                    switch (action) {
+                      case _HistoryEntryAction.delete:
+                        _delete(context, entry);
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: _HistoryEntryAction.delete,
+                      child: Text(
+                        strings.deleteCalculation,
+                        style: TextStyle(color: textColor),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              icon: Icon(Icons.copy_outlined, color: textColor),
             ),
           ),
         ],

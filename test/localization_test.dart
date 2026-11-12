@@ -29,6 +29,7 @@ Map<String, String> calculatorMessages(S strings) => {
   'reuseResult': strings.reuseResult,
   'deleteCalculation': strings.deleteCalculation,
   'copyCalculation': strings.copyCalculation,
+  'historyEntryActions': strings.historyEntryActions,
   'inputSettings': strings.inputSettings,
   'hapticFeedback': strings.hapticFeedback,
   'hapticFeedbackDescription': strings.hapticFeedbackDescription,
