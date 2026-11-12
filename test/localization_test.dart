@@ -63,6 +63,11 @@ Map<String, String> calculatorMessages(S strings) => {
   'copyMatchingHistory': strings.copyMatchingHistory,
   'highContrast': strings.highContrast,
   'highContrastDescription': strings.highContrastDescription,
+  'premiumTools': strings.premiumTools,
+  'premiumWhatIfPreview': strings.premiumWhatIfPreview,
+  'premiumWhatIfPrice': strings.premiumWhatIfPrice,
+  'premiumWhatIfBaseline': strings.premiumWhatIfBaseline,
+  'premiumWhatIfAlternate': strings.premiumWhatIfAlternate,
 };
 
 void main() {

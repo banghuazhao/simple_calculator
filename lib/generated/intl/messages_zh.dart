@@ -166,7 +166,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "premiumPending": MessageLookupByLibrary.simpleMessage("购买正在等待批准。"),
     "premiumRestore": MessageLookupByLibrary.simpleMessage("恢复购买"),
     "premiumRestored": MessageLookupByLibrary.simpleMessage("已恢复高级版购买。"),
+    "premiumTools": MessageLookupByLibrary.simpleMessage("高级版工具"),
     "premiumUnavailable": MessageLookupByLibrary.simpleMessage("高级版暂时不可用。"),
+    "premiumWhatIfAlternate": MessageLookupByLibrary.simpleMessage(
+      "减价 25% 后，实付 \$75。",
+    ),
+    "premiumWhatIfBaseline": MessageLookupByLibrary.simpleMessage(
+      "减价 10% 后，实付 \$90。",
+    ),
+    "premiumWhatIfPreview": MessageLookupByLibrary.simpleMessage("方案比较预览"),
+    "premiumWhatIfPrice": MessageLookupByLibrary.simpleMessage("以原价 \$100 为例。"),
     "reusableFormulas": MessageLookupByLibrary.simpleMessage("可重用公式"),
     "reuseResult": MessageLookupByLibrary.simpleMessage("使用此结果"),
     "scientificCalculator": MessageLookupByLibrary.simpleMessage("科学计算器"),

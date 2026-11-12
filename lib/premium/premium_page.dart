@@ -147,6 +147,46 @@ class _PremiumPageState extends State<PremiumPage> {
                   textAlign: TextAlign.center,
                 ),
               ),
+            if (!premium.isPremium)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: model.highContrastEnabled
+                          ? model.textColor1
+                          : model.dividerColor,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: DefaultTextStyle.merge(
+                      style: TextStyle(color: model.textColor1),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              strings.premiumWhatIfPreview,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(strings.premiumWhatIfPrice),
+                          const SizedBox(height: 8),
+                          Text(strings.premiumWhatIfBaseline),
+                          const SizedBox(height: 4),
+                          Text(strings.premiumWhatIfAlternate),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

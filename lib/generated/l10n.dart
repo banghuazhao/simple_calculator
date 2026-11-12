@@ -830,6 +830,16 @@ class S {
     );
   }
 
+  /// `Premium tools`
+  String get premiumTools {
+    return Intl.message(
+      'Premium tools',
+      name: 'premiumTools',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Premium is active.`
   String get premiumActive {
     return Intl.message(
@@ -845,6 +855,46 @@ class S {
     return Intl.message(
       'A one-time purchase unlocks both tools and removes ads.',
       name: 'premiumOffer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What-if preview`
+  String get premiumWhatIfPreview {
+    return Intl.message(
+      'What-if preview',
+      name: 'premiumWhatIfPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start with a price of $100.`
+  String get premiumWhatIfPrice {
+    return Intl.message(
+      'Start with a price of \$100.',
+      name: 'premiumWhatIfPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With 10% off, you pay $90.`
+  String get premiumWhatIfBaseline {
+    return Intl.message(
+      'With 10% off, you pay \$90.',
+      name: 'premiumWhatIfBaseline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With 25% off, you pay $75.`
+  String get premiumWhatIfAlternate {
+    return Intl.message(
+      'With 25% off, you pay \$75.',
+      name: 'premiumWhatIfAlternate',
       desc: '',
       args: [],
     );

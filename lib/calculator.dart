@@ -13,6 +13,7 @@ import 'package:simple_calculator/key_controller.dart' as input;
 import 'package:simple_calculator/key_pad.dart';
 import 'package:simple_calculator/more_page.dart';
 import 'package:simple_calculator/premium/premium_controller.dart';
+import 'package:simple_calculator/premium/premium_page.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
@@ -161,6 +162,9 @@ class _CalculatorState extends State<Calculator> {
     final allowsAds = context.select<PremiumController?, bool>(
       (premium) => premium?.allowsAds ?? true,
     );
+    final showPremiumTools = context.select<PremiumController?, bool>(
+      (premium) => premium?.isPremium ?? false,
+    );
     final screenHeight = MediaQuery.of(context).size.height;
     final strings = S.of(context);
 
@@ -195,6 +199,19 @@ class _CalculatorState extends State<Calculator> {
                           ),
                         ),
                         const Spacer(),
+                        if (showPremiumTools)
+                          IconButton(
+                            tooltip: strings.premiumTools,
+                            onPressed: () => Navigator.of(context).push<void>(
+                              MaterialPageRoute(
+                                builder: (_) => const PremiumPage(),
+                              ),
+                            ),
+                            icon: Icon(
+                              Icons.workspace_premium_outlined,
+                              color: model.textColor1,
+                            ),
+                          ),
                         IconButton(
                           tooltip: strings.undo,
                           onPressed: Processor.canUndo ? Processor.undo : null,

@@ -48,6 +48,8 @@ void main() {
 
     await tester.pumpWidget(CalculatorApp(premiumController: controller));
     await tester.pumpAndSettle();
+    final premiumTools = find.byTooltip('Premium tools');
+    expect(premiumTools, findsNothing);
     await tester.tap(find.byTooltip('Settings'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('SwiftSum Premium'));
@@ -56,16 +58,37 @@ void main() {
     final scientific = find.widgetWithText(ListTile, 'Scientific calculator');
     final formulas = find.widgetWithText(ListTile, 'Reusable formulas');
     final buy = find.text('Buy Premium · ${_FakeStore.price}');
+    final preview = find.text('What-if preview');
+    final alternateTotal = find.text(r'With 25% off, you pay $75.');
     expect(tester.widget<ListTile>(scientific).onTap, isNull);
     expect(tester.widget<ListTile>(formulas).onTap, isNull);
     expect(controller.allowsAds, isTrue);
+    await tester.scrollUntilVisible(alternateTotal, 120);
+    await tester.pumpAndSettle();
+    expect(preview, findsOneWidget);
+    expect(find.text(r'With 10% off, you pay $90.'), findsOneWidget);
+    expect(alternateTotal, findsOneWidget);
+    expect(find.byType(EditableText), findsNothing);
 
+    await tester.ensureVisible(buy);
+    await tester.pumpAndSettle();
     await tester.tap(buy);
     await tester.pumpAndSettle();
     expect(find.text('Premium is active.'), findsOneWidget);
     expect(buy, findsNothing);
+    expect(preview, findsNothing);
     expect(controller.isPremium, isTrue);
     expect(controller.allowsAds, isFalse);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(premiumTools);
+    await tester.pumpAndSettle();
+    expect(find.byType(PremiumPage), findsOneWidget);
+    expect(tester.widget<ListTile>(scientific).onTap, isNotNull);
+    expect(tester.widget<ListTile>(formulas).onTap, isNotNull);
 
     await tester.tap(scientific);
     await tester.pumpAndSettle();
@@ -97,6 +120,11 @@ void main() {
     expect(tester.widget<ListTile>(formulas).onTap, isNull);
     expect(FormulaStorage.instance.load(), isEmpty);
     expect(controller.allowsAds, isTrue);
+    Navigator.of(
+      tester.element(find.byType(PremiumPage)),
+    ).popUntil((route) => route.isFirst);
+    await tester.pumpAndSettle();
+    expect(premiumTools, findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

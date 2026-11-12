@@ -229,8 +229,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "premiumRestored": MessageLookupByLibrary.simpleMessage(
       "Premium purchase restored.",
     ),
+    "premiumTools": MessageLookupByLibrary.simpleMessage("Premium tools"),
     "premiumUnavailable": MessageLookupByLibrary.simpleMessage(
       "Premium is temporarily unavailable.",
+    ),
+    "premiumWhatIfAlternate": MessageLookupByLibrary.simpleMessage(
+      "With 25% off, you pay \$75.",
+    ),
+    "premiumWhatIfBaseline": MessageLookupByLibrary.simpleMessage(
+      "With 10% off, you pay \$90.",
+    ),
+    "premiumWhatIfPreview": MessageLookupByLibrary.simpleMessage(
+      "What-if preview",
+    ),
+    "premiumWhatIfPrice": MessageLookupByLibrary.simpleMessage(
+      "Start with a price of \$100.",
     ),
     "reusableFormulas": MessageLookupByLibrary.simpleMessage(
       "Reusable formulas",
