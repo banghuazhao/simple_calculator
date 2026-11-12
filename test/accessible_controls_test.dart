@@ -163,9 +163,12 @@ void main() {
         hasTapAction: true,
       ),
     );
-    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.tap(find.byIcon(Icons.copy_outlined));
     await tester.pumpAndSettle();
     expect(clipboardWrites, ['1234.50']);
+    node.owner!.performAction(node.id, SemanticsAction.tap);
+    await tester.pumpAndSettle();
+    expect(clipboardWrites, ['1234.50', '1234.50']);
     expect(find.text('Copied'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -223,6 +226,7 @@ void main() {
       tester.getSemantics(find.bySemanticsLabel('Error')),
       matchesSemantics(label: 'Error'),
     );
+    expect(find.byIcon(Icons.copy_outlined), findsNothing);
     await tester.tap(find.text('Error'));
     await tester.pumpAndSettle();
     expect(clipboardWrites, 0);

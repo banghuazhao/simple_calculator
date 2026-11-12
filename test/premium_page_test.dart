@@ -70,6 +70,34 @@ void main() {
     expect(alternateTotal, findsOneWidget);
     expect(find.byType(EditableText), findsNothing);
 
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.binding.setSurfaceSize(const Size(375, 667));
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    await tester.pumpAndSettle();
+    final premiumScroll = find.descendant(
+      of: find.byType(PremiumPage),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(buy, -120, scrollable: premiumScroll);
+    await tester.pumpAndSettle();
+    expect(buy.hitTestable(), findsOneWidget);
+    final restore = find.text('Restore purchases');
+    await tester.scrollUntilVisible(restore, 120, scrollable: premiumScroll);
+    await tester.pumpAndSettle();
+    expect(restore.hitTestable(), findsOneWidget);
+    await tester.scrollUntilVisible(
+      alternateTotal,
+      120,
+      scrollable: premiumScroll,
+    );
+    await tester.pumpAndSettle();
+    expect(alternateTotal.hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.binding.setSurfaceSize(null);
+    tester.platformDispatcher.clearTextScaleFactorTestValue();
+    await tester.pumpAndSettle();
     await tester.ensureVisible(buy);
     await tester.pumpAndSettle();
     await tester.tap(buy);

@@ -40,26 +40,24 @@ class Display extends StatelessWidget {
   Widget build(BuildContext context) {
     final strings = S.of(context);
     final model = Provider.of<ThemeModel>(context);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    final double inset = screenWidth > 600 ? (screenWidth - 560) / 2 : 24.0;
-    final bool compact = screenHeight <= 740;
-
-    final Color textColor = model.textColor1;
-    final Color historyColor = model.secondaryTextColor;
+    final compact = MediaQuery.sizeOf(context).height <= 740;
+    final transitionDuration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 160);
+    final textColor = model.panelTextColor;
 
     final mainStyle =
         Theme.of(context).textTheme.displayMedium?.copyWith(
           color: textColor,
-          fontWeight: FontWeight.w300,
+          fontWeight: FontWeight.w500,
           fontSize: compact ? 48 : 60,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ) ??
         const TextStyle();
 
     final historyStyle =
         Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: historyColor,
+          color: textColor,
           fontSize: compact ? 14 : 16,
         ) ??
         const TextStyle();
@@ -79,89 +77,107 @@ class Display extends StatelessWidget {
         : null;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(inset, 0, inset, compact ? 8 : 16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Semantics(
-            label: copyCalculation == null ? history : strings.copyCalculation,
-            value: copyCalculation == null ? null : history,
-            button: copyCalculation != null,
-            onTap: copyCalculation,
-            excludeSemantics: true,
-            child: GestureDetector(
-              excludeFromSemantics: true,
-              onTap: copyCalculation,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                transitionBuilder: (child, anim) =>
-                    FadeTransition(opacity: anim, child: child),
-                child: history.isNotEmpty
-                    ? Align(
-                        key: ValueKey(history),
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          history,
-                          style: historyStyle,
-                          textAlign: TextAlign.right,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      )
-                    : const SizedBox.shrink(key: ValueKey('no-history')),
-              ),
-            ),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Material(
+          color: model.panelColor,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: model.panelBorderColor),
+            borderRadius: BorderRadius.circular(20),
           ),
-          SizedBox(height: compact ? 2 : 4),
-          // Main number — tap to copy
-          // Bound the result height so large system text can fit above the keypad.
-          Flexible(
-            fit: FlexFit.loose,
-            child: Semantics(
-              label: isError ? strings.error : strings.copyResult,
-              value: isError ? null : formattedCurrent,
-              button: !isError,
-              onTap: copyNumber,
-              excludeSemantics: true,
-              child: GestureDetector(
-                excludeFromSemantics: true,
-                onTap: copyNumber,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 220),
-                  transitionBuilder: (child, anim) => FadeTransition(
-                    opacity: anim,
-                    child: SlideTransition(
-                      position:
-                          Tween<Offset>(
-                            begin: const Offset(0, 0.25),
-                            end: Offset.zero,
-                          ).animate(
-                            CurvedAnimation(
-                              parent: anim,
-                              curve: Curves.easeOutCubic,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (history.isNotEmpty)
+                  Semantics(
+                    label: copyCalculation == null
+                        ? history
+                        : strings.copyCalculation,
+                    value: copyCalculation == null ? null : history,
+                    button: copyCalculation != null,
+                    onTap: copyCalculation,
+                    excludeSemantics: true,
+                    child: InkWell(
+                      excludeFromSemantics: true,
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: copyCalculation,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: AnimatedSwitcher(
+                          duration: transitionDuration,
+                          child: Align(
+                            key: ValueKey(history),
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              history,
+                              style: historyStyle,
+                              textAlign: TextAlign.right,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                      child: child,
+                        ),
+                      ),
                     ),
                   ),
-                  child: Align(
-                    key: displayKey,
-                    alignment: Alignment.bottomRight,
-                    heightFactor: 1,
-                    child: AutoSizeText(
-                      formattedCurrent,
-                      style: mainStyle,
-                      maxLines: 1,
-                      textAlign: TextAlign.right,
-                      minFontSize: 12,
+                Flexible(
+                  child: Semantics(
+                    label: isError ? strings.error : strings.copyResult,
+                    value: isError ? null : formattedCurrent,
+                    button: !isError,
+                    onTap: copyNumber,
+                    excludeSemantics: true,
+                    child: InkWell(
+                      excludeFromSemantics: true,
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: copyNumber,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            children: [
+                              if (!isError) ...[
+                                Icon(
+                                  Icons.copy_outlined,
+                                  color: textColor,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                              Expanded(
+                                child: AnimatedSwitcher(
+                                  duration: transitionDuration,
+                                  child: Align(
+                                    key: displayKey,
+                                    alignment: Alignment.centerRight,
+                                    heightFactor: 1,
+                                    child: AutoSizeText(
+                                      formattedCurrent,
+                                      style: mainStyle,
+                                      maxLines: 1,
+                                      textAlign: TextAlign.right,
+                                      minFontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

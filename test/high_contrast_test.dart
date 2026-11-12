@@ -98,6 +98,37 @@ void main() {
 
   setUp(() => _load({}));
 
+  test('calculator foregrounds are readable across the built-in themes', () {
+    final model = ThemeModel();
+    for (var index = 0; index < 18; index++) {
+      model.switchTheme(index);
+      expect(
+        _contrast(model.readableTextColor, model.backgroundColor),
+        greaterThanOrEqualTo(4.5),
+        reason: 'Toolbar, theme $index',
+      );
+      expect(
+        _contrast(model.panelTextColor, model.panelColor),
+        greaterThanOrEqualTo(4.5),
+        reason: 'Panel, theme $index',
+      );
+      for (final keyColor in [
+        model.buttonColor1,
+        model.buttonColor2,
+        model.buttonColor3,
+      ]) {
+        expect(
+          _contrast(
+            ThemeModel.readableOn(keyColor, model.textColor2),
+            keyColor,
+          ),
+          greaterThanOrEqualTo(4.5),
+          reason: 'Key on $keyColor, theme $index',
+        );
+      }
+    }
+  });
+
   test('contrast defaults off and invalid stored values are ignored', () async {
     expect(ThemeModel().highContrastEnabled, isFalse);
     expect(ThemeModel().accessibilityTheme, isNull);

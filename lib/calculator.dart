@@ -167,6 +167,7 @@ class _CalculatorState extends State<Calculator> {
     );
     final screenHeight = MediaQuery.of(context).size.height;
     final strings = S.of(context);
+    final toolbarColor = model.readableTextColor;
 
     return CalculatorShortcuts(
       onKey: (symbol) => input.KeyController.fire(
@@ -178,13 +179,13 @@ class _CalculatorState extends State<Calculator> {
       child: Scaffold(
         backgroundColor: model.backgroundColor,
         body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: Column(
                 children: [
-                  // Top bar
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Row(
                       children: [
                         IconButton(
@@ -195,10 +196,25 @@ class _CalculatorState extends State<Calculator> {
                           ),
                           icon: Icon(
                             Icons.settings_outlined,
-                            color: model.textColor1,
+                            color: toolbarColor,
                           ),
                         ),
-                        const Spacer(),
+                        Expanded(
+                          child: Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'SwiftSum',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: toolbarColor,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ),
                         if (showPremiumTools)
                           IconButton(
                             tooltip: strings.premiumTools,
@@ -209,30 +225,28 @@ class _CalculatorState extends State<Calculator> {
                             ),
                             icon: Icon(
                               Icons.workspace_premium_outlined,
-                              color: model.textColor1,
+                              color: toolbarColor,
                             ),
                           ),
                         IconButton(
                           tooltip: strings.undo,
                           onPressed: Processor.canUndo ? Processor.undo : null,
-                          color: model.textColor1,
-                          disabledColor: model.textColor1.withValues(
-                            alpha: 0.35,
-                          ),
+                          color: toolbarColor,
+                          disabledColor: toolbarColor.withValues(alpha: 0.35),
                           icon: const Icon(Icons.undo),
                         ),
                         IconButton(
                           tooltip: strings.pasteNumber,
                           onPressed: () => ClipboardHelper.paste(context),
                           icon: Icon(
-                            Icons.content_paste,
-                            color: model.textColor1,
+                            Icons.content_paste_outlined,
+                            color: toolbarColor,
                           ),
                         ),
                         IconButton(
                           tooltip: strings.history,
                           onPressed: _showHistory,
-                          icon: Icon(Icons.history, color: model.textColor1),
+                          icon: Icon(Icons.history, color: toolbarColor),
                         ),
                       ],
                     ),
@@ -260,7 +274,7 @@ class _CalculatorState extends State<Calculator> {
                   const SizedBox(height: 8),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),

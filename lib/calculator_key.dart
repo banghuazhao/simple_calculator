@@ -50,7 +50,7 @@ class _CalculatorKeyState extends State<CalculatorKey>
   );
   late final Animation<double> _scale = Tween<double>(
     begin: 1.0,
-    end: 0.88,
+    end: 0.96,
   ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
   @override
@@ -61,7 +61,7 @@ class _CalculatorKeyState extends State<CalculatorKey>
 
   void _onTapDown(TapDownDetails _) {
     unawaited(InputFeedback.lightImpact());
-    _controller.forward();
+    if (!MediaQuery.disableAnimationsOf(context)) _controller.forward();
   }
 
   void _onTapUp(TapUpDetails _) {
@@ -111,6 +111,7 @@ class _CalculatorKeyState extends State<CalculatorKey>
   Widget build(BuildContext context) {
     final model = Provider.of<ThemeModel>(context);
     final screenSize = MediaQuery.of(context).size;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     double size = (screenSize.width - 40) / 4;
     if (size > 150) size = 150;
@@ -133,12 +134,38 @@ class _CalculatorKeyState extends State<CalculatorKey>
         color = model.buttonColor1;
     }
 
+    final foreground = ThemeModel.readableOn(color, model.textColor2);
+    final isEquals = widget.symbol == Keys.equals;
     final style =
         Theme.of(context).textTheme.headlineSmall?.copyWith(
-          color: model.textColor2,
-          fontWeight: FontWeight.w500,
+          color: foreground,
+          fontWeight: isEquals ? FontWeight.w700 : FontWeight.w500,
         ) ??
         const TextStyle();
+    final keyFace = Padding(
+      padding: const EdgeInsets.all(4),
+      child: SizedBox(
+        width: max(0.0, size - 8),
+        height: max(0.0, size - 8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color,
+            border: model.highContrastEnabled
+                ? Border.all(color: Colors.white, width: 1.5)
+                : isEquals
+                ? Border.all(color: foreground.withValues(alpha: 0.5), width: 2)
+                : null,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(widget.symbol.value, style: style),
+            ),
+          ),
+        ),
+      ),
+    );
 
     return Semantics(
       label: _accessibilityLabel(S.of(context)),
@@ -146,37 +173,14 @@ class _CalculatorKeyState extends State<CalculatorKey>
       onTap: _onSemanticTap,
       excludeSemantics: true,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         excludeFromSemantics: true,
         onTapDown: _onTapDown,
         onTapUp: _onTapUp,
         onTapCancel: _onTapCancel,
-        child: ScaleTransition(
-          scale: _scale,
-          child: Padding(
-            padding: const EdgeInsets.all(5),
-            child: SizedBox(
-              width: size - 10,
-              height: size - 10,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  border: model.highContrastEnabled
-                      ? Border.all(color: Colors.white, width: 1.5)
-                      : null,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Center(child: Text(widget.symbol.value, style: style)),
-              ),
-            ),
-          ),
-        ),
+        child: reduceMotion
+            ? keyFace
+            : ScaleTransition(scale: _scale, child: keyFace),
       ),
     );
   }

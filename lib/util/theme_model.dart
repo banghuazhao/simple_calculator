@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +23,31 @@ class ThemeModel with ChangeNotifier {
   late Color buttonColor3;
   late Color textColor1;
   late Color textColor2;
+
+  Color get readableTextColor => readableOn(backgroundColor, textColor1);
+
+  Color get panelColor {
+    if (highContrastEnabled) return backgroundColor;
+    final tint = backgroundColor.computeLuminance() < 0.2
+        ? Colors.white
+        : Colors.black;
+    return Color.alphaBlend(tint.withValues(alpha: 0.045), backgroundColor);
+  }
+
+  Color get panelTextColor => readableOn(panelColor, textColor1);
+
+  Color get panelBorderColor => highContrastEnabled
+      ? dividerColor
+      : panelTextColor.withValues(alpha: 0.18);
+
+  static Color readableOn(Color background, Color preferred) {
+    final surface = background.computeLuminance() + 0.05;
+    final ink = preferred.computeLuminance() + 0.05;
+    if (math.max(surface, ink) / math.min(surface, ink) >= 4.5) {
+      return preferred;
+    }
+    return surface / 0.05 >= 1.05 / surface ? Colors.black : Colors.white;
+  }
 
   Color get secondaryTextColor =>
       highContrastEnabled ? Colors.white : textColor1.withValues(alpha: 0.5);
