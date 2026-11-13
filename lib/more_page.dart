@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/help_page.dart';
+import 'package:simple_calculator/premium/premium_controller.dart';
+import 'package:simple_calculator/premium/premium_page.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/input_settings.dart';
@@ -23,30 +26,61 @@ class MorePage extends StatefulWidget {
 class _MorePageState extends State<MorePage> {
   InterstitialAd? _interstitialAd;
   int _interstitialLoadAttempts = 0;
+  bool _interstitialLoading = false;
   bool _themeChanged = false;
+  PremiumController? _premium;
 
-  void _createInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AdsManager.interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (InterstitialAd ad) {
-          if (!mounted) {
-            ad.dispose();
-            return;
-          }
-          _interstitialAd = ad;
-          _interstitialLoadAttempts = 0;
-        },
-        onAdFailedToLoad: (LoadAdError error) {
-          _interstitialLoadAttempts += 1;
-          _interstitialAd = null;
-          if (mounted && _interstitialLoadAttempts <= maxFailedLoadAttempts) {
-            _createInterstitialAd();
-          }
-        },
-      ),
-    );
+  bool get _allowsAds =>
+      (Platform.isIOS || Platform.isAndroid) && (_premium?.allowsAds ?? true);
+
+  void _syncInterstitial() {
+    if (_allowsAds) {
+      unawaited(_createInterstitialAd());
+      return;
+    }
+    final ad = _interstitialAd;
+    _interstitialAd = null;
+    unawaited(AdsManager.disposeAd(ad));
+  }
+
+  Future<void> _createInterstitialAd() async {
+    if (!mounted ||
+        !_allowsAds ||
+        _interstitialLoading ||
+        _interstitialAd != null ||
+        _interstitialLoadAttempts > maxFailedLoadAttempts) {
+      return;
+    }
+    _interstitialLoading = true;
+    try {
+      if (!await AdsManager.initialize() || !mounted || !_allowsAds) {
+        _interstitialLoading = false;
+        return;
+      }
+      await InterstitialAd.load(
+        adUnitId: AdsManager.interstitialAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _interstitialLoading = false;
+            if (!mounted || !_allowsAds) {
+              unawaited(AdsManager.disposeAd(ad));
+              return;
+            }
+            _interstitialAd = ad;
+            _interstitialLoadAttempts = 0;
+          },
+          onAdFailedToLoad: (_) {
+            _interstitialLoading = false;
+            _interstitialLoadAttempts++;
+            unawaited(_createInterstitialAd());
+          },
+        ),
+      );
+    } catch (error) {
+      _interstitialLoading = false;
+      debugPrint('Interstitial unavailable: $error');
+    }
   }
 
   /// Shown once when leaving Settings after a theme change, never while the
@@ -54,6 +88,8 @@ class _MorePageState extends State<MorePage> {
   void _showInterstitialAd() {
     final ad = _interstitialAd;
     if (ad == null ||
+        !_allowsAds ||
+        (_premium?.isBusy ?? false) ||
         AdState.isShowingFullScreenAd ||
         !AdsManager.canShowInterstitial) {
       return;
@@ -80,19 +116,27 @@ class _MorePageState extends State<MorePage> {
   @override
   void initState() {
     super.initState();
-    if (!Platform.isMacOS) {
-      _createInterstitialAd();
-    }
+    _premium = context.read<PremiumController?>();
+    _premium?.addListener(_syncInterstitial);
+    _syncInterstitial();
   }
 
   @override
   void dispose() {
-    _interstitialAd?.dispose();
+    _premium?.removeListener(_syncInterstitial);
+    unawaited(AdsManager.disposeAd(_interstitialAd));
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final premiumSupported = context.select<PremiumController?, bool>(
+      (premium) => premium?.isSupported ?? false,
+    );
+    final showMoreApps = !Platform.isMacOS &&
+        context.select<PremiumController?, bool>(
+          (premium) => premium?.allowsAds ?? true,
+        );
     List<MoreAppItem> items = [];
 
     var classicMemoryGame = MoreAppItem(
@@ -305,7 +349,8 @@ class _MorePageState extends State<MorePage> {
         classicReversi,
       ];
     }
-    var model = Provider.of<ThemeModel>(context);
+    final model = context.watch<ThemeModel>();
+    final strings = S.of(context);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
@@ -316,129 +361,225 @@ class _MorePageState extends State<MorePage> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(
-            S.of(context).More,
-            style: TextStyle(color: model.textColor1),
-          ),
+          scrolledUnderElevation: 0,
+          title: Text(strings.settings),
           leading: IconButton(
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-            icon: Icon(Icons.arrow_back_rounded, color: model.textColor1),
+            icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () {
               Navigator.pop(context);
             },
           ),
-          // elevation: 0,
           backgroundColor: model.backgroundColor,
+          foregroundColor: model.readableTextColor,
         ),
         backgroundColor: model.backgroundColor,
-        body: ListView(
-          children: [
-            const InputSettingsSection(),
-            ListTile(
-              leading: Icon(Icons.help_outline, color: model.textColor1),
-              title: Text(
-                S.of(context).helpAndShortcuts,
-                style: TextStyle(color: model.textColor1),
-              ),
-              trailing: Icon(Icons.chevron_right, color: model.textColor1),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const HelpPage()),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-              child: Text(
-                S.of(context).theme,
-                style: TextStyle(fontSize: 21, color: model.textColor1),
-              ),
-            ),
-            const HighContrastSetting(),
-            Container(
-              padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
-              height: 210,
+        body: SafeArea(
+          top: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 680),
               child: ListView(
-                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 children: [
-                  ...const [
-                    "assets/theme/theme1.png",
-                    "assets/theme/theme2.png",
-                    "assets/theme/theme3.png",
-                    "assets/theme/theme4.png",
-                    "assets/theme/theme5.png",
-                    "assets/theme/theme6.png",
-                    "assets/theme/theme7.png",
-                    "assets/theme/theme8.png",
-                    "assets/theme/theme9.png",
-                    "assets/theme/theme10.png",
-                    "assets/theme/theme11.png",
-                    "assets/theme/theme12.png",
-                    "assets/theme/theme13.png",
-                    "assets/theme/theme14.png",
-                    "assets/theme/theme15.png",
-                    "assets/theme/theme16.png",
-                    "assets/theme/theme17.png",
-                    "assets/theme/theme18.png",
-                  ].asMap().entries.map((entry) {
-                    String themeImage = entry.value;
-                    int index = entry.key;
-                    final selected = index == model.themeColor;
-                    return Semantics(
-                      label: '${S.of(context).theme} ${index + 1}',
-                      selected: selected,
-                      button: true,
-                      excludeSemantics: true,
-                      child: Container(
-                        margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                        decoration: BoxDecoration(
-                          border: selected
-                              ? Border.all(
-                                  color: const Color(0xff4ACE5F),
-                                  width: 2,
-                                )
-                              : null,
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(10),
+                  _SettingsGroup(
+                    child: Column(
+                      children: [
+                        if (premiumSupported) ...[
+                          ListTile(
+                            leading: const Icon(
+                              Icons.workspace_premium_outlined,
+                            ),
+                            title: Text(strings.premium),
+                            trailing: const Icon(Icons.chevron_right_rounded),
+                            onTap: () => Navigator.push<void>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const PremiumPage(),
+                              ),
+                            ),
                           ),
-                          image: DecorationImage(
-                            image: AssetImage(themeImage),
-                            fit: BoxFit.cover,
+                          Divider(
+                            height: 1,
+                            indent: 16,
+                            endIndent: 16,
+                            color: model.panelBorderColor,
+                          ),
+                        ],
+                        ListTile(
+                          leading: const Icon(Icons.help_outline),
+                          title: Text(strings.helpAndShortcuts),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () => Navigator.push<void>(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HelpPage()),
                           ),
                         ),
-                        // color: color,
-                        child: InkWell(
-                          onTap: () {
-                            if (selected) return;
-                            model.switchTheme(index);
-                            setState(() => _themeChanged = true);
-                          },
-                          child: const SizedBox(width: 90),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const InputSettingsSection(),
+                  const SizedBox(height: 16),
+                  _SettingsHeading(strings.theme),
+                  _SettingsGroup(
+                    child: Column(
+                      children: [
+                        const HighContrastSetting(),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 176,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            itemCount: 18,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(width: 8),
+                            itemBuilder: (context, index) => _ThemePreview(
+                              number: index + 1,
+                              selected: index == model.themeColor,
+                              onTap: () {
+                                if (index == model.themeColor) return;
+                                model.switchTheme(index);
+                                _themeChanged = true;
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                    );
-                  }),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+                  if (showMoreApps) ...[
+                    const SizedBox(height: 24),
+                    _SettingsHeading(strings.MoreApps),
+                    for (final item in items) MoreAppsRow.factory(item),
+                  ],
                 ],
               ),
             ),
-            if (!Platform.isMacOS)
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                child: Text(
-                  S.of(context).MoreApps,
-                  style: TextStyle(fontSize: 21, color: model.textColor1),
-                ),
-              ),
-            if (!Platform.isMacOS)
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return MoreAppsRow.factory(items[index]);
-                },
-              ),
-            const SizedBox(height: 50),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsHeading extends StatelessWidget {
+  const _SettingsHeading(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final model = context.watch<ThemeModel>();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+      child: Semantics(
+        header: true,
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: model.readableTextColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsGroup extends StatelessWidget {
+  const _SettingsGroup({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final model = context.watch<ThemeModel>();
+    return Material(
+      color: model.panelColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: model.panelBorderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ListTileTheme(
+        iconColor: model.panelTextColor,
+        textColor: model.panelTextColor,
+        child: child,
+      ),
+    );
+  }
+}
+
+class _ThemePreview extends StatelessWidget {
+  const _ThemePreview({
+    required this.number,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final int number;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final model = context.watch<ThemeModel>();
+    final radius = BorderRadius.circular(12);
+    final selectionColor = model.panelTextColor;
+
+    return Semantics(
+      label: '${S.of(context).theme} $number',
+      selected: selected,
+      button: true,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: Material(
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: Ink(
+          width: 82,
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            border: Border.all(
+              color: selected ? selectionColor : model.panelBorderColor,
+              width: selected ? 2 : 1,
+            ),
+            image: DecorationImage(
+              image: AssetImage('assets/theme/theme$number.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: InkWell(
+            onTap: onTap,
+            child: selected
+                ? Align(
+                    alignment: AlignmentDirectional.topEnd,
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: selectionColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.check_rounded,
+                            size: 16,
+                            color: ThemeModel.readableOn(
+                              selectionColor,
+                              model.panelColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
+          ),
         ),
       ),
     );
@@ -454,15 +595,9 @@ class HighContrastSetting extends StatelessWidget {
     final strings = S.of(context);
     return SwitchListTile.adaptive(
       key: const ValueKey('high-contrast-setting'),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-      title: Text(
-        strings.highContrast,
-        style: TextStyle(color: model.textColor1),
-      ),
-      subtitle: Text(
-        strings.highContrastDescription,
-        style: TextStyle(color: model.textColor1),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(strings.highContrast),
+      subtitle: Text(strings.highContrastDescription),
       value: model.highContrastEnabled,
       onChanged: model.setHighContrastEnabled,
       activeThumbColor: model.highContrastEnabled ? Colors.black : null,
@@ -488,54 +623,59 @@ class InputSettingsSection extends StatelessWidget {
       builder: (context, _) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Text(
-              strings.inputSettings,
-              style: TextStyle(fontSize: 21, color: model.textColor1),
+          _SettingsHeading(strings.inputSettings),
+          _SettingsGroup(
+            child: Column(
+              children: [
+                SwitchListTile.adaptive(
+                  key: const ValueKey('haptics-setting'),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  title: Text(strings.hapticFeedback),
+                  subtitle: Text(strings.hapticFeedbackDescription),
+                  value: settings.hapticsEnabled,
+                  onChanged: settings.setHapticsEnabled,
+                  activeThumbColor: model.highContrastEnabled
+                      ? Colors.black
+                      : null,
+                  activeTrackColor: model.highContrastEnabled
+                      ? Colors.white
+                      : null,
+                  inactiveThumbColor: model.highContrastEnabled
+                      ? Colors.white
+                      : null,
+                  inactiveTrackColor: model.highContrastEnabled
+                      ? const Color(0xff444444)
+                      : null,
+                ),
+                Divider(
+                  height: 1,
+                  indent: 16,
+                  endIndent: 16,
+                  color: model.panelBorderColor,
+                ),
+                SwitchListTile.adaptive(
+                  key: const ValueKey('shake-setting'),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  title: Text(strings.shakeToUndo),
+                  subtitle: Text(strings.shakeToUndoDescription),
+                  value: settings.shakeToUndoEnabled,
+                  onChanged: settings.setShakeToUndoEnabled,
+                  activeThumbColor: model.highContrastEnabled
+                      ? Colors.black
+                      : null,
+                  activeTrackColor: model.highContrastEnabled
+                      ? Colors.white
+                      : null,
+                  inactiveThumbColor: model.highContrastEnabled
+                      ? Colors.white
+                      : null,
+                  inactiveTrackColor: model.highContrastEnabled
+                      ? const Color(0xff444444)
+                      : null,
+                ),
+              ],
             ),
           ),
-          SwitchListTile.adaptive(
-            key: const ValueKey('haptics-setting'),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-            title: Text(
-              strings.hapticFeedback,
-              style: TextStyle(color: model.textColor1),
-            ),
-            subtitle: Text(
-              strings.hapticFeedbackDescription,
-              style: TextStyle(color: model.textColor1),
-            ),
-            value: settings.hapticsEnabled,
-            onChanged: settings.setHapticsEnabled,
-            activeThumbColor: model.highContrastEnabled ? Colors.black : null,
-            activeTrackColor: model.highContrastEnabled ? Colors.white : null,
-            inactiveThumbColor: model.highContrastEnabled ? Colors.white : null,
-            inactiveTrackColor: model.highContrastEnabled
-                ? const Color(0xff444444)
-                : null,
-          ),
-          SwitchListTile.adaptive(
-            key: const ValueKey('shake-setting'),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-            title: Text(
-              strings.shakeToUndo,
-              style: TextStyle(color: model.textColor1),
-            ),
-            subtitle: Text(
-              strings.shakeToUndoDescription,
-              style: TextStyle(color: model.textColor1),
-            ),
-            value: settings.shakeToUndoEnabled,
-            onChanged: settings.setShakeToUndoEnabled,
-            activeThumbColor: model.highContrastEnabled ? Colors.black : null,
-            activeTrackColor: model.highContrastEnabled ? Colors.white : null,
-            inactiveThumbColor: model.highContrastEnabled ? Colors.white : null,
-            inactiveTrackColor: model.highContrastEnabled
-                ? const Color(0xff444444)
-                : null,
-          ),
-          const SizedBox(height: 8),
         ],
       ),
     );
@@ -572,37 +712,17 @@ class MoreAppsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = Provider.of<ThemeModel>(context);
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      decoration: BoxDecoration(
-        color: model.highContrastEnabled ? model.buttonColor1 : Colors.white60,
-        borderRadius: const BorderRadius.all(Radius.circular(24)),
-        border: model.highContrastEnabled
-            ? Border.all(color: Colors.white)
-            : null,
-      ),
-      child: InkWell(
-        customBorder: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(24)),
-        ),
-        onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: _SettingsGroup(
         child: ListTile(
-          visualDensity: const VisualDensity(vertical: 4), // to compact
           leading: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            child: SizedBox(height: 50, width: 50, child: appIcon),
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(height: 40, width: 40, child: appIcon),
           ),
-          trailing: Icon(
-            trailingIcon,
-            color: model.highContrastEnabled ? model.textColor1 : null,
-          ),
-          title: Text(
-            title,
-            style: model.highContrastEnabled
-                ? TextStyle(color: model.textColor1)
-                : null,
-          ),
+          trailing: Icon(trailingIcon),
+          title: Text(title),
+          onTap: onTap,
         ),
       ),
     );

@@ -29,6 +29,7 @@ Map<String, String> calculatorMessages(S strings) => {
   'reuseResult': strings.reuseResult,
   'deleteCalculation': strings.deleteCalculation,
   'copyCalculation': strings.copyCalculation,
+  'historyEntryActions': strings.historyEntryActions,
   'inputSettings': strings.inputSettings,
   'hapticFeedback': strings.hapticFeedback,
   'hapticFeedbackDescription': strings.hapticFeedbackDescription,
@@ -37,8 +38,12 @@ Map<String, String> calculatorMessages(S strings) => {
   'helpAndShortcuts': strings.helpAndShortcuts,
   'helpBasics': strings.helpBasics,
   'helpCopy': strings.helpCopy,
+  'helpCopyHistory': strings.helpCopyHistory,
   'helpUndo': strings.helpUndo,
   'helpHistory': strings.helpHistory,
+  'helpPremiumShortcut': strings.helpPremiumShortcut,
+  'helpPremiumScientific': strings.helpPremiumScientific,
+  'helpPremiumFormulas': strings.helpPremiumFormulas,
   'helpKeyboard': strings.helpKeyboard,
   'shortcutNumbers': strings.shortcutNumbers,
   'shortcutOperators': strings.shortcutOperators,
@@ -61,6 +66,12 @@ Map<String, String> calculatorMessages(S strings) => {
   'copyMatchingHistory': strings.copyMatchingHistory,
   'highContrast': strings.highContrast,
   'highContrastDescription': strings.highContrastDescription,
+  'premiumTools': strings.premiumTools,
+  'premiumWhatIfPreview': strings.premiumWhatIfPreview,
+  'premiumWhatIfPrice': strings.premiumWhatIfPrice,
+  'premiumWhatIfBaseline': strings.premiumWhatIfBaseline,
+  'premiumWhatIfAlternate': strings.premiumWhatIfAlternate,
+  'formulaCopyComparison': strings.formulaCopyComparison,
 };
 
 void main() {

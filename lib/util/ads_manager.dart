@@ -174,7 +174,11 @@ class AdState {
 /// Loads and shows App Open ads on app foreground, with a cooldown so a user
 /// flipping in and out of the app isn't bombarded.
 class AppOpenAdManager {
+  AppOpenAdManager({bool Function()? adsAllowed}) : _adsAllowed = adsAllowed;
+
+  final bool Function()? _adsAllowed;
   AppOpenAd? _appOpenAd;
+  bool _isLoadingAd = false;
   bool _isShowingAd = false;
   DateTime? _appOpenLoadTime;
   DateTime? _lastShowTime;
@@ -187,6 +191,17 @@ class AppOpenAdManager {
 
   bool get isAdAvailable => _appOpenAd != null;
 
+  bool get _canLoadOrShow =>
+      !AdsManager.disableAllAdsForScreenshot && (_adsAllowed?.call() ?? true);
+
+  void discardCachedAd() {
+    if (_isShowingAd) return;
+    final ad = _appOpenAd;
+    _appOpenAd = null;
+    _appOpenLoadTime = null;
+    unawaited(AdsManager.disposeAd(ad));
+  }
+
   bool get _isExpired {
     final loaded = _appOpenLoadTime;
     return loaded == null ||
@@ -194,22 +209,34 @@ class AppOpenAdManager {
   }
 
   Future<void> loadAd() async {
-    if (AdsManager.disableAllAdsForScreenshot) return;
+    if (!_canLoadOrShow || _isLoadingAd || isAdAvailable) return;
+    _isLoadingAd = true;
     try {
+      if (!await AdsManager.initialize() || !_canLoadOrShow) {
+        _isLoadingAd = false;
+        return;
+      }
       await AppOpenAd.load(
         adUnitId: AdsManager.appOpenAdUnitId,
         request: const AdRequest(),
         adLoadCallback: AppOpenAdLoadCallback(
           onAdLoaded: (ad) {
+            _isLoadingAd = false;
+            if (!_canLoadOrShow) {
+              unawaited(AdsManager.disposeAd(ad));
+              return;
+            }
             _appOpenLoadTime = DateTime.now();
             _appOpenAd = ad;
           },
           onAdFailedToLoad: (error) {
+            _isLoadingAd = false;
             debugPrint('AppOpenAd failed to load: $error');
           },
         ),
       );
     } catch (error) {
+      _isLoadingAd = false;
       debugPrint('App open ad unavailable: $error');
     }
   }
@@ -217,12 +244,11 @@ class AppOpenAdManager {
   /// Shows the ad if one is ready, not on cooldown, and nothing else is on
   /// screen. Otherwise (re)loads one for next time.
   Future<void> showAdIfAvailable() async {
-    if (AdsManager.disableAllAdsForScreenshot) return;
+    if (!_canLoadOrShow) return;
     if (_isShowingAd || AdState.isShowingFullScreenAd) return;
 
     if (!isAdAvailable || _isExpired) {
-      unawaited(AdsManager.disposeAd(_appOpenAd));
-      _appOpenAd = null;
+      discardCachedAd();
       loadAd();
       return;
     }
@@ -273,16 +299,27 @@ class AppOpenAdManager {
 /// Listens for app foreground events and shows an App Open ad when the user
 /// returns to the app.
 class AppLifecycleReactor with WidgetsBindingObserver {
-  AppLifecycleReactor({required this.appOpenAdManager});
+  AppLifecycleReactor({
+    required this.appOpenAdManager,
+    this.refreshEntitlement,
+  });
 
   final AppOpenAdManager appOpenAdManager;
+  final Future<void> Function()? refreshEntitlement;
 
   void listen() => WidgetsBinding.instance.addObserver(this);
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      unawaited(appOpenAdManager.showAdIfAvailable());
+      unawaited(_showOnResume());
+    }
+  }
+
+  Future<void> _showOnResume() async {
+    await refreshEntitlement?.call();
+    if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      await appOpenAdManager.showAdIfAvailable();
     }
   }
 }

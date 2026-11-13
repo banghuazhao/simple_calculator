@@ -79,4 +79,6 @@ flutter pub get
 flutter run
 ```
 
-Requires Flutter 3.x. For macOS, the window size is fixed at 350×700.
+Requires Flutter 3.x. To run the native desktop app, use `flutter run -d macos` on a Mac with Xcode. SwiftSum supports macOS 12 and later.
+
+The iOS and Mac App Store targets use `com.appsbay.simpleCalculator` and the same SwiftSum Premium product. Premium unlocks the scientific calculator and reusable formulas on Mac. Use **Restore Purchases** with the same Apple Account to access an existing purchase.

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,11 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_calculator/calculator.dart';
 import 'package:simple_calculator/calculator_key.dart';
 import 'package:simple_calculator/display.dart';
+import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/history_sheet.dart';
 import 'package:simple_calculator/key_controller.dart' as input;
 import 'package:simple_calculator/key_symbol.dart';
 import 'package:simple_calculator/main.dart';
 import 'package:simple_calculator/more_page.dart';
+import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
@@ -81,6 +85,34 @@ void main() {
       await press([Keys.two, Keys.add, Keys.three, Keys.equals, Keys.equals]);
       expect(state.current, '5');
       expect(Processor.historyLog, hasLength(1));
+    });
+
+    test('continuing after equals records each calculation once', () async {
+      await press([Keys.two, Keys.add, Keys.three, Keys.equals]);
+      final original = Processor.historyLog.single;
+
+      await press([Keys.multiply]);
+      expect(state.current, '5');
+      expect(state.history, '5 ×');
+      expect(state.isResult, isFalse);
+      expect(Processor.historyLog, [original]);
+
+      await press([Keys.four, Keys.subtract]);
+      expect(state.current, '20');
+      expect(state.history, '20 -');
+      expect(Processor.historyLog.map((entry) => entry.equation), [
+        '5 × 4 =',
+        original.equation,
+      ]);
+
+      await press([Keys.one, Keys.equals]);
+      expect(state.current, '19');
+      expect(state.history, '20 - 1 =');
+      expect(
+        Processor.historyLog.map((entry) => (entry.equation, entry.result)),
+        [('20 - 1 =', '19'), ('5 × 4 =', '20'), ('2 + 3 =', '5')],
+      );
+      expect(Processor.historyLog.last.id, original.id);
     });
 
     test('a trailing decimal point is accepted and tidied', () async {
@@ -222,6 +254,152 @@ void main() {
       expect(find.text('Copy a valid number to paste.'), findsOneWidget);
     });
 
+    testWidgets(
+      'keyboard copy follows the calculator display and focused history search',
+      (tester) async {
+        final clipboardWrites = <String>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async {
+            if (call.method == 'Clipboard.setData') {
+              clipboardWrites.add((call.arguments as Map)['text'] as String);
+            }
+            return null;
+          },
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+
+        Future<void> copyWith(LogicalKeyboardKey modifier) async {
+          await tester.sendKeyDownEvent(modifier);
+          await tester.sendKeyEvent(LogicalKeyboardKey.keyC, character: 'c');
+          await tester.sendKeyUpEvent(modifier);
+          await tester.pumpAndSettle();
+        }
+
+        final premium = PremiumController(supported: false);
+        addTearDown(premium.dispose);
+        await tester.pumpWidget(CalculatorApp(premiumController: premium));
+        await tester.pumpAndSettle();
+        for (final symbol in ['1', '2', '3', '4']) {
+          await press(tester, symbol);
+        }
+        expect(find.text('1,234'), findsOneWidget);
+        await copyWith(LogicalKeyboardKey.controlLeft);
+        await copyWith(LogicalKeyboardKey.metaLeft);
+        expect(clipboardWrites, ['1234', '1234']);
+
+        for (final symbol in ['÷', '0', '=']) {
+          await press(tester, symbol);
+        }
+        expect(find.text('Error'), findsOneWidget);
+        await copyWith(LogicalKeyboardKey.controlLeft);
+        await copyWith(LogicalKeyboardKey.metaLeft);
+        expect(clipboardWrites, ['1234', '1234']);
+
+        await press(tester, '7');
+        await tester.tap(find.byTooltip('History'));
+        await tester.pumpAndSettle();
+        final search = find.byKey(const ValueKey('history-search'));
+        await tester.enterText(search, 'history query');
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: 'history query',
+            selection: TextSelection(baseOffset: 0, extentOffset: 7),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await copyWith(
+          defaultTargetPlatform == TargetPlatform.macOS
+              ? LogicalKeyboardKey.metaLeft
+              : LogicalKeyboardKey.controlLeft,
+        );
+        expect(clipboardWrites, ['1234', '1234', 'history']);
+        expect(current(tester), '7');
+        expect(tester.takeException(), isNull);
+      },
+      variant: const TargetPlatformVariant({
+        TargetPlatform.macOS,
+        TargetPlatform.windows,
+      }),
+    );
+
+    testWidgets('the display copies an equation only while it is complete', (
+      tester,
+    ) async {
+      final clipboardWrites = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardWrites.add((call.arguments as Map)['text'] as String);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+
+      final copyEquation = find.bySemanticsLabel('Copy calculation');
+      for (final symbol in ['1', '2', '0', '0', '+', '3', '4']) {
+        await press(tester, symbol);
+      }
+      expect(copyEquation, findsNothing);
+      await tester.tap(find.text('1200 +'));
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, isEmpty);
+
+      await press(tester, '=');
+      final equation = find.text('1200 + 34 =');
+      final equationPosition = tester.getCenter(equation);
+      final history = Processor.historyLog;
+      await tester.tap(equation);
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, ['1200 + 34 = 1234']);
+      expect(find.text('Copied'), findsOneWidget);
+
+      final node = tester.getSemantics(copyEquation);
+      expect(
+        node,
+        isSemantics(value: '1200 + 34 =', isButton: true, hasTapAction: true),
+      );
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('1,234'));
+      await tester.pumpAndSettle();
+      final expectedCopies = ['1200 + 34 = 1234', '1200 + 34 = 1234', '1234'];
+      expect(clipboardWrites, expectedCopies);
+      expect(Processor.historyLog, history);
+
+      await tester.tap(find.text('÷'));
+      await tester.pump();
+      expect(find.text('1234 ÷'), findsOneWidget);
+      expect(equation, findsOneWidget);
+      expect(copyEquation, findsNothing);
+      await tester.tapAt(equationPosition);
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, expectedCopies);
+
+      await press(tester, '0');
+      await press(tester, '=');
+      expect(find.text('Error'), findsOneWidget);
+      expect(copyEquation, findsNothing);
+      await tester.tap(find.text('Error'));
+      await tester.pumpAndSettle();
+      expect(clipboardWrites, expectedCopies);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('history search, swipe delete, and undo', (tester) async {
       await tester.pumpWidget(const CalculatorApp());
       await tester.pumpAndSettle();
@@ -253,10 +431,61 @@ void main() {
       expect(Processor.historyLog, hasLength(2));
     });
 
-    testWidgets('theme tiles are labelled and announce the selection', (
+    testWidgets('tips explain how to copy results, equations, and history', (
       tester,
     ) async {
-      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+
+      final strings = S.of(tester.element(find.byType(MorePage)));
+      await tester.tap(find.text(strings.helpAndShortcuts));
+      await tester.pumpAndSettle();
+
+      expect(find.text(strings.helpCopy), findsOneWidget);
+      expect(find.text(strings.helpCopyHistory), findsOneWidget);
+    });
+
+    testWidgets('tips explain how to open and use the Premium tools', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tips and shortcuts'));
+      await tester.pumpAndSettle();
+
+      final formulasTip = find.text(
+        'In Reusable formulas, open an example to edit its inputs and compare two scenarios.',
+      );
+      await tester.ensureVisible(formulasTip);
+      await tester.pumpAndSettle();
+
+      expect(find.text('SwiftSum Premium').hitTestable(), findsOneWidget);
+      expect(
+        find
+            .text(
+              'Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.',
+            )
+            .hitTestable(),
+        findsOneWidget,
+      );
+      expect(
+        find
+            .text(
+              'Choose Degrees or Radians in the scientific calculator before using trigonometric functions.',
+            )
+            .hitTestable(),
+        findsOneWidget,
+      );
+      expect(formulasTip.hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('theme tiles support accessibility and pointer activation', (
+      tester,
+    ) async {
       await tester.pumpWidget(const CalculatorApp());
       await tester.pumpAndSettle();
       final model = Provider.of<ThemeModel>(
@@ -267,21 +496,36 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(MorePage), findsOneWidget);
 
+      final defaultTheme = find.bySemanticsLabel('Theme 1');
+      final alternateTheme = find.bySemanticsLabel('Theme 2');
       expect(
-        tester.getSemantics(find.bySemanticsLabel('Theme 1')),
+        tester.getSemantics(defaultTheme),
         isSemantics(label: 'Theme 1', isButton: true, isSelected: true),
       );
-      await tester.tap(find.bySemanticsLabel('Theme 2'));
+      final node = tester.getSemantics(alternateTheme);
+      expect(
+        node,
+        isSemantics(
+          label: 'Theme 2',
+          isButton: true,
+          isSelected: false,
+          hasTapAction: true,
+        ),
+      );
+      node.owner!.performAction(node.id, SemanticsAction.tap);
       await tester.pumpAndSettle();
       expect(model.themeColor, 1);
       expect(
-        tester.getSemantics(find.bySemanticsLabel('Theme 2')),
+        tester.getSemantics(alternateTheme),
         isSemantics(label: 'Theme 2', isButton: true, isSelected: true),
       );
+      final preferences = StorageManager.sharedPreferences!;
+      await preferences.reload();
+      expect(preferences.getInt(ThemeModel.kThemeColorIndex), 1);
 
-      model.switchTheme(0);
+      await tester.tap(defaultTheme);
       await tester.pumpAndSettle();
-      semantics.dispose();
+      expect(model.themeColor, 0);
     });
   });
 }

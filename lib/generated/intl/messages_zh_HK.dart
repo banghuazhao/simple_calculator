@@ -75,6 +75,38 @@ class MessageLookup extends MessageLookupByLibrary {
     "divide": MessageLookupByLibrary.simpleMessage("除以"),
     "equals": MessageLookupByLibrary.simpleMessage("等於"),
     "error": MessageLookupByLibrary.simpleMessage("錯誤"),
+    "formulaAlternate": MessageLookupByLibrary.simpleMessage("替代方案"),
+    "formulaBaseline": MessageLookupByLibrary.simpleMessage("基準方案"),
+    "formulaCopyComparison": MessageLookupByLibrary.simpleMessage("複製方案比較"),
+    "formulaDelete": MessageLookupByLibrary.simpleMessage("刪除公式"),
+    "formulaDeleteMessage": MessageLookupByLibrary.simpleMessage("刪除這個已儲存的公式？"),
+    "formulaDifference": MessageLookupByLibrary.simpleMessage("差值（替代 − 基準）"),
+    "formulaEdit": MessageLookupByLibrary.simpleMessage("編輯公式"),
+    "formulaEmpty": MessageLookupByLibrary.simpleMessage("尚未儲存公式。"),
+    "formulaExampleDiscount": MessageLookupByLibrary.simpleMessage("折後價格"),
+    "formulaExampleOrderTotal": MessageLookupByLibrary.simpleMessage("訂單總額"),
+    "formulaExampleTax": MessageLookupByLibrary.simpleMessage("含稅價格"),
+    "formulaExamples": MessageLookupByLibrary.simpleMessage("公式範例"),
+    "formulaExpression": MessageLookupByLibrary.simpleMessage("算式"),
+    "formulaExpressionHint": MessageLookupByLibrary.simpleMessage(
+      "例如 price * quantity",
+    ),
+    "formulaInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "請輸入有效的算式。",
+    ),
+    "formulaInvalidInput": MessageLookupByLibrary.simpleMessage("請輸入有效的數字。"),
+    "formulaInvalidName": MessageLookupByLibrary.simpleMessage("請輸入公式名稱。"),
+    "formulaLimitReached": MessageLookupByLibrary.simpleMessage(
+      "最多可儲存 30 個公式。",
+    ),
+    "formulaName": MessageLookupByLibrary.simpleMessage("公式名稱"),
+    "formulaNew": MessageLookupByLibrary.simpleMessage("新增公式"),
+    "formulaNoResult": MessageLookupByLibrary.simpleMessage("沒有結果"),
+    "formulaSave": MessageLookupByLibrary.simpleMessage("儲存"),
+    "formulaSaveFailed": MessageLookupByLibrary.simpleMessage("無法儲存公式。"),
+    "formulaTooManyInputs": MessageLookupByLibrary.simpleMessage(
+      "最多可使用 12 個命名變數。",
+    ),
     "hapticFeedback": MessageLookupByLibrary.simpleMessage("觸覺回饋"),
     "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage(
       "操作計算器時震動",
@@ -82,14 +114,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "helpAndShortcuts": MessageLookupByLibrary.simpleMessage("使用提示與快捷鍵"),
     "helpBasics": MessageLookupByLibrary.simpleMessage("計算器使用方法"),
     "helpCopy": MessageLookupByLibrary.simpleMessage(
-      "點按結果即可複製數字。使用歷史記錄中的複製按鈕，可以複製完整的計算過程。",
+      "點按結果可複製數字。按下等號後，點按結果上方的算式可複製算式和結果。",
+    ),
+    "helpCopyHistory": MessageLookupByLibrary.simpleMessage(
+      "在歷史記錄中，點按記錄旁的複製按鈕可複製該項計算的算式和結果。選擇「複製全部歷史記錄」可複製所有記錄，搜尋時則可選擇「複製相符的計算記錄」。",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
-      "歷史記錄最多保留100項計算。點按記錄可使用其結果，滑動可刪除記錄，刪除後可點按「復原」恢復。",
+      "歷史記錄最多保留100項計算。點按記錄可使用其結果。滑動可刪除記錄，也可在操作選單中選擇「刪除計算記錄」。刪除後可點按「復原」恢復。",
     ),
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("鍵盤快捷鍵"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
       "貼上僅接受單一有限數值，包括分組正確的千位分隔數字或科學記數法。計算運算式和其他文字將被拒絕。",
+    ),
+    "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage(
+      "在「可重用公式」中開啟一個範例，即可編輯輸入並比較兩個方案。",
+    ),
+    "helpPremiumScientific": MessageLookupByLibrary.simpleMessage(
+      "使用三角函數前，請在科學計算器中選擇「角度」或「弧度」。",
+    ),
+    "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage(
+      "點按計算器工具列中的「進階版工具」，即可開啟科學計算器或可重用公式。",
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "使用「復原」恢復最近的輸入。您可以在輸入設定中調整搖動復原和觸覺回饋。",
@@ -100,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "history": MessageLookupByLibrary.simpleMessage("歷史記錄"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage("已刪除計算記錄"),
+    "historyEntryActions": MessageLookupByLibrary.simpleMessage("計算記錄操作"),
     "inputSettings": MessageLookupByLibrary.simpleMessage("輸入設定"),
     "invalidPaste": MessageLookupByLibrary.simpleMessage("請先複製有效數字再貼上。"),
     "multiply": MessageLookupByLibrary.simpleMessage("乘以"),
@@ -108,7 +153,59 @@ class MessageLookup extends MessageLookupByLibrary {
     "pasteNumber": MessageLookupByLibrary.simpleMessage("貼上數字"),
     "pasted": MessageLookupByLibrary.simpleMessage("已貼上數字"),
     "percent": MessageLookupByLibrary.simpleMessage("百分比"),
+    "premium": MessageLookupByLibrary.simpleMessage("SwiftSum 進階版"),
+    "premiumActive": MessageLookupByLibrary.simpleMessage("進階版已啟用。"),
+    "premiumAdFree": MessageLookupByLibrary.simpleMessage("無廣告計算器"),
+    "premiumBuy": MessageLookupByLibrary.simpleMessage("購買進階版"),
+    "premiumCheckPrice": MessageLookupByLibrary.simpleMessage(
+      "查看 App Store 價格",
+    ),
+    "premiumCheckPriceGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "查看 Google Play 價格",
+    ),
+    "premiumFailed": MessageLookupByLibrary.simpleMessage(
+      "App Store 無法完成要求，請重試。",
+    ),
+    "premiumFailedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "Google Play 無法完成要求，請重試。",
+    ),
+    "premiumNotPurchased": MessageLookupByLibrary.simpleMessage(
+      "找不到此 Apple 帳戶的進階版購買記錄。",
+    ),
+    "premiumNotPurchasedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "找不到此 Google 帳戶的進階版購買記錄。",
+    ),
+    "premiumOffer": MessageLookupByLibrary.simpleMessage("一次性購買即可解鎖兩款工具並移除廣告。"),
+    "premiumOfferToolsOnly": MessageLookupByLibrary.simpleMessage(
+      "一次性購買即可解鎖科學計算器和可重用公式。",
+    ),
+    "premiumPending": MessageLookupByLibrary.simpleMessage("購買正在等候批准。"),
+    "premiumRestore": MessageLookupByLibrary.simpleMessage("恢復購買"),
+    "premiumRestored": MessageLookupByLibrary.simpleMessage("已恢復進階版購買。"),
+    "premiumTools": MessageLookupByLibrary.simpleMessage("進階版工具"),
+    "premiumUnavailable": MessageLookupByLibrary.simpleMessage("進階版暫時無法使用。"),
+    "premiumWhatIfAlternate": MessageLookupByLibrary.simpleMessage(
+      "減價 25% 後，實付 \$75。",
+    ),
+    "premiumWhatIfBaseline": MessageLookupByLibrary.simpleMessage(
+      "減價 10% 後，實付 \$90。",
+    ),
+    "premiumWhatIfPreview": MessageLookupByLibrary.simpleMessage("方案比較預覽"),
+    "premiumWhatIfPrice": MessageLookupByLibrary.simpleMessage("以原價 \$100 為例。"),
+    "reusableFormulas": MessageLookupByLibrary.simpleMessage("可重用公式"),
     "reuseResult": MessageLookupByLibrary.simpleMessage("使用此結果"),
+    "scientificCalculator": MessageLookupByLibrary.simpleMessage("科學計算器"),
+    "scientificDegrees": MessageLookupByLibrary.simpleMessage("角度"),
+    "scientificEvaluate": MessageLookupByLibrary.simpleMessage("計算"),
+    "scientificExpression": MessageLookupByLibrary.simpleMessage("算式"),
+    "scientificExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "使用 * 表示乘法，例如 2 * sin(30) + sqrt(9)。",
+    ),
+    "scientificInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "請輸入有效且結果為有限數值的算式。",
+    ),
+    "scientificRadians": MessageLookupByLibrary.simpleMessage("弧度"),
+    "scientificResult": MessageLookupByLibrary.simpleMessage("結果"),
     "searchHistory": MessageLookupByLibrary.simpleMessage("搜尋歷史記錄"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "shakeToUndo": MessageLookupByLibrary.simpleMessage("搖動復原"),

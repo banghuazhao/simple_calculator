@@ -490,6 +490,16 @@ class S {
     );
   }
 
+  /// `Calculation actions`
+  String get historyEntryActions {
+    return Intl.message(
+      'Calculation actions',
+      name: 'historyEntryActions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Input settings`
   String get inputSettings {
     return Intl.message(
@@ -560,11 +570,21 @@ class S {
     );
   }
 
-  /// `Tap the result to copy the number. Use the copy button in history to copy a full calculation.`
+  /// `Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.`
   String get helpCopy {
     return Intl.message(
-      'Tap the result to copy the number. Use the copy button in history to copy a full calculation.',
+      'Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.',
       name: 'helpCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.`
+  String get helpCopyHistory {
+    return Intl.message(
+      'In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.',
+      name: 'helpCopyHistory',
       desc: '',
       args: [],
     );
@@ -580,11 +600,41 @@ class S {
     );
   }
 
-  /// `History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.`
+  /// `History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.`
   String get helpHistory {
     return Intl.message(
-      'History keeps up to 100 calculations. Tap an entry to reuse its result, swipe to delete it, or use Undo after deletion.',
+      'History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.',
       name: 'helpHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.`
+  String get helpPremiumShortcut {
+    return Intl.message(
+      'Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.',
+      name: 'helpPremiumShortcut',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose Degrees or Radians in the scientific calculator before using trigonometric functions.`
+  String get helpPremiumScientific {
+    return Intl.message(
+      'Choose Degrees or Radians in the scientific calculator before using trigonometric functions.',
+      name: 'helpPremiumScientific',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In Reusable formulas, open an example to edit its inputs and compare two scenarios.`
+  String get helpPremiumFormulas {
+    return Intl.message(
+      'In Reusable formulas, open an example to edit its inputs and compare two scenarios.',
+      name: 'helpPremiumFormulas',
       desc: '',
       args: [],
     );
@@ -798,6 +848,526 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `SwiftSum Premium`
+  String get premium {
+    return Intl.message(
+      'SwiftSum Premium',
+      name: 'premium',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Premium tools`
+  String get premiumTools {
+    return Intl.message(
+      'Premium tools',
+      name: 'premiumTools',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Premium is active.`
+  String get premiumActive {
+    return Intl.message(
+      'Premium is active.',
+      name: 'premiumActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A one-time purchase unlocks both tools and removes ads.`
+  String get premiumOffer {
+    return Intl.message(
+      'A one-time purchase unlocks both tools and removes ads.',
+      name: 'premiumOffer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A one-time purchase unlocks the scientific calculator and reusable formulas.`
+  String get premiumOfferToolsOnly {
+    return Intl.message(
+      'A one-time purchase unlocks the scientific calculator and reusable formulas.',
+      name: 'premiumOfferToolsOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What-if preview`
+  String get premiumWhatIfPreview {
+    return Intl.message(
+      'What-if preview',
+      name: 'premiumWhatIfPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start with a price of $100.`
+  String get premiumWhatIfPrice {
+    return Intl.message(
+      'Start with a price of \$100.',
+      name: 'premiumWhatIfPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With 10% off, you pay $90.`
+  String get premiumWhatIfBaseline {
+    return Intl.message(
+      'With 10% off, you pay \$90.',
+      name: 'premiumWhatIfBaseline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `With 25% off, you pay $75.`
+  String get premiumWhatIfAlternate {
+    return Intl.message(
+      'With 25% off, you pay \$75.',
+      name: 'premiumWhatIfAlternate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ad-free calculator`
+  String get premiumAdFree {
+    return Intl.message(
+      'Ad-free calculator',
+      name: 'premiumAdFree',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Buy Premium`
+  String get premiumBuy {
+    return Intl.message('Buy Premium', name: 'premiumBuy', desc: '', args: []);
+  }
+
+  /// `Check App Store price`
+  String get premiumCheckPrice {
+    return Intl.message(
+      'Check App Store price',
+      name: 'premiumCheckPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check Google Play price`
+  String get premiumCheckPriceGooglePlay {
+    return Intl.message(
+      'Check Google Play price',
+      name: 'premiumCheckPriceGooglePlay',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore purchases`
+  String get premiumRestore {
+    return Intl.message(
+      'Restore purchases',
+      name: 'premiumRestore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Premium purchase restored.`
+  String get premiumRestored {
+    return Intl.message(
+      'Premium purchase restored.',
+      name: 'premiumRestored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The purchase is waiting for approval.`
+  String get premiumPending {
+    return Intl.message(
+      'The purchase is waiting for approval.',
+      name: 'premiumPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Premium purchase was found for this Apple Account.`
+  String get premiumNotPurchased {
+    return Intl.message(
+      'No Premium purchase was found for this Apple Account.',
+      name: 'premiumNotPurchased',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Premium purchase was found for this Google account.`
+  String get premiumNotPurchasedGooglePlay {
+    return Intl.message(
+      'No Premium purchase was found for this Google account.',
+      name: 'premiumNotPurchasedGooglePlay',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Premium is temporarily unavailable.`
+  String get premiumUnavailable {
+    return Intl.message(
+      'Premium is temporarily unavailable.',
+      name: 'premiumUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The App Store couldn’t complete the request. Try again.`
+  String get premiumFailed {
+    return Intl.message(
+      'The App Store couldn’t complete the request. Try again.',
+      name: 'premiumFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google Play couldn’t complete the request. Try again.`
+  String get premiumFailedGooglePlay {
+    return Intl.message(
+      'Google Play couldn’t complete the request. Try again.',
+      name: 'premiumFailedGooglePlay',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scientific calculator`
+  String get scientificCalculator {
+    return Intl.message(
+      'Scientific calculator',
+      name: 'scientificCalculator',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expression`
+  String get scientificExpression {
+    return Intl.message(
+      'Expression',
+      name: 'scientificExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use * for multiplication. Try 2 * sin(30) + sqrt(9).`
+  String get scientificExpressionHelp {
+    return Intl.message(
+      'Use * for multiplication. Try 2 * sin(30) + sqrt(9).',
+      name: 'scientificExpressionHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Degrees`
+  String get scientificDegrees {
+    return Intl.message(
+      'Degrees',
+      name: 'scientificDegrees',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Radians`
+  String get scientificRadians {
+    return Intl.message(
+      'Radians',
+      name: 'scientificRadians',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculate`
+  String get scientificEvaluate {
+    return Intl.message(
+      'Calculate',
+      name: 'scientificEvaluate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Result`
+  String get scientificResult {
+    return Intl.message('Result', name: 'scientificResult', desc: '', args: []);
+  }
+
+  /// `Enter a valid expression with a finite result.`
+  String get scientificInvalidExpression {
+    return Intl.message(
+      'Enter a valid expression with a finite result.',
+      name: 'scientificInvalidExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reusable formulas`
+  String get reusableFormulas {
+    return Intl.message(
+      'Reusable formulas',
+      name: 'reusableFormulas',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New formula`
+  String get formulaNew {
+    return Intl.message('New formula', name: 'formulaNew', desc: '', args: []);
+  }
+
+  /// `Formula examples`
+  String get formulaExamples {
+    return Intl.message(
+      'Formula examples',
+      name: 'formulaExamples',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Order total`
+  String get formulaExampleOrderTotal {
+    return Intl.message(
+      'Order total',
+      name: 'formulaExampleOrderTotal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discounted price`
+  String get formulaExampleDiscount {
+    return Intl.message(
+      'Discounted price',
+      name: 'formulaExampleDiscount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price with tax`
+  String get formulaExampleTax {
+    return Intl.message(
+      'Price with tax',
+      name: 'formulaExampleTax',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit formula`
+  String get formulaEdit {
+    return Intl.message(
+      'Edit formula',
+      name: 'formulaEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Formula name`
+  String get formulaName {
+    return Intl.message(
+      'Formula name',
+      name: 'formulaName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expression`
+  String get formulaExpression {
+    return Intl.message(
+      'Expression',
+      name: 'formulaExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Example: price * quantity`
+  String get formulaExpressionHint {
+    return Intl.message(
+      'Example: price * quantity',
+      name: 'formulaExpressionHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Baseline`
+  String get formulaBaseline {
+    return Intl.message(
+      'Baseline',
+      name: 'formulaBaseline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alternate`
+  String get formulaAlternate {
+    return Intl.message(
+      'Alternate',
+      name: 'formulaAlternate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Difference (alternate − baseline)`
+  String get formulaDifference {
+    return Intl.message(
+      'Difference (alternate − baseline)',
+      name: 'formulaDifference',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy comparison`
+  String get formulaCopyComparison {
+    return Intl.message(
+      'Copy comparison',
+      name: 'formulaCopyComparison',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No formulas saved yet.`
+  String get formulaEmpty {
+    return Intl.message(
+      'No formulas saved yet.',
+      name: 'formulaEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid expression.`
+  String get formulaInvalidExpression {
+    return Intl.message(
+      'Enter a valid expression.',
+      name: 'formulaInvalidExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid number.`
+  String get formulaInvalidInput {
+    return Intl.message(
+      'Enter a valid number.',
+      name: 'formulaInvalidInput',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a formula name.`
+  String get formulaInvalidName {
+    return Intl.message(
+      'Enter a formula name.',
+      name: 'formulaInvalidName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No result`
+  String get formulaNoResult {
+    return Intl.message(
+      'No result',
+      name: 'formulaNoResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not save formulas.`
+  String get formulaSaveFailed {
+    return Intl.message(
+      'Could not save formulas.',
+      name: 'formulaSaveFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can save up to 30 formulas.`
+  String get formulaLimitReached {
+    return Intl.message(
+      'You can save up to 30 formulas.',
+      name: 'formulaLimitReached',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use at most 12 named inputs.`
+  String get formulaTooManyInputs {
+    return Intl.message(
+      'Use at most 12 named inputs.',
+      name: 'formulaTooManyInputs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete formula`
+  String get formulaDelete {
+    return Intl.message(
+      'Delete formula',
+      name: 'formulaDelete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete this saved formula?`
+  String get formulaDeleteMessage {
+    return Intl.message(
+      'Delete this saved formula?',
+      name: 'formulaDeleteMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save`
+  String get formulaSave {
+    return Intl.message('Save', name: 'formulaSave', desc: '', args: []);
   }
 }
 

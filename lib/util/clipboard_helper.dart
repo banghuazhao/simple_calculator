@@ -7,6 +7,11 @@ import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/input_feedback.dart';
 
 class ClipboardHelper {
+  static Future<void> copyNumber(BuildContext context, String number) async {
+    if (number == 'Error') return;
+    await copy(context, number);
+  }
+
   static Future<void> copy(BuildContext context, String text) async {
     try {
       await Clipboard.setData(ClipboardData(text: text));

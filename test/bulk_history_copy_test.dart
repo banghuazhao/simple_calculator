@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show SemanticsAction;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -173,6 +174,93 @@ void main() {
     await tester.pumpAndSettle();
     expect(copies, ['4 × 5 = 20', _allHistory, '8 ÷ 2 = 4']);
     expect(Processor.historyLog, hasLength(3));
+    expect(state.current, '77');
+  });
+
+  testWidgets('history finds grouped numbers and copies the original text', (
+    tester,
+  ) async {
+    final copies = <String>[];
+    mockClipboard(tester, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copies.add((call.arguments as Map)['text'] as String);
+      }
+      return null;
+    });
+    Processor.setFromHistory('-1234567.5');
+    press([Keys.divide]);
+    expect(Processor.paste('1000'), isTrue);
+    press([Keys.equals]);
+    Processor.setFromHistory('77');
+    final history = Processor.historyLog;
+    await _open(tester);
+
+    final search = find.byKey(const ValueKey('history-search'));
+    const equation = '-1234567.5 ÷ 1000 =';
+    for (final query in ['-1234.5675', '−1,234.5675', '−1,234,567.5 / 1,000']) {
+      await tester.enterText(search, query);
+      await tester.pumpAndSettle();
+      expect(find.text(equation), findsOneWidget, reason: query);
+      expect(find.text('8 ÷ 2 ='), findsNothing, reason: query);
+    }
+
+    await tester.tap(find.byTooltip(S.current.copyMatchingHistory));
+    await tester.pumpAndSettle();
+    expect(copies, ['$equation -1234.5675']);
+
+    for (final query in ['−12,34.5675', '−1,234.5,675', ',']) {
+      await tester.enterText(search, query);
+      await tester.pumpAndSettle();
+      expect(
+        find.text(S.current.noHistoryMatches),
+        findsOneWidget,
+        reason: query,
+      );
+      expect(tester.widget<IconButton>(find.byKey(_bulkKey)).onPressed, isNull);
+    }
+    expect(Processor.historyLog, history);
+    expect(state.current, '77');
+  });
+
+  testWidgets('history actions delete a filtered row and Undo restores order', (
+    tester,
+  ) async {
+    final history = Processor.historyLog;
+    await _open(tester);
+    final strings = S.current;
+    final search = find.byKey(const ValueKey('history-search'));
+    const equation = '4 × 5 =';
+    await tester.enterText(search, '4*5');
+    await tester.pumpAndSettle();
+
+    void semanticTap(Finder finder, {String? value, String? tooltip}) {
+      final node = tester.getSemantics(finder);
+      expect(
+        node,
+        isSemantics(value: value, tooltip: tooltip, hasTapAction: true),
+      );
+      node.owner!.performAction(node.id, SemanticsAction.tap);
+    }
+
+    expect(find.byTooltip(strings.copyCalculation), findsOneWidget);
+    semanticTap(
+      find.byTooltip(strings.historyEntryActions),
+      value: equation,
+      tooltip: strings.historyEntryActions,
+    );
+    await tester.pumpAndSettle();
+    semanticTap(find.text(strings.deleteCalculation));
+    await tester.pumpAndSettle();
+
+    expect(find.text(equation), findsNothing);
+    expect(find.text(strings.noHistoryMatches), findsOneWidget);
+    expect(Processor.historyLog, [history[0], history[2]]);
+
+    semanticTap(find.text(strings.undo));
+    await tester.pumpAndSettle();
+    expect(find.text(equation), findsOneWidget);
+    expect(find.text('8 ÷ 2 ='), findsNothing);
+    expect(Processor.historyLog, history);
     expect(state.current, '77');
   });
 

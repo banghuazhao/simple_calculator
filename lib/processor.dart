@@ -287,7 +287,7 @@ abstract class Processor {
       refresh();
       return;
     }
-    if (_valB != null) _calculate();
+    if (_result == null && _valB != null) _calculate();
     if (_result != null) _condense();
 
     _operator = key.symbol;

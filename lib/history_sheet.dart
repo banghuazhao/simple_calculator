@@ -10,6 +10,8 @@ import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/input_feedback.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
+enum _HistoryEntryAction { delete }
+
 class HistorySheet extends StatefulWidget {
   const HistorySheet({super.key});
 
@@ -18,6 +20,10 @@ class HistorySheet extends StatefulWidget {
 }
 
 class _HistorySheetState extends State<HistorySheet> {
+  // Match the whole numeric token so malformed grouping stays literal.
+  static final _searchNumber = RegExp(r'[\d.,]+(?:e[+-]?[\d.,]*)?');
+  static final _groupedNumber = RegExp(r'^\d{1,3}(?:,\d{3})+(?:\.\d*)?$');
+
   final TextEditingController _search = TextEditingController();
   String _query = '';
   int _deletionRevision = 0;
@@ -156,15 +162,49 @@ class _HistorySheetState extends State<HistorySheet> {
               ),
             ),
           ),
+          IconButton(
+            tooltip: strings.copyCalculation,
+            onPressed: () => ClipboardHelper.copy(
+              context,
+              '${entry.equation} ${entry.result}',
+            ),
+            icon: Icon(Icons.copy_outlined, color: textColor),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: IconButton(
-              tooltip: strings.copyCalculation,
-              onPressed: () => ClipboardHelper.copy(
-                context,
-                '${entry.equation} ${entry.result}',
+            child: MergeSemantics(
+              child: Semantics(
+                value: entry.equation,
+                child: PopupMenuButton<_HistoryEntryAction>(
+                  tooltip: strings.historyEntryActions,
+                  iconColor: textColor,
+                  color: model.backgroundColor,
+                  surfaceTintColor: Colors.transparent,
+                  shape: model.highContrastEnabled
+                      ? RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          side: BorderSide(color: textColor),
+                        )
+                      : null,
+                  requestFocus: true,
+                  onSelected: (action) {
+                    if (!mounted || !context.mounted) return;
+                    switch (action) {
+                      case _HistoryEntryAction.delete:
+                        _delete(context, entry);
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: _HistoryEntryAction.delete,
+                      child: Text(
+                        strings.deleteCalculation,
+                        style: TextStyle(color: textColor),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              icon: Icon(Icons.copy_outlined, color: textColor),
             ),
           ),
         ],
@@ -175,7 +215,12 @@ class _HistorySheetState extends State<HistorySheet> {
   Widget _contents(BuildContext context, ThemeModel model) {
     final strings = S.of(context);
     final entries = Processor.historyLog;
-    final query = _searchable(_query);
+    final query = _searchable(_query).replaceAllMapped(_searchNumber, (match) {
+      final number = match[0]!;
+      return _groupedNumber.hasMatch(number)
+          ? number.replaceAll(',', '')
+          : number;
+    });
     final filtered = query.isEmpty
         ? entries
         : entries
