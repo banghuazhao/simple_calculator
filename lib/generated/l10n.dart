@@ -965,6 +965,16 @@ class S {
     );
   }
 
+  /// `Check Google Play price`
+  String get premiumCheckPriceGooglePlay {
+    return Intl.message(
+      'Check Google Play price',
+      name: 'premiumCheckPriceGooglePlay',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Restore purchases`
   String get premiumRestore {
     return Intl.message(
@@ -1005,6 +1015,16 @@ class S {
     );
   }
 
+  /// `No Premium purchase was found for this Google account.`
+  String get premiumNotPurchasedGooglePlay {
+    return Intl.message(
+      'No Premium purchase was found for this Google account.',
+      name: 'premiumNotPurchasedGooglePlay',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Premium is temporarily unavailable.`
   String get premiumUnavailable {
     return Intl.message(
@@ -1020,6 +1040,16 @@ class S {
     return Intl.message(
       'The App Store couldn’t complete the request. Try again.',
       name: 'premiumFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google Play couldn’t complete the request. Try again.`
+  String get premiumFailedGooglePlay {
+    return Intl.message(
+      'Google Play couldn’t complete the request. Try again.',
+      name: 'premiumFailedGooglePlay',
       desc: '',
       args: [],
     );

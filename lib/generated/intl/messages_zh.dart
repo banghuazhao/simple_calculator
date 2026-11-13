@@ -166,11 +166,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "premiumCheckPrice": MessageLookupByLibrary.simpleMessage(
       "查看 App Store 价格",
     ),
+    "premiumCheckPriceGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "查看 Google Play 价格",
+    ),
     "premiumFailed": MessageLookupByLibrary.simpleMessage(
       "App Store 无法完成请求，请重试。",
     ),
+    "premiumFailedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "Google Play 无法完成请求，请重试。",
+    ),
     "premiumNotPurchased": MessageLookupByLibrary.simpleMessage(
       "未找到此 Apple 账户的高级版购买记录。",
+    ),
+    "premiumNotPurchasedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "未找到此 Google 账户的高级版购买记录。",
     ),
     "premiumOffer": MessageLookupByLibrary.simpleMessage("一次性购买即可解锁两款工具并移除广告。"),
     "premiumOfferToolsOnly": MessageLookupByLibrary.simpleMessage(

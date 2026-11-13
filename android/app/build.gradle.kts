@@ -74,3 +74,8 @@ flutter {
     source = "../.."
 }
 
+dependencies {
+    // Google Play Billing for the one-time "premium" product (see PremiumStoreBridge.kt).
+    implementation("com.android.billingclient:billing:8.3.0")
+}
+

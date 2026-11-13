@@ -28,19 +28,26 @@ class PremiumController extends ChangeNotifier {
     PremiumStore? store,
     bool? supported,
     Duration lookupTimeout = const Duration(seconds: 5),
-  }) : _store = store ?? const _StoreKitStore(),
+  }) : _store = store ?? const _NativeStore(),
        _supported =
            supported ??
            (!kIsWeb &&
                (defaultTargetPlatform == TargetPlatform.iOS ||
-                   defaultTargetPlatform == TargetPlatform.macOS)),
+                   defaultTargetPlatform == TargetPlatform.macOS ||
+                   defaultTargetPlatform == TargetPlatform.android)),
        offersAdRemoval =
            !kIsWeb &&
            (defaultTargetPlatform == TargetPlatform.iOS ||
                defaultTargetPlatform == TargetPlatform.android),
        _lookupTimeout = lookupTimeout;
 
+  // Store product IDs; the native bridges own the lookup.
   static const productId = 'com.appsbay.simpleCalculator.premium';
+  static const playProductId = 'premium';
+
+  // The native bridge reports this when the device has no usable billing
+  // service (e.g. no Google Play), so Premium is hidden and ads keep serving.
+  static const unavailableErrorCode = 'billing_unavailable';
 
   final bool offersAdRemoval;
   final PremiumStore _store;
@@ -63,7 +70,7 @@ class PremiumController extends ChangeNotifier {
   bool get isBusy => _busy;
   String? get price => _price;
 
-  // Wait for a definitive StoreKit answer before serving ads on iOS.
+  // Wait for a definitive store answer before serving ads.
   bool get allowsAds =>
       offersAdRemoval && !isPremium && (!isSupported || _entitlement == false);
 
@@ -100,8 +107,14 @@ class PremiumController extends ChangeNotifier {
       _observeEntitlement();
     } on MissingPluginException {
       _markUnsupported();
+    } on PlatformException catch (error) {
+      if (error.code == unavailableErrorCode) {
+        _markUnsupported();
+      } else {
+        debugPrint('Could not read the store entitlement.');
+      }
     } catch (_) {
-      debugPrint('Could not read the StoreKit entitlement.');
+      debugPrint('Could not read the store entitlement.');
     }
   }
 
@@ -120,8 +133,11 @@ class PremiumController extends ChangeNotifier {
       notifyListeners();
     } on MissingPluginException {
       _markUnsupported();
+    } on PlatformException catch (error) {
+      if (error.code == unavailableErrorCode) _markUnsupported();
+      debugPrint('Could not load the store product.');
     } catch (_) {
-      debugPrint('Could not load the StoreKit product.');
+      debugPrint('Could not load the store product.');
     }
   }
 
@@ -193,8 +209,10 @@ class PremiumController extends ChangeNotifier {
   }
 }
 
-class _StoreKitStore implements PremiumStore {
-  const _StoreKitStore();
+/// Talks to apple/PremiumStoreBridge.swift (StoreKit) or
+/// android/.../PremiumStoreBridge.kt (Google Play Billing).
+class _NativeStore implements PremiumStore {
+  const _NativeStore();
 
   static const _methods = MethodChannel('simple_calculator/premium');
   static const _entitlements = EventChannel(
@@ -211,7 +229,7 @@ class _StoreKitStore implements PremiumStore {
   Future<bool> currentEntitlement() async {
     final active = await _methods.invokeMethod<bool>('currentEntitlement');
     if (active == null) {
-      throw const FormatException('Missing StoreKit entitlement');
+      throw const FormatException('Missing store entitlement');
     }
     return active;
   }

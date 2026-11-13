@@ -225,11 +225,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "premiumCheckPrice": MessageLookupByLibrary.simpleMessage(
       "Check App Store price",
     ),
+    "premiumCheckPriceGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "Check Google Play price",
+    ),
     "premiumFailed": MessageLookupByLibrary.simpleMessage(
       "The App Store couldn’t complete the request. Try again.",
     ),
+    "premiumFailedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "Google Play couldn’t complete the request. Try again.",
+    ),
     "premiumNotPurchased": MessageLookupByLibrary.simpleMessage(
       "No Premium purchase was found for this Apple Account.",
+    ),
+    "premiumNotPurchasedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "No Premium purchase was found for this Google account.",
     ),
     "premiumOffer": MessageLookupByLibrary.simpleMessage(
       "A one-time purchase unlocks both tools and removes ads.",

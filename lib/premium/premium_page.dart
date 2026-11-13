@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
@@ -65,13 +66,17 @@ class _PremiumPageState extends State<PremiumPage> {
     final isPremium = premium.isPremium;
     final price = premium.price;
     final busy = premium.isChecking || premium.isBusy || _loadingPrice;
+    final googlePlay = defaultTargetPlatform == TargetPlatform.android;
     final status = switch (_outcome) {
       PremiumOutcome.restored when isPremium => strings.premiumRestored,
       PremiumOutcome.pending when !isPremium => strings.premiumPending,
       PremiumOutcome.notPurchased when !isPremium =>
-        strings.premiumNotPurchased,
+        googlePlay
+            ? strings.premiumNotPurchasedGooglePlay
+            : strings.premiumNotPurchased,
       PremiumOutcome.unavailable => strings.premiumUnavailable,
-      PremiumOutcome.failed => strings.premiumFailed,
+      PremiumOutcome.failed =>
+        googlePlay ? strings.premiumFailedGooglePlay : strings.premiumFailed,
       _ => null,
     };
 
@@ -106,7 +111,9 @@ class _PremiumPageState extends State<PremiumPage> {
               ),
               onPressed: () => _loadPrice(premium),
               child: Text(
-                strings.premiumCheckPrice,
+                googlePlay
+                    ? strings.premiumCheckPriceGooglePlay
+                    : strings.premiumCheckPrice,
                 textAlign: TextAlign.center,
               ),
             ),

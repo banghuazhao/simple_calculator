@@ -173,4 +173,27 @@ void main() {
     expect(store.updates.hasListener, isFalse);
     expect(store.purchaseCount, 0);
   });
+
+  test(
+    'device without Google Play billing hides Premium and keeps ads',
+    () async {
+      store.entitlement = () async =>
+          throw PlatformException(code: PremiumController.unavailableErrorCode);
+      await controller.initialize();
+      expect(controller.isSupported, isFalse);
+      expect(controller.isChecking, isFalse);
+      expect(controller.allowsAds, isTrue);
+      expect(await controller.purchase(), PremiumOutcome.unavailable);
+      expect(store.purchaseCount, 0);
+    },
+  );
+
+  test('transient store errors keep waiting for a definitive answer', () async {
+    store.entitlement = () async =>
+        throw PlatformException(code: 'store_unavailable');
+    await controller.initialize();
+    expect(controller.isSupported, isTrue);
+    expect(controller.isChecking, isFalse);
+    expect(controller.allowsAds, isFalse);
+  });
 }
