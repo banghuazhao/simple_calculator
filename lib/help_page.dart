@@ -93,6 +93,7 @@ class HelpPage extends StatelessWidget {
                     paragraph(strings.helpPremiumShortcut),
                     paragraph(strings.helpPremiumScientific),
                     paragraph(strings.helpPremiumFormulas),
+                    paragraph(strings.helpScientificAdvanced),
                   ],
                 ),
               ),

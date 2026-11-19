@@ -197,5 +197,67 @@
         "type": "String"
       }
     }
+  },
+  "scientificHistory": "Scientific history",
+  "scientificGraph": "Graph",
+  "scientificEngineeringNotation": "Engineering notation",
+  "scientificShowKeyboard": "Show system keyboard",
+  "scientificHideKeyboard": "Hide system keyboard",
+  "scientificOpenParenthesis": "Open parenthesis",
+  "scientificCloseParenthesis": "Close parenthesis",
+  "scientificPreviousAnswer": "Previous answer",
+  "scientificExponentEntry": "Scientific exponent",
+  "scientificPower": "Power",
+  "scientificFactorial": "Factorial",
+  "scientificArgumentSeparator": "Argument separator",
+  "scientificSyntaxError": "Check the expression near the cursor.",
+  "scientificMissingParen": "Add a closing parenthesis.",
+  "scientificUnknownFunction": "The function {name} is unknown.",
+  "scientificUnknownVariable": "Replace {name} with a number or Ans.",
+  "scientificNoAnswer": "Calculate a result before using Ans.",
+  "scientificDivideByZero": "Change the divisor to a nonzero value.",
+  "scientificDomainError": "Check the allowed values for this operation.",
+  "scientificOverflow": "The result is outside the supported range.",
+  "scientificTooLong": "Shorten the expression.",
+  "scientificTooDeep": "Use fewer nested operations.",
+  "scientificErrorPosition": "{message} (character {position})",
+  "graphExpressionHelp": "Enter a function of x, such as x^2 − 4.",
+  "graphXMin": "Minimum x",
+  "graphXMax": "Maximum x",
+  "graphPlot": "Plot",
+  "graphFindRoot": "Find root",
+  "graphValueTable": "Value table",
+  "graphPlotHint": "Tap or drag on the curve to inspect values.",
+  "graphInvalidRange": "Enter a finite interval with minimum below maximum.",
+  "graphInvalidVariables": "Use x and a previous answer (Ans) as variables.",
+  "graphNoValues": "The function has no finite values in this interval.",
+  "graphRootNeedsBracket": "Choose an interval with opposite signs at its ends, or a root at an endpoint.",
+  "graphRootNotFound": "A root could not be verified. Try a smaller interval where the function is continuous.",
+  "graphUndefined": "Undefined",
+  "graphRootResult": "Approximate root",
+  "helpScientificAdvanced": "Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.",
+  "@scientificUnknownFunction": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@scientificUnknownVariable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@scientificErrorPosition": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      }
+    }
   }
 }

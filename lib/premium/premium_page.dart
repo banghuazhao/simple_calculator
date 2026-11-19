@@ -233,7 +233,12 @@ class _PremiumPageState extends State<PremiumPage> {
                       toolTile(
                         icon: Icons.functions,
                         title: strings.scientificCalculator,
-                        open: () => _open(const ScientificPage()),
+                        open: () => _open(
+                          ScientificPage(
+                            guard: _gate,
+                            canUse: () => premium.isPremium,
+                          ),
+                        ),
                       ),
                       Divider(
                         color: model.panelBorderColor,

@@ -18,6 +18,7 @@ A clean, themeable calculator app built with Flutter — available on iOS.
 - **Percentage adjustments** — add or subtract a percentage of a value, such as `200 + 10% = 220`
 - **Offline unit converter** — convert length, mass, volume, and temperature and use the result in the calculator
 - **Reusable formulas** — open saved Premium formulas to compare inputs, with custom input labels, units, and scenario names
+- **Scientific calculator** — enter expressions with a touch keypad, reuse the last answer, switch angle units and engineering notation, edit past calculations, and graph functions with a value table and interval-based root finding
 - **Input settings** — independently enable or disable haptic feedback and shake-to-undo
 - **Keyboard support** — use number keys or the numeric keypad, operators, Enter for equals, Backspace to delete, Escape to clear, Ctrl/Cmd+Z to undo, and Ctrl/Cmd+V to paste
 - **Tips and shortcuts** — an in-app help page in settings explains gestures and keyboard shortcuts

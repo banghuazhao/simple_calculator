@@ -22,6 +22,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(alternate, baseline) => "差值（${alternate} − ${baseline}）";
 
+  static String m1(message, position) => "${message}（第 ${position} 个字符）";
+
+  static String m2(name) => "未知函数 ${name}。";
+
+  static String m3(name) => "请用数字或 Ans 替换 ${name}。";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "Classic_15_Puzzle": MessageLookupByLibrary.simpleMessage("十五数字华容道"),
@@ -148,6 +154,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "formulaTooManyInputs": MessageLookupByLibrary.simpleMessage(
       "最多可使用 12 个命名变量。",
     ),
+    "graphExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "请输入 x 的函数，例如 x^2 − 4。",
+    ),
+    "graphFindRoot": MessageLookupByLibrary.simpleMessage("求根"),
+    "graphInvalidRange": MessageLookupByLibrary.simpleMessage(
+      "请输入有限区间，且最小值小于最大值。",
+    ),
+    "graphInvalidVariables": MessageLookupByLibrary.simpleMessage(
+      "请使用 x 和上次结果（Ans）作为变量。",
+    ),
+    "graphNoValues": MessageLookupByLibrary.simpleMessage("此区间内没有有限的函数值。"),
+    "graphPlot": MessageLookupByLibrary.simpleMessage("绘制"),
+    "graphPlotHint": MessageLookupByLibrary.simpleMessage("点按或拖动曲线以查看数值。"),
+    "graphRootNeedsBracket": MessageLookupByLibrary.simpleMessage(
+      "请选择两端函数值异号或端点为根的区间。",
+    ),
+    "graphRootNotFound": MessageLookupByLibrary.simpleMessage(
+      "无法验证根。请尝试函数连续的更小区间。",
+    ),
+    "graphRootResult": MessageLookupByLibrary.simpleMessage("近似根"),
+    "graphUndefined": MessageLookupByLibrary.simpleMessage("未定义"),
+    "graphValueTable": MessageLookupByLibrary.simpleMessage("数值表"),
+    "graphXMax": MessageLookupByLibrary.simpleMessage("x 最大值"),
+    "graphXMin": MessageLookupByLibrary.simpleMessage("x 最小值"),
     "hapticFeedback": MessageLookupByLibrary.simpleMessage("触感反馈"),
     "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage(
       "操作计算器时振动",
@@ -181,6 +211,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage(
       "点按计算器工具栏中的“高级版工具”，即可打开科学计算器或可重用公式。",
+    ),
+    "helpScientificAdvanced": MessageLookupByLibrary.simpleMessage(
+      "用 Ans 使用上次科学计算结果，用 EXP 输入指数，用 ENG 切换结果格式。打开函数图像可绘制函数、查看数值或在区间内求根。",
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "使用“撤销”恢复最近的输入。您可以在输入设置中调整摇动撤销和触感反馈。",
@@ -249,18 +282,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "premiumWhatIfPrice": MessageLookupByLibrary.simpleMessage("以原价 \$100 为例。"),
     "reusableFormulas": MessageLookupByLibrary.simpleMessage("可重用公式"),
     "reuseResult": MessageLookupByLibrary.simpleMessage("使用此结果"),
+    "scientificArgumentSeparator": MessageLookupByLibrary.simpleMessage(
+      "参数分隔符",
+    ),
     "scientificCalculator": MessageLookupByLibrary.simpleMessage("科学计算器"),
+    "scientificCloseParenthesis": MessageLookupByLibrary.simpleMessage("右括号"),
     "scientificDegrees": MessageLookupByLibrary.simpleMessage("角度"),
+    "scientificDivideByZero": MessageLookupByLibrary.simpleMessage(
+      "请将除数改为非零值。",
+    ),
+    "scientificDomainError": MessageLookupByLibrary.simpleMessage(
+      "请检查此运算允许的数值范围。",
+    ),
+    "scientificEngineeringNotation": MessageLookupByLibrary.simpleMessage(
+      "工程记数法",
+    ),
+    "scientificErrorPosition": m1,
     "scientificEvaluate": MessageLookupByLibrary.simpleMessage("计算"),
+    "scientificExponentEntry": MessageLookupByLibrary.simpleMessage("科学记数法指数"),
     "scientificExpression": MessageLookupByLibrary.simpleMessage("表达式"),
     "scientificExpressionHelp": MessageLookupByLibrary.simpleMessage(
       "使用 * 表示乘法，例如 2 * sin(30) + sqrt(9)。",
     ),
+    "scientificFactorial": MessageLookupByLibrary.simpleMessage("阶乘"),
+    "scientificGraph": MessageLookupByLibrary.simpleMessage("函数图像"),
+    "scientificHideKeyboard": MessageLookupByLibrary.simpleMessage("隐藏系统键盘"),
+    "scientificHistory": MessageLookupByLibrary.simpleMessage("科学计算历史"),
     "scientificInvalidExpression": MessageLookupByLibrary.simpleMessage(
       "请输入有效且结果为有限数值的表达式。",
     ),
+    "scientificMissingParen": MessageLookupByLibrary.simpleMessage("请添加右括号。"),
+    "scientificNoAnswer": MessageLookupByLibrary.simpleMessage(
+      "请先计算结果，再使用 Ans。",
+    ),
+    "scientificOpenParenthesis": MessageLookupByLibrary.simpleMessage("左括号"),
+    "scientificOverflow": MessageLookupByLibrary.simpleMessage("结果超出支持范围。"),
+    "scientificPower": MessageLookupByLibrary.simpleMessage("乘方"),
+    "scientificPreviousAnswer": MessageLookupByLibrary.simpleMessage("上次结果"),
     "scientificRadians": MessageLookupByLibrary.simpleMessage("弧度"),
     "scientificResult": MessageLookupByLibrary.simpleMessage("结果"),
+    "scientificShowKeyboard": MessageLookupByLibrary.simpleMessage("显示系统键盘"),
+    "scientificSyntaxError": MessageLookupByLibrary.simpleMessage(
+      "请检查光标附近的表达式。",
+    ),
+    "scientificTooDeep": MessageLookupByLibrary.simpleMessage("请减少嵌套运算层数。"),
+    "scientificTooLong": MessageLookupByLibrary.simpleMessage("请缩短表达式。"),
+    "scientificUnknownFunction": m2,
+    "scientificUnknownVariable": m3,
     "searchHistory": MessageLookupByLibrary.simpleMessage("搜索历史记录"),
     "settings": MessageLookupByLibrary.simpleMessage("设置"),
     "shakeToUndo": MessageLookupByLibrary.simpleMessage("摇动撤销"),

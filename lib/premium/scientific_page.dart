@@ -1,27 +1,106 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/premium/expression_engine.dart';
+import 'package:simple_calculator/premium/scientific_graph_page.dart';
+import 'package:simple_calculator/premium/scientific_history.dart';
+import 'package:simple_calculator/premium/scientific_history_page.dart';
+import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/clipboard_helper.dart';
+import 'package:simple_calculator/util/storage_manager.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
 class ScientificPage extends StatefulWidget {
-  const ScientificPage({super.key});
+  const ScientificPage({super.key, this.guard, this.canUse});
+
+  static const anglePreferenceKey = 'scientific_angle_mode';
+
+  final Widget Function(Widget)? guard;
+  final bool Function()? canUse;
 
   @override
   State<ScientificPage> createState() => _ScientificPageState();
 }
 
 class _ScientificPageState extends State<ScientificPage> {
-  static const _functions = ['sqrt', 'log', 'ln', 'abs', 'sin', 'cos', 'tan'];
-  static const _symbols = ['π', 'e', '+', '-', '*', '/', '^', '(', ')'];
+  static const _functions = [
+    'sin',
+    'cos',
+    'tan',
+    'asin',
+    'acos',
+    'atan',
+    'sqrt',
+    'log',
+    'ln',
+    'abs',
+    'nCr',
+    'nPr',
+  ];
+  static const _keys = [
+    '(',
+    ')',
+    'Ans',
+    'EXP',
+    '⌫',
+    '7',
+    '8',
+    '9',
+    '÷',
+    '^',
+    '4',
+    '5',
+    '6',
+    '×',
+    '!',
+    '1',
+    '2',
+    '3',
+    '−',
+    'π',
+    '0',
+    '.',
+    ',',
+    '+',
+    '=',
+  ];
 
   final _expression = TextEditingController();
   final _expressionFocus = FocusNode();
-  bool _degrees = true;
-  bool _hasError = false;
-  String? _result;
+  final _editorAnchor = GlobalKey();
+  final _resultAnchor = GlobalKey();
+  final _history = ScientificHistory.instance;
+  late bool _degrees;
+  bool _engineering = false;
+  bool _showKeyboard = false;
+  FormatException? _error;
+  double? _result;
+  double? _answer;
+  ScientificHistoryEntry? _restoredEntry;
+
+  double? get _inputAnswer =>
+      _restoredEntry == null ? _answer : _restoredEntry!.answer;
+
+  @override
+  void initState() {
+    super.initState();
+    _degrees = _preferredDegrees();
+    _answer = _history.entries.firstOrNull?.result;
+  }
+
+  bool _preferredDegrees() {
+    try {
+      return StorageManager.sharedPreferences?.get(
+            ScientificPage.anglePreferenceKey,
+          ) !=
+          1;
+    } catch (_) {
+      return true;
+    }
+  }
 
   @override
   void dispose() {
@@ -31,59 +110,126 @@ class _ScientificPageState extends State<ScientificPage> {
   }
 
   void _calculate() {
-    String? result;
+    if (widget.canUse?.call() == false) return;
+    final source = _expression.text;
+    final answer = _inputAnswer;
     try {
-      final value = ExpressionEngine.evaluate(
-        _expression.text,
+      final compiled = ExpressionEngine.compile(source);
+      final value = compiled.evaluate(
         degrees: _degrees,
+        variables: {
+          if (answer != null)
+            for (final name in compiled.variables)
+              if (name.toLowerCase() == 'ans') name: answer,
+        },
       );
-      result = _formatResult(value);
-    } on FormatException {
-      // The inline error stays visible until the next edit or calculation.
+      unawaited(
+        _history.add(
+          ScientificHistoryEntry(
+            expression: source,
+            degrees: _degrees,
+            answer: answer,
+            result: value,
+          ),
+        ),
+      );
+      setState(() {
+        _result = value;
+        _answer = value;
+        _error = null;
+        _restoredEntry = null;
+      });
+      _reveal(_resultAnchor);
+    } on FormatException catch (error) {
+      setState(() {
+        _result = null;
+        _error = error;
+      });
+      if (error.offset case final offset?) {
+        _expression.selection = TextSelection.collapsed(
+          offset: offset.clamp(0, source.length),
+        );
+      }
+      _reveal(_editorAnchor);
     }
-    setState(() {
-      _result = result;
-      _hasError = result == null;
-    });
   }
 
-  String _formatResult(double value) {
-    if (value == 0) return '0';
-    final rounded = double.parse(value.toStringAsPrecision(15));
-    final text = (rounded.isFinite ? rounded : value).toString();
-    return text.endsWith('.0') ? text.substring(0, text.length - 2) : text;
+  void _reveal(GlobalKey key) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (key.currentContext case final target?) {
+        unawaited(
+          Scrollable.ensureVisible(
+            target,
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+          ),
+        );
+      }
+    });
   }
 
   void _clearResult() {
-    if (_result == null && !_hasError) return;
+    if (_result == null && _error == null) return;
     setState(() {
       _result = null;
-      _hasError = false;
+      _error = null;
     });
+  }
+
+  void _clear() {
+    _expression.clear();
+    _restoredEntry = null;
+    _clearResult();
+    _expressionFocus.requestFocus();
   }
 
   void _setDegrees(bool degrees) {
-    if (_degrees == degrees) return;
+    if (_degrees == degrees && _preferredDegrees() == degrees) return;
     setState(() {
       _degrees = degrees;
       _result = null;
-      _hasError = false;
+      _error = null;
     });
+    unawaited(
+      StorageManager.saveInt(
+        ScientificPage.anglePreferenceKey,
+        degrees ? 0 : 1,
+      ),
+    );
   }
 
-  void _insert(String token, {bool function = false}) {
+  void _toggleKeyboard() {
+    _expressionFocus.unfocus();
+    setState(() => _showKeyboard = !_showKeyboard);
+    if (_showKeyboard) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _expressionFocus.requestFocus();
+      });
+    }
+  }
+
+  void _insert(String token, {bool function = false, bool delete = false}) {
     final text = _expression.text;
     final selection = _expression.selection;
     final hasSelection = selection.isValid && selection.end <= text.length;
-    final start = hasSelection ? selection.start : text.length;
+    var start = hasSelection ? selection.start : text.length;
     final end = hasSelection ? selection.end : text.length;
+    if (delete && start == end && start > 0) {
+      start -= text.substring(0, start).characters.last.length;
+    }
     final selected = text.substring(start, end);
-    final replacement = function ? '$token($selected)' : token;
+    final twoArguments = token == 'nCr' || token == 'nPr';
+    final hasSelectedArgument = twoArguments && selected.isNotEmpty;
+    final replacement = function
+        ? '$token($selected${hasSelectedArgument ? ',' : ''})'
+        : token;
     final updated = text.replaceRange(start, end, replacement);
     if (updated.length > ExpressionEngine.maxLength) return;
-    final cursor = function && selected.isEmpty
-        ? start + token.length + 1
-        : start + replacement.length;
+    final cursor = switch (function) {
+      true when selected.isEmpty => start + token.length + 1,
+      true when hasSelectedArgument => start + replacement.length - 1,
+      _ => start + replacement.length,
+    };
     _expression.value = TextEditingValue(
       text: updated,
       selection: TextSelection.collapsed(offset: cursor),
@@ -92,147 +238,426 @@ class _ScientificPageState extends State<ScientificPage> {
     _expressionFocus.requestFocus();
   }
 
+  void _pressKey(String key) {
+    switch (key) {
+      case '=':
+        _calculate();
+      case '⌫':
+        _insert('', delete: true);
+      case 'EXP':
+        _insert('E');
+      default:
+        _insert(key);
+    }
+  }
+
+  Future<void> _openHistory() async {
+    if (widget.canUse?.call() == false) return;
+    final guard = widget.guard;
+    final entry = await Navigator.of(context).push<ScientificHistoryEntry>(
+      MaterialPageRoute(
+        builder: (_) {
+          const page = ScientificHistoryPage();
+          return guard?.call(page) ?? page;
+        },
+      ),
+    );
+    if (!mounted || entry == null || widget.canUse?.call() == false) return;
+    _expression.value = TextEditingValue(
+      text: entry.expression,
+      selection: TextSelection.collapsed(offset: entry.expression.length),
+    );
+    setState(() {
+      _restoredEntry = entry;
+      _degrees = entry.degrees;
+      _result = null;
+      _error = null;
+    });
+    _reveal(_editorAnchor);
+  }
+
+  void _openGraph() {
+    if (widget.canUse?.call() == false) return;
+    final page = ScientificGraphPage(
+      initialExpression: _expression.text,
+      degrees: _degrees,
+      answer: _inputAnswer,
+    );
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => widget.guard?.call(page) ?? page),
+    );
+  }
+
+  void _useResult(double result) {
+    if (widget.canUse?.call() == false) return;
+    Processor.useResult(result);
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  String _formatResult(double value) {
+    if (!_engineering || value == 0) return Processor.formatResult(value);
+    final parts = value.toStringAsExponential(14).split('e');
+    final exponent = int.parse(parts[1]);
+    final shift = exponent % 3;
+    final engineeringExponent = exponent - shift;
+    final mantissa = double.parse(parts[0]) * const [1, 10, 100][shift];
+    final sign = engineeringExponent < 0 ? '' : '+';
+    return '${Processor.formatResult(mantissa)}e$sign$engineeringExponent';
+  }
+
+  String? _errorText(S strings) {
+    final error = _error;
+    if (error == null) return null;
+    if (error is! ExpressionException) {
+      return strings.scientificInvalidExpression;
+    }
+    final message = switch (error.kind) {
+      ExpressionError.syntax => strings.scientificSyntaxError,
+      ExpressionError.missingClosingParenthesis =>
+        strings.scientificMissingParen,
+      ExpressionError.unknownFunction => strings.scientificUnknownFunction(
+        error.identifier ?? '',
+      ),
+      ExpressionError.missingVariable
+          when error.identifier?.toLowerCase() == 'ans' =>
+        strings.scientificNoAnswer,
+      ExpressionError.missingVariable => strings.scientificUnknownVariable(
+        error.identifier ?? '',
+      ),
+      ExpressionError.divideByZero => strings.scientificDivideByZero,
+      ExpressionError.domain => strings.scientificDomainError,
+      ExpressionError.overflow => strings.scientificOverflow,
+      ExpressionError.tooLong => strings.scientificTooLong,
+      ExpressionError.tooDeep => strings.scientificTooDeep,
+    };
+    final offset = error.offset;
+    return offset == null
+        ? message
+        : strings.scientificErrorPosition(message, offset + 1);
+  }
+
+  Widget _editor(S strings, ThemeModel model, bool useTouchKeyboard) {
+    final ink = model.readableTextColor;
+    final border = OutlineInputBorder(borderSide: BorderSide(color: ink));
+    final error = _errorText(strings);
+    final result = _result;
+    final displayedResult = result == null ? null : _formatResult(result);
+    final textStyle = TextStyle(color: ink);
+
+    ChoiceChip angleChip(String label, bool degrees) => ChoiceChip(
+      label: Text(label),
+      selected: _degrees == degrees,
+      onSelected: (_) => _setDegrees(degrees),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          key: _editorAnchor,
+          controller: _expression,
+          focusNode: _expressionFocus,
+          style: textStyle,
+          keyboardType: useTouchKeyboard
+              ? TextInputType.none
+              : TextInputType.multiline,
+          autocorrect: false,
+          enableSuggestions: false,
+          smartDashesType: SmartDashesType.disabled,
+          minLines: 1,
+          maxLines: 4,
+          textInputAction: TextInputAction.done,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(ExpressionEngine.maxLength),
+          ],
+          onChanged: (_) => _clearResult(),
+          onSubmitted: (_) => _calculate(),
+          decoration: InputDecoration(
+            labelText: strings.scientificExpression,
+            labelStyle: textStyle,
+            helperText: error == null ? strings.scientificExpressionHelp : null,
+            helperStyle: textStyle,
+            helperMaxLines: 3,
+            errorText: error,
+            errorStyle: textStyle,
+            errorMaxLines: 4,
+            border: border,
+            enabledBorder: border,
+            errorBorder: border,
+            focusedErrorBorder: border,
+            suffixIcon: IconButton(
+              tooltip: strings.clearInput,
+              color: ink,
+              onPressed: _clear,
+              icon: const Icon(Icons.clear),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            angleChip(strings.scientificDegrees, true),
+            angleChip(strings.scientificRadians, false),
+            Tooltip(
+              message: strings.scientificEngineeringNotation,
+              child: FilterChip(
+                label: const Text('ENG'),
+                selected: _engineering,
+                onSelected: (selected) =>
+                    setState(() => _engineering = selected),
+              ),
+            ),
+          ],
+        ),
+        if (result != null && displayedResult != null) ...[
+          const SizedBox(height: 8),
+          DecoratedBox(
+            key: _resultAnchor,
+            decoration: BoxDecoration(
+              color: model.panelColor,
+              border: Border.all(color: model.panelBorderColor),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Semantics(
+                          liveRegion: true,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                strings.scientificResult,
+                                style: TextStyle(color: model.panelTextColor),
+                              ),
+                              SelectableText(
+                                displayedResult,
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(
+                                      color: model.panelTextColor,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: strings.copyResult,
+                        icon: Icon(
+                          Icons.copy_outlined,
+                          color: model.panelTextColor,
+                        ),
+                        onPressed: () =>
+                            ClipboardHelper.copy(context, displayedResult),
+                      ),
+                    ],
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _useResult(result),
+                    icon: const Icon(Icons.calculate_outlined),
+                    label: Text(strings.reuseResult),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  String? _keyTooltip(String key, S strings) => switch (key) {
+    '(' => strings.scientificOpenParenthesis,
+    ')' => strings.scientificCloseParenthesis,
+    'Ans' => strings.scientificPreviousAnswer,
+    'EXP' => strings.scientificExponentEntry,
+    '⌫' => strings.backspace,
+    '^' => strings.scientificPower,
+    '!' => strings.scientificFactorial,
+    '÷' => strings.divide,
+    '×' => strings.multiply,
+    '−' => strings.subtract,
+    '+' => strings.add,
+    '.' => strings.decimalPoint,
+    ',' => strings.scientificArgumentSeparator,
+    '=' => strings.scientificEvaluate,
+    _ => null,
+  };
+
+  Widget _key(String key, S strings, ThemeModel model) {
+    final primary = key == '=';
+    final digit = key.codeUnitAt(0) >= 48 && key.codeUnitAt(0) <= 57;
+    final background = primary
+        ? model.readableTextColor
+        : digit || key == '.'
+        ? model.buttonColor1
+        : model.buttonColor2;
+    final foreground = ThemeModel.readableOn(
+      background,
+      primary ? model.backgroundColor : model.textColor2,
+    );
+    final tooltip = _keyTooltip(key, strings);
+    final button = TextButton(
+      style: TextButton.styleFrom(
+        foregroundColor: foreground,
+        backgroundColor: background,
+        padding: const EdgeInsets.all(4),
+        minimumSize: const Size(0, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: model.highContrastEnabled ? BorderSide(color: foreground) : null,
+      ),
+      onPressed: () => _pressKey(key),
+      child: key == '⌫'
+          ? const Icon(Icons.backspace_outlined, size: 20)
+          : FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                key,
+                style: TextStyle(
+                  fontSize: key.length > 1 ? 14 : 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+    );
+    return tooltip == null ? button : Tooltip(message: tooltip, child: button);
+  }
+
+  Widget _keypad(S strings, ThemeModel model) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 272 ? 5 : 4;
+        final width = (constraints.maxWidth - 8 * (columns - 1)) / columns;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.end,
+              children: [
+                for (final key in _keys)
+                  SizedBox(width: width, child: _key(key, strings, model)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final name in _functions)
+                  ActionChip(
+                    label: Text(name),
+                    onPressed: () => _insert(name, function: true),
+                  ),
+                ActionChip(
+                  label: const Text('e'),
+                  onPressed: () => _insert('e'),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = S.of(context);
-    final theme = context.watch<ThemeModel>();
-    final textColor = theme.textColor1;
-    final backgroundColor = theme.backgroundColor;
-    final textStyle = TextStyle(color: textColor);
-    final border = BorderSide(color: textColor);
-    final result = _result;
-
-    ChoiceChip angleChip(String label, bool degrees) {
-      final selected = _degrees == degrees;
-      return ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        labelStyle: TextStyle(color: selected ? backgroundColor : textColor),
-        backgroundColor: backgroundColor,
-        selectedColor: textColor,
-        checkmarkColor: backgroundColor,
-        side: border,
-        onSelected: (_) => _setDegrees(degrees),
-      );
-    }
-
-    ActionChip insertChip(String token, {bool function = false}) => ActionChip(
-      label: Text(token),
-      labelStyle: textStyle,
-      backgroundColor: backgroundColor,
-      side: border,
-      onPressed: () => _insert(token, function: function),
-    );
-
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        foregroundColor: textColor,
-        title: Text(strings.scientificCalculator),
+    final model = context.watch<ThemeModel>();
+    final theme = Theme.of(context);
+    final ink = model.readableTextColor;
+    final mobile =
+        theme.platform == TargetPlatform.android ||
+        theme.platform == TargetPlatform.iOS;
+    final editor = _editor(strings, model, mobile && !_showKeyboard);
+    final keypad = _keypad(strings, model);
+    return Theme(
+      data: theme.copyWith(
+        colorScheme: theme.colorScheme.copyWith(
+          primary: ink,
+          onPrimary: model.backgroundColor,
+          secondaryContainer: ink,
+          onSecondaryContainer: model.backgroundColor,
+          surface: model.panelColor,
+          onSurface: model.panelTextColor,
+          onSurfaceVariant: model.panelTextColor,
+          outline: ink,
+        ),
       ),
-      body: SafeArea(
-        top: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-              children: [
-                TextField(
-                  controller: _expression,
-                  focusNode: _expressionFocus,
-                  style: textStyle,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  smartDashesType: SmartDashesType.disabled,
-                  minLines: 2,
-                  maxLines: 4,
-                  textInputAction: TextInputAction.done,
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(
-                      ExpressionEngine.maxLength,
-                    ),
-                  ],
-                  onChanged: (_) => _clearResult(),
-                  onSubmitted: (_) => _calculate(),
-                  decoration: InputDecoration(
-                    labelText: strings.scientificExpression,
-                    labelStyle: textStyle,
-                    helperText: strings.scientificExpressionHelp,
-                    helperStyle: textStyle,
-                    helperMaxLines: 4,
-                    errorText: _hasError
-                        ? strings.scientificInvalidExpression
-                        : null,
-                    errorStyle: textStyle,
-                    errorMaxLines: 4,
-                    border: OutlineInputBorder(borderSide: border),
-                    enabledBorder: OutlineInputBorder(borderSide: border),
-                  ),
+      child: Scaffold(
+        backgroundColor: model.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: model.backgroundColor,
+          foregroundColor: ink,
+          title: Text(strings.scientificCalculator),
+          actions: [
+            if (mobile)
+              IconButton(
+                tooltip: _showKeyboard
+                    ? strings.scientificHideKeyboard
+                    : strings.scientificShowKeyboard,
+                icon: Icon(
+                  _showKeyboard ? Icons.keyboard_hide : Icons.keyboard_outlined,
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    angleChip(strings.scientificDegrees, true),
-                    angleChip(strings.scientificRadians, false),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final function in _functions)
-                      insertChip(function, function: true),
-                    for (final symbol in _symbols) insertChip(symbol),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: textColor,
-                    foregroundColor: backgroundColor,
-                  ),
-                  onPressed: _calculate,
-                  child: Text(strings.scientificEvaluate),
-                ),
-                if (result != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Semantics(
-                            liveRegion: true,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  strings.scientificResult,
-                                  style: textStyle,
-                                ),
-                                SelectableText(
-                                  result,
-                                  style: textStyle.copyWith(fontSize: 28),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: strings.copyResult,
-                          icon: Icon(Icons.copy_outlined, color: textColor),
-                          onPressed: () =>
-                              ClipboardHelper.copy(context, result),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
+                onPressed: _toggleKeyboard,
+              ),
+            IconButton(
+              tooltip: strings.scientificHistory,
+              onPressed: _openHistory,
+              icon: const Icon(Icons.history),
             ),
+            IconButton(
+              tooltip: strings.scientificGraph,
+              onPressed: _openGraph,
+              icon: const Icon(Icons.show_chart),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          top: false,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 780;
+              return Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: wide ? 1000 : 640),
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    children: [
+                      if (wide)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(child: editor),
+                            const SizedBox(width: 24),
+                            Expanded(child: keypad),
+                          ],
+                        )
+                      else ...[
+                        editor,
+                        const SizedBox(height: 12),
+                        keypad,
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

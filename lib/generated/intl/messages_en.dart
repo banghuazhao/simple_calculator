@@ -23,6 +23,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(alternate, baseline) =>
       "Difference (${alternate} − ${baseline})";
 
+  static String m1(message, position) => "${message} (character ${position})";
+
+  static String m2(name) => "The function ${name} is unknown.";
+
+  static String m3(name) => "Replace ${name} with a number or Ans.";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "Classic_15_Puzzle": MessageLookupByLibrary.simpleMessage(
@@ -204,6 +210,34 @@ class MessageLookup extends MessageLookupByLibrary {
     "formulaTooManyInputs": MessageLookupByLibrary.simpleMessage(
       "Use at most 12 named inputs.",
     ),
+    "graphExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "Enter a function of x, such as x^2 − 4.",
+    ),
+    "graphFindRoot": MessageLookupByLibrary.simpleMessage("Find root"),
+    "graphInvalidRange": MessageLookupByLibrary.simpleMessage(
+      "Enter a finite interval with minimum below maximum.",
+    ),
+    "graphInvalidVariables": MessageLookupByLibrary.simpleMessage(
+      "Use x and a previous answer (Ans) as variables.",
+    ),
+    "graphNoValues": MessageLookupByLibrary.simpleMessage(
+      "The function has no finite values in this interval.",
+    ),
+    "graphPlot": MessageLookupByLibrary.simpleMessage("Plot"),
+    "graphPlotHint": MessageLookupByLibrary.simpleMessage(
+      "Tap or drag on the curve to inspect values.",
+    ),
+    "graphRootNeedsBracket": MessageLookupByLibrary.simpleMessage(
+      "Choose an interval with opposite signs at its ends, or a root at an endpoint.",
+    ),
+    "graphRootNotFound": MessageLookupByLibrary.simpleMessage(
+      "A root could not be verified. Try a smaller interval where the function is continuous.",
+    ),
+    "graphRootResult": MessageLookupByLibrary.simpleMessage("Approximate root"),
+    "graphUndefined": MessageLookupByLibrary.simpleMessage("Undefined"),
+    "graphValueTable": MessageLookupByLibrary.simpleMessage("Value table"),
+    "graphXMax": MessageLookupByLibrary.simpleMessage("Maximum x"),
+    "graphXMin": MessageLookupByLibrary.simpleMessage("Minimum x"),
     "hapticFeedback": MessageLookupByLibrary.simpleMessage("Haptic feedback"),
     "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage(
       "Vibrate when using calculator controls",
@@ -239,6 +273,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage(
       "Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.",
+    ),
+    "helpScientificAdvanced": MessageLookupByLibrary.simpleMessage(
+      "Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.",
     ),
     "helpUndo": MessageLookupByLibrary.simpleMessage(
       "Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.",
@@ -333,20 +370,77 @@ class MessageLookup extends MessageLookupByLibrary {
       "Reusable formulas",
     ),
     "reuseResult": MessageLookupByLibrary.simpleMessage("Use this result"),
+    "scientificArgumentSeparator": MessageLookupByLibrary.simpleMessage(
+      "Argument separator",
+    ),
     "scientificCalculator": MessageLookupByLibrary.simpleMessage(
       "Scientific calculator",
     ),
+    "scientificCloseParenthesis": MessageLookupByLibrary.simpleMessage(
+      "Close parenthesis",
+    ),
     "scientificDegrees": MessageLookupByLibrary.simpleMessage("Degrees"),
+    "scientificDivideByZero": MessageLookupByLibrary.simpleMessage(
+      "Change the divisor to a nonzero value.",
+    ),
+    "scientificDomainError": MessageLookupByLibrary.simpleMessage(
+      "Check the allowed values for this operation.",
+    ),
+    "scientificEngineeringNotation": MessageLookupByLibrary.simpleMessage(
+      "Engineering notation",
+    ),
+    "scientificErrorPosition": m1,
     "scientificEvaluate": MessageLookupByLibrary.simpleMessage("Calculate"),
+    "scientificExponentEntry": MessageLookupByLibrary.simpleMessage(
+      "Scientific exponent",
+    ),
     "scientificExpression": MessageLookupByLibrary.simpleMessage("Expression"),
     "scientificExpressionHelp": MessageLookupByLibrary.simpleMessage(
       "Use * for multiplication. Try 2 * sin(30) + sqrt(9).",
     ),
+    "scientificFactorial": MessageLookupByLibrary.simpleMessage("Factorial"),
+    "scientificGraph": MessageLookupByLibrary.simpleMessage("Graph"),
+    "scientificHideKeyboard": MessageLookupByLibrary.simpleMessage(
+      "Hide system keyboard",
+    ),
+    "scientificHistory": MessageLookupByLibrary.simpleMessage(
+      "Scientific history",
+    ),
     "scientificInvalidExpression": MessageLookupByLibrary.simpleMessage(
       "Enter a valid expression with a finite result.",
     ),
+    "scientificMissingParen": MessageLookupByLibrary.simpleMessage(
+      "Add a closing parenthesis.",
+    ),
+    "scientificNoAnswer": MessageLookupByLibrary.simpleMessage(
+      "Calculate a result before using Ans.",
+    ),
+    "scientificOpenParenthesis": MessageLookupByLibrary.simpleMessage(
+      "Open parenthesis",
+    ),
+    "scientificOverflow": MessageLookupByLibrary.simpleMessage(
+      "The result is outside the supported range.",
+    ),
+    "scientificPower": MessageLookupByLibrary.simpleMessage("Power"),
+    "scientificPreviousAnswer": MessageLookupByLibrary.simpleMessage(
+      "Previous answer",
+    ),
     "scientificRadians": MessageLookupByLibrary.simpleMessage("Radians"),
     "scientificResult": MessageLookupByLibrary.simpleMessage("Result"),
+    "scientificShowKeyboard": MessageLookupByLibrary.simpleMessage(
+      "Show system keyboard",
+    ),
+    "scientificSyntaxError": MessageLookupByLibrary.simpleMessage(
+      "Check the expression near the cursor.",
+    ),
+    "scientificTooDeep": MessageLookupByLibrary.simpleMessage(
+      "Use fewer nested operations.",
+    ),
+    "scientificTooLong": MessageLookupByLibrary.simpleMessage(
+      "Shorten the expression.",
+    ),
+    "scientificUnknownFunction": m2,
+    "scientificUnknownVariable": m3,
     "searchHistory": MessageLookupByLibrary.simpleMessage("Search history"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "shakeToUndo": MessageLookupByLibrary.simpleMessage("Shake to undo"),

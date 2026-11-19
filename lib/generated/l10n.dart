@@ -1684,6 +1684,356 @@ class S {
       args: [],
     );
   }
+
+  /// `Scientific history`
+  String get scientificHistory {
+    return Intl.message(
+      'Scientific history',
+      name: 'scientificHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Graph`
+  String get scientificGraph {
+    return Intl.message('Graph', name: 'scientificGraph', desc: '', args: []);
+  }
+
+  /// `Engineering notation`
+  String get scientificEngineeringNotation {
+    return Intl.message(
+      'Engineering notation',
+      name: 'scientificEngineeringNotation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show system keyboard`
+  String get scientificShowKeyboard {
+    return Intl.message(
+      'Show system keyboard',
+      name: 'scientificShowKeyboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide system keyboard`
+  String get scientificHideKeyboard {
+    return Intl.message(
+      'Hide system keyboard',
+      name: 'scientificHideKeyboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open parenthesis`
+  String get scientificOpenParenthesis {
+    return Intl.message(
+      'Open parenthesis',
+      name: 'scientificOpenParenthesis',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close parenthesis`
+  String get scientificCloseParenthesis {
+    return Intl.message(
+      'Close parenthesis',
+      name: 'scientificCloseParenthesis',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Previous answer`
+  String get scientificPreviousAnswer {
+    return Intl.message(
+      'Previous answer',
+      name: 'scientificPreviousAnswer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scientific exponent`
+  String get scientificExponentEntry {
+    return Intl.message(
+      'Scientific exponent',
+      name: 'scientificExponentEntry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Power`
+  String get scientificPower {
+    return Intl.message('Power', name: 'scientificPower', desc: '', args: []);
+  }
+
+  /// `Factorial`
+  String get scientificFactorial {
+    return Intl.message(
+      'Factorial',
+      name: 'scientificFactorial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Argument separator`
+  String get scientificArgumentSeparator {
+    return Intl.message(
+      'Argument separator',
+      name: 'scientificArgumentSeparator',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check the expression near the cursor.`
+  String get scientificSyntaxError {
+    return Intl.message(
+      'Check the expression near the cursor.',
+      name: 'scientificSyntaxError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a closing parenthesis.`
+  String get scientificMissingParen {
+    return Intl.message(
+      'Add a closing parenthesis.',
+      name: 'scientificMissingParen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The function {name} is unknown.`
+  String scientificUnknownFunction(String name) {
+    return Intl.message(
+      'The function $name is unknown.',
+      name: 'scientificUnknownFunction',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Replace {name} with a number or Ans.`
+  String scientificUnknownVariable(String name) {
+    return Intl.message(
+      'Replace $name with a number or Ans.',
+      name: 'scientificUnknownVariable',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Calculate a result before using Ans.`
+  String get scientificNoAnswer {
+    return Intl.message(
+      'Calculate a result before using Ans.',
+      name: 'scientificNoAnswer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change the divisor to a nonzero value.`
+  String get scientificDivideByZero {
+    return Intl.message(
+      'Change the divisor to a nonzero value.',
+      name: 'scientificDivideByZero',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check the allowed values for this operation.`
+  String get scientificDomainError {
+    return Intl.message(
+      'Check the allowed values for this operation.',
+      name: 'scientificDomainError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The result is outside the supported range.`
+  String get scientificOverflow {
+    return Intl.message(
+      'The result is outside the supported range.',
+      name: 'scientificOverflow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shorten the expression.`
+  String get scientificTooLong {
+    return Intl.message(
+      'Shorten the expression.',
+      name: 'scientificTooLong',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use fewer nested operations.`
+  String get scientificTooDeep {
+    return Intl.message(
+      'Use fewer nested operations.',
+      name: 'scientificTooDeep',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{message} (character {position})`
+  String scientificErrorPosition(String message, int position) {
+    return Intl.message(
+      '$message (character $position)',
+      name: 'scientificErrorPosition',
+      desc: '',
+      args: [message, position],
+    );
+  }
+
+  /// `Enter a function of x, such as x^2 − 4.`
+  String get graphExpressionHelp {
+    return Intl.message(
+      'Enter a function of x, such as x^2 − 4.',
+      name: 'graphExpressionHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minimum x`
+  String get graphXMin {
+    return Intl.message('Minimum x', name: 'graphXMin', desc: '', args: []);
+  }
+
+  /// `Maximum x`
+  String get graphXMax {
+    return Intl.message('Maximum x', name: 'graphXMax', desc: '', args: []);
+  }
+
+  /// `Plot`
+  String get graphPlot {
+    return Intl.message('Plot', name: 'graphPlot', desc: '', args: []);
+  }
+
+  /// `Find root`
+  String get graphFindRoot {
+    return Intl.message('Find root', name: 'graphFindRoot', desc: '', args: []);
+  }
+
+  /// `Value table`
+  String get graphValueTable {
+    return Intl.message(
+      'Value table',
+      name: 'graphValueTable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap or drag on the curve to inspect values.`
+  String get graphPlotHint {
+    return Intl.message(
+      'Tap or drag on the curve to inspect values.',
+      name: 'graphPlotHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a finite interval with minimum below maximum.`
+  String get graphInvalidRange {
+    return Intl.message(
+      'Enter a finite interval with minimum below maximum.',
+      name: 'graphInvalidRange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use x and a previous answer (Ans) as variables.`
+  String get graphInvalidVariables {
+    return Intl.message(
+      'Use x and a previous answer (Ans) as variables.',
+      name: 'graphInvalidVariables',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The function has no finite values in this interval.`
+  String get graphNoValues {
+    return Intl.message(
+      'The function has no finite values in this interval.',
+      name: 'graphNoValues',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose an interval with opposite signs at its ends, or a root at an endpoint.`
+  String get graphRootNeedsBracket {
+    return Intl.message(
+      'Choose an interval with opposite signs at its ends, or a root at an endpoint.',
+      name: 'graphRootNeedsBracket',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A root could not be verified. Try a smaller interval where the function is continuous.`
+  String get graphRootNotFound {
+    return Intl.message(
+      'A root could not be verified. Try a smaller interval where the function is continuous.',
+      name: 'graphRootNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Undefined`
+  String get graphUndefined {
+    return Intl.message(
+      'Undefined',
+      name: 'graphUndefined',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Approximate root`
+  String get graphRootResult {
+    return Intl.message(
+      'Approximate root',
+      name: 'graphRootResult',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.`
+  String get helpScientificAdvanced {
+    return Intl.message(
+      'Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.',
+      name: 'helpScientificAdvanced',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
