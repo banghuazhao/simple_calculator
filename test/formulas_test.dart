@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_calculator/generated/l10n.dart';
+import 'package:simple_calculator/premium/expression_engine.dart';
 import 'package:simple_calculator/premium/formula_storage.dart';
 import 'package:simple_calculator/premium/formulas_page.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
@@ -39,6 +40,27 @@ void main() {
   });
 
   test(
+    'compiled expressions reuse syntax with independent scenario inputs',
+    () {
+      final expression = ExpressionEngine.compile('scale * sin(angle)');
+      expect(expression.variables, orderedEquals(['scale', 'angle']));
+      expect(() => expression.variables.add('extra'), throwsUnsupportedError);
+      expect(
+        expression.evaluate(variables: {'scale': 2, 'angle': 30}),
+        closeTo(1, 1e-12),
+      );
+      expect(
+        expression.evaluate(variables: {'scale': 4, 'angle': 30}),
+        closeTo(2, 1e-12),
+      );
+      expect(
+        () => expression.evaluate(variables: {'scale': 2}),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test(
     'formula storage keeps valid entries and rejects malformed data',
     () async {
       final preferences = StorageManager.sharedPreferences!;
@@ -64,6 +86,13 @@ void main() {
               ...valid,
               'baseline': {'amount': '24'},
             },
+            {
+              ...valid,
+              'inputMetadata': {
+                'unknown': {'label': 'Unknown'},
+              },
+            },
+            {...valid, 'baselineName': 42},
             valid,
           ],
         }),
@@ -72,6 +101,9 @@ void main() {
       expect(formula.name, 'Monthly amount');
       expect(formula.baseline, {'amount': 24.0, 'months': 0.0});
       expect(formula.alternate, {'months': 2.0});
+      expect(formula.inputMetadata, isEmpty);
+      expect(formula.baselineName, isEmpty);
+      expect(formula.alternateName, isEmpty);
 
       expect(await storage.save(List.filled(31, formula)), isFalse);
       expect(storage.load(), hasLength(1));
@@ -139,6 +171,8 @@ void main() {
     expect(find.text('Discounted price'), findsNothing);
     await tester.tap(find.text('My order total'));
     await tester.pumpAndSettle();
+    expect(_field('expression'), findsNothing);
+    expect(find.byTooltip('Edit formula'), findsOneWidget);
     expect(_result(tester, 'baseline'), '50');
     expect(_result(tester, 'alternate'), '87.5');
 
@@ -159,6 +193,73 @@ void main() {
     expect(FormulaStorage.instance.load(), isEmpty);
     expect(find.text('My order total'), findsNothing);
     expect(find.text('Discounted price'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('custom input details and scenario names survive quick runs', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 840));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    expect(
+      await FormulaStorage.instance.save([
+        SavedFormula(
+          name: 'Double length',
+          expression: '2 * length',
+          baseline: const {'length': 3},
+          alternate: const {'length': 5},
+        ),
+      ]),
+      isTrue,
+    );
+
+    await tester.pumpWidget(_harness());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Double length'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Edit formula'));
+    await tester.pumpAndSettle();
+    expect(_field('expression'), findsOneWidget);
+
+    await tester.tap(find.text('Customize labels and scenarios'));
+    await tester.pumpAndSettle();
+    for (final (name, value) in const [
+      ('baseline-name', 'Current'),
+      ('alternate-name', 'Proposed'),
+      ('label-length', 'Length'),
+      ('unit-length', 'm'),
+    ]) {
+      await tester.ensureVisible(_field(name));
+      await tester.enterText(_field(name), value);
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Double length'));
+    await tester.pumpAndSettle();
+    expect(_field('expression'), findsNothing);
+    expect(find.text('Current'), findsOneWidget);
+    expect(find.text('Proposed'), findsOneWidget);
+    expect(find.text('Length (m)'), findsNWidgets(2));
+    expect(find.text('Difference (Proposed − Current)'), findsOneWidget);
+    expect(_result(tester, 'baseline'), '6');
+    expect(_result(tester, 'alternate'), '10');
+
+    await tester.enterText(_field('alternate-length'), '6');
+    await tester.pumpAndSettle();
+    expect(_result(tester, 'alternate'), '12');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    final saved = FormulaStorage.instance.load().single;
+    expect(saved.inputMetadata['length']?.toJson(), {
+      'label': 'Length',
+      'unit': 'm',
+    });
+    expect(saved.baselineName, 'Current');
+    expect(saved.alternateName, 'Proposed');
+    expect(saved.alternate['length'], 6);
     expect(tester.takeException(), isNull);
   });
 

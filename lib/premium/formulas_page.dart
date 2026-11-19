@@ -28,7 +28,11 @@ class _FormulasPageState extends State<FormulasPage> {
     return saved;
   }
 
-  Future<void> _edit({int? index, SavedFormula? example}) async {
+  Future<void> _openFormula({
+    int? index,
+    SavedFormula? example,
+    bool runFirst = false,
+  }) async {
     if (_interactionPending || widget.canEdit?.call() == false) return;
     if (index == null && _formulas.length >= FormulaStorage.maxFormulas) {
       _showMessage(context, S.of(context).formulaLimitReached);
@@ -43,9 +47,10 @@ class _FormulasPageState extends State<FormulasPage> {
       await Navigator.of(context).push<void>(
         MaterialPageRoute(
           builder: (_) {
-            final editor = _FormulaEditor(
+            final workspace = _FormulaWorkspace(
               formula: original,
               isNew: index == null,
+              runFirst: runFirst,
               canEdit: canEdit,
               onSave: (formula) {
                 if (!mounted) return Future.value(false);
@@ -58,7 +63,7 @@ class _FormulasPageState extends State<FormulasPage> {
                 return _persist(updated);
               },
             );
-            return guard?.call(editor) ?? editor;
+            return guard?.call(workspace) ?? workspace;
           },
         ),
       );
@@ -139,7 +144,7 @@ class _FormulasPageState extends State<FormulasPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 FilledButton.icon(
-                  onPressed: _edit,
+                  onPressed: _openFormula,
                   icon: const Icon(Icons.add),
                   label: Text(strings.formulaNew),
                 ),
@@ -158,7 +163,7 @@ class _FormulasPageState extends State<FormulasPage> {
                       ListTile(
                         title: Text(example.name),
                         subtitle: Text(example.expression),
-                        onTap: () => _edit(example: example),
+                        onTap: () => _openFormula(example: example),
                       ),
                   ],
                 ),
@@ -191,7 +196,7 @@ class _FormulasPageState extends State<FormulasPage> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              onTap: () => _edit(index: index - 1),
+              onTap: () => _openFormula(index: index - 1, runFirst: true),
               trailing: IconButton(
                 tooltip: strings.formulaDelete,
                 onPressed: () => _delete(index - 1),
@@ -205,31 +210,49 @@ class _FormulasPageState extends State<FormulasPage> {
   }
 }
 
-class _FormulaEditor extends StatefulWidget {
-  const _FormulaEditor({
+class _FormulaWorkspace extends StatefulWidget {
+  const _FormulaWorkspace({
     required this.formula,
     required this.isNew,
+    required this.runFirst,
     required this.onSave,
     this.canEdit,
   });
 
   final SavedFormula? formula;
   final bool isNew;
+  final bool runFirst;
   final Future<bool> Function(SavedFormula) onSave;
   final bool Function()? canEdit;
 
   @override
-  State<_FormulaEditor> createState() => _FormulaEditorState();
+  State<_FormulaWorkspace> createState() => _FormulaWorkspaceState();
 }
 
-class _FormulaEditorState extends State<_FormulaEditor> {
+class _FormulaWorkspaceState extends State<_FormulaWorkspace> {
+  late bool _editing = !widget.runFirst;
   late String _name = widget.formula?.name ?? '';
   late String _expression = widget.formula?.expression ?? '';
+  late String _baselineName = widget.formula?.baselineName ?? '';
+  late String _alternateName = widget.formula?.alternateName ?? '';
   late final _baseline = _editableValues(widget.formula?.baseline);
   late final _alternate = _editableValues(widget.formula?.alternate);
-  Set<String>? _variables;
+  late final _labels =
+      widget.formula?.inputMetadata.map(
+        (name, metadata) => MapEntry(name, metadata.label),
+      ) ??
+      <String, String>{};
+  late final _units =
+      widget.formula?.inputMetadata.map(
+        (name, metadata) => MapEntry(name, metadata.unit),
+      ) ??
+      <String, String>{};
+  String? _compiledSource;
+  CompiledExpression? _compiled;
   bool _submitted = false;
   bool _saving = false;
+
+  Set<String>? get _variables => _compiled?.variables;
 
   @override
   void initState() {
@@ -241,14 +264,20 @@ class _FormulaEditorState extends State<_FormulaEditor> {
       values?.map((name, value) => MapEntry(name, _numberText(value))) ?? {};
 
   void _parseExpression() {
+    final source = _expression.trim();
+    if (_compiledSource == source) return;
+    _compiledSource = source;
     try {
-      final variables = ExpressionEngine.variablesIn(_expression.trim());
-      _variables = variables;
+      final compiled = ExpressionEngine.compile(source);
+      _compiled = compiled;
+      final variables = compiled.variables;
       if (variables.length > FormulaStorage.maxInputs) return;
       _baseline.removeWhere((name, _) => !variables.contains(name));
       _alternate.removeWhere((name, _) => !variables.contains(name));
+      _labels.removeWhere((name, _) => !variables.contains(name));
+      _units.removeWhere((name, _) => !variables.contains(name));
     } on FormatException {
-      _variables = null;
+      _compiled = null;
     }
   }
 
@@ -269,18 +298,14 @@ class _FormulaEditorState extends State<_FormulaEditor> {
   }
 
   ({double? value, bool error}) _calculate(Map<String, String> input) {
-    final variables = _variables;
+    final compiled = _compiled;
+    if (compiled == null) return (value: null, error: false);
     final values = _parsedInputs(input);
-    if (variables == null ||
-        values == null ||
-        values.length != variables.length) {
+    if (values == null || values.length != compiled.variables.length) {
       return (value: null, error: false);
     }
     try {
-      final value = ExpressionEngine.evaluate(
-        _expression.trim(),
-        variables: values,
-      );
+      final value = compiled.evaluate(variables: values);
       return (value: value.isFinite ? value : null, error: !value.isFinite);
     } on FormatException {
       return (value: null, error: true);
@@ -302,12 +327,26 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     }
 
     setState(() => _saving = true);
+    final inputMetadata = <String, FormulaInputMetadata>{};
+    for (final variable in variables) {
+      final label = _labels[variable]?.trim() ?? '';
+      final unit = _units[variable]?.trim() ?? '';
+      if (label.isNotEmpty || unit.isNotEmpty) {
+        inputMetadata[variable] = FormulaInputMetadata(
+          label: label,
+          unit: unit,
+        );
+      }
+    }
     final saved = await widget.onSave(
       SavedFormula(
         name: _name.trim(),
         expression: _expression.trim(),
         baseline: baseline,
         alternate: alternate,
+        inputMetadata: inputMetadata,
+        baselineName: _baselineName.trim(),
+        alternateName: _alternateName.trim(),
       ),
     );
     if (!mounted) return;
@@ -317,6 +356,13 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     } else {
       _showMessage(context, S.of(context).formulaSaveFailed);
     }
+  }
+
+  String _inputLabel(String variable) {
+    final customLabel = _labels[variable]?.trim() ?? '';
+    final label = customLabel.isEmpty ? variable : customLabel;
+    final unit = _units[variable]?.trim() ?? '';
+    return unit.isEmpty ? label : '$label ($unit)';
   }
 
   Widget _scenario({
@@ -375,7 +421,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                     ),
                     maxLength: FormulaStorage.maxValueLength,
                     decoration: InputDecoration(
-                      labelText: variable,
+                      labelText: _inputLabel(variable),
                       counterText: '',
                       errorText:
                           _submitted &&
@@ -408,14 +454,25 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     final differenceText = difference != null && difference.isFinite
         ? _resultText(difference)
         : null;
+    final baselineName = _baselineName.trim();
+    final alternateName = _alternateName.trim();
+    final baselineTitle = baselineName.isEmpty
+        ? strings.formulaBaseline
+        : baselineName;
+    final alternateTitle = alternateName.isEmpty
+        ? strings.formulaAlternate
+        : alternateName;
+    final differenceTitle = baselineName.isEmpty && alternateName.isEmpty
+        ? strings.formulaDifference
+        : strings.formulaNamedDifference(alternateTitle, baselineTitle);
     final baselineCard = _scenario(
-      title: strings.formulaBaseline,
+      title: baselineTitle,
       keyPrefix: 'baseline',
       input: _baseline,
       result: baseline,
     );
     final alternateCard = _scenario(
-      title: strings.formulaAlternate,
+      title: alternateTitle,
       keyPrefix: 'alternate',
       input: _alternate,
       result: alternate,
@@ -448,7 +505,7 @@ class _FormulaEditorState extends State<_FormulaEditor> {
         ),
         if (difference != null) ...[
           const SizedBox(height: 16),
-          Text(strings.formulaDifference),
+          Text(differenceTitle),
           Text(
             differenceText ?? strings.error,
             key: const ValueKey('formula-difference-result'),
@@ -469,9 +526,9 @@ class _FormulaEditorState extends State<_FormulaEditor> {
                 final comparison = [
                   if (name.isNotEmpty) name,
                   _expression.trim(),
-                  '${strings.formulaBaseline}: ${_resultText(baselineValue)}',
-                  '${strings.formulaAlternate}: ${_resultText(alternateValue)}',
-                  '${strings.formulaDifference}: $differenceText',
+                  '$baselineTitle: ${_resultText(baselineValue)}',
+                  '$alternateTitle: ${_resultText(alternateValue)}',
+                  '$differenceTitle: $differenceText',
                 ].join('\n');
                 ClipboardHelper.copy(context, comparison);
               },
@@ -484,66 +541,152 @@ class _FormulaEditorState extends State<_FormulaEditor> {
     );
   }
 
+  Widget _customization(S strings, Set<String> variables) {
+    Widget field({
+      required String key,
+      required String label,
+      required String? value,
+      required int maxLength,
+      required ValueChanged<String> onChanged,
+    }) => Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: TextFormField(
+        key: ValueKey('formula-$key'),
+        initialValue: value,
+        enabled: !_saving,
+        maxLength: maxLength,
+        decoration: InputDecoration(labelText: label, counterText: ''),
+        onChanged: (value) => setState(() => onChanged(value)),
+      ),
+    );
+
+    return ExpansionTile(
+      title: Text(strings.formulaCustomize),
+      tilePadding: EdgeInsets.zero,
+      expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        field(
+          key: 'baseline-name',
+          label: strings.formulaBaselineName,
+          value: _baselineName,
+          maxLength: FormulaStorage.maxNameLength,
+          onChanged: (value) => _baselineName = value,
+        ),
+        field(
+          key: 'alternate-name',
+          label: strings.formulaAlternateName,
+          value: _alternateName,
+          maxLength: FormulaStorage.maxNameLength,
+          onChanged: (value) => _alternateName = value,
+        ),
+        for (final variable in variables) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Semantics(header: true, child: Text(variable)),
+          ),
+          Semantics(
+            hint: variable,
+            child: field(
+              key: 'label-$variable',
+              label: strings.formulaInputLabel,
+              value: _labels[variable],
+              maxLength: FormulaStorage.maxInputLabelLength,
+              onChanged: (value) => _labels[variable] = value,
+            ),
+          ),
+          Semantics(
+            hint: variable,
+            child: field(
+              key: 'unit-$variable',
+              label: strings.formulaInputUnit,
+              value: _units[variable],
+              maxLength: FormulaStorage.maxUnitLength,
+              onChanged: (value) => _units[variable] = value,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = S.of(context);
     final variables = _variables;
     final tooManyInputs = (variables?.length ?? 0) > FormulaStorage.maxInputs;
+    final title = switch ((widget.isNew, _editing)) {
+      (true, _) => strings.formulaNew,
+      (_, true) => strings.formulaEdit,
+      _ => _name,
+    };
     return PopScope(
       canPop: !_saving,
       child: _FormulaScaffold(
-        title: widget.isNew ? strings.formulaNew : strings.formulaEdit,
+        title: title,
         actions: [
+          if (!_editing)
+            IconButton(
+              tooltip: strings.formulaEdit,
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: _saving ? null : () => setState(() => _editing = true),
+            ),
           TextButton(
             onPressed: _saving ? null : _save,
             child: Text(strings.formulaSave),
           ),
         ],
         body: ListView(
+          key: ValueKey(_editing),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
-            TextFormField(
-              key: const ValueKey('formula-name'),
-              initialValue: _name,
-              enabled: !_saving,
-              maxLength: FormulaStorage.maxNameLength,
-              decoration: InputDecoration(
-                labelText: strings.formulaName,
-                counterText: '',
-                errorText: _submitted && !_nameValid
-                    ? strings.formulaInvalidName
-                    : null,
+            if (_editing) ...[
+              TextFormField(
+                key: const ValueKey('formula-name'),
+                initialValue: _name,
+                enabled: !_saving,
+                maxLength: FormulaStorage.maxNameLength,
+                decoration: InputDecoration(
+                  labelText: strings.formulaName,
+                  counterText: '',
+                  errorText: _submitted && !_nameValid
+                      ? strings.formulaInvalidName
+                      : null,
+                ),
+                onChanged: (value) => setState(() => _name = value),
               ),
-              onChanged: (value) => setState(() => _name = value),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              key: const ValueKey('formula-expression'),
-              initialValue: _expression,
-              enabled: !_saving,
-              maxLength: ExpressionEngine.maxLength,
-              maxLines: 3,
-              minLines: 1,
-              autocorrect: false,
-              enableSuggestions: false,
-              decoration: InputDecoration(
-                labelText: strings.formulaExpression,
-                helperText: strings.formulaExpressionHint,
-                helperMaxLines: 2,
-                counterText: '',
-                errorText: tooManyInputs
-                    ? strings.formulaTooManyInputs
-                    : _submitted && variables == null
-                    ? strings.formulaInvalidExpression
-                    : null,
+              const SizedBox(height: 12),
+              TextFormField(
+                key: const ValueKey('formula-expression'),
+                initialValue: _expression,
+                enabled: !_saving,
+                maxLength: ExpressionEngine.maxLength,
+                maxLines: 3,
+                minLines: 1,
+                autocorrect: false,
+                enableSuggestions: false,
+                decoration: InputDecoration(
+                  labelText: strings.formulaExpression,
+                  helperText: strings.formulaExpressionHint,
+                  helperMaxLines: 2,
+                  counterText: '',
+                  errorText: tooManyInputs
+                      ? strings.formulaTooManyInputs
+                      : _submitted && variables == null
+                      ? strings.formulaInvalidExpression
+                      : null,
+                ),
+                onChanged: (value) => setState(() {
+                  _expression = value;
+                  _parseExpression();
+                }),
               ),
-              onChanged: (value) => setState(() {
-                _expression = value;
-                _parseExpression();
-              }),
-            ),
+            ],
             if (variables != null && !tooManyInputs) ...[
-              const SizedBox(height: 20),
+              if (_editing) ...[
+                const SizedBox(height: 12),
+                _customization(strings, variables),
+                const SizedBox(height: 12),
+              ],
               _comparison(strings),
             ],
           ],

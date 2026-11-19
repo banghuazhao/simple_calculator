@@ -14,14 +14,30 @@ class ExpressionEngine {
     degrees: degrees,
   ));
 
+  /// Validates syntax once so the same expression can be evaluated repeatedly.
+  static CompiledExpression compile(String expression) {
+    final parser = _ExpressionParser(expression);
+    final evaluate = parser.parse();
+    return CompiledExpression._(evaluate, Set.unmodifiable(parser.variables));
+  }
+
   /// Validates syntax and lists variable names in their first-use order.
   /// Names use ASCII letters, digits, and underscores and may not start with
   /// a digit. Names are case-sensitive. Functions and constants are reserved.
-  static Set<String> variablesIn(String expression) {
-    final parser = _ExpressionParser(expression);
-    parser.parse();
-    return Set.unmodifiable(parser.variables);
-  }
+  static Set<String> variablesIn(String expression) =>
+      compile(expression).variables;
+}
+
+class CompiledExpression {
+  const CompiledExpression._(this._evaluate, this.variables);
+
+  final _Expression _evaluate;
+  final Set<String> variables;
+
+  double evaluate({
+    Map<String, double> variables = const {},
+    bool degrees = true,
+  }) => _evaluate((variables: variables, degrees: degrees));
 }
 
 typedef _Evaluation = ({Map<String, double> variables, bool degrees});

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:simple_calculator/calculator_key.dart';
+import 'package:simple_calculator/history_expression.dart';
 import 'package:simple_calculator/key_controller.dart';
 import 'package:simple_calculator/key_symbol.dart';
 import 'package:simple_calculator/util/history_storage.dart';
@@ -10,11 +11,13 @@ class CalcState {
   final String current; // main large display
   final String history; // small equation line above (empty when not applicable)
   final bool isResult; // true when showing a freshly computed result
+  final bool canUndo;
 
   const CalcState({
     required this.current,
     required this.history,
     this.isResult = false,
+    this.canUndo = false,
   });
 }
 
@@ -22,12 +25,20 @@ class CalcState {
 class HistoryEntry {
   final int id;
   final String equation; // e.g. "3 + 4 ="
-  final String result; // raw value without formatting
+  final String result;
+  final String? rawResult;
+  final String? rawExpression;
   const HistoryEntry({
     required this.id,
     required this.equation,
     required this.result,
+    this.rawResult,
+    this.rawExpression,
   });
+
+  String get preciseResult => rawResult ?? result;
+  String get expression =>
+      rawExpression ?? HistoryExpression.fromEquation(equation);
 }
 
 /// A removed history entry and where it was, so deletion can be undone.
@@ -37,25 +48,29 @@ class HistoryDeletion {
   const HistoryDeletion._(this.entry, this.index);
 }
 
-class _Snapshot {
-  final String valA;
-  final String? valB;
-  final KeySymbol? op;
-  final String? result;
-  const _Snapshot(this.valA, this.valB, this.op, this.result);
-
-  bool matches(_Snapshot other) =>
-      valA == other.valA &&
-      valB == other.valB &&
-      op == other.op &&
-      result == other.result;
-}
+// Text remains editable and readable. Keep a separate value when formatting
+// the text for the display would lose precision for the next operation.
+typedef _Number = ({String text, double? preciseValue});
+typedef _Calculation = ({String equation, _Number number});
+typedef _Snapshot = ({
+  _Number valA,
+  _Number? valB,
+  KeySymbol? op,
+  bool percentB,
+  _Calculation? result,
+});
 
 abstract class Processor {
+  static const _Number _zero = (text: '0', preciseValue: null);
+  static const _Calculation _error = (
+    equation: '',
+    number: (text: 'Error', preciseValue: null),
+  );
   static KeySymbol? _operator;
-  static String _valA = '0';
-  static String? _valB;
-  static String? _result;
+  static _Number _valA = _zero;
+  static _Number? _valB;
+  static bool _percentB = false;
+  static _Calculation? _result;
 
   static final List<HistoryEntry> _history = [];
   static final List<_Snapshot> _undoStack = [];
@@ -76,40 +91,44 @@ abstract class Processor {
   static bool get canUndo => _undoStack.isNotEmpty;
 
   static CalcState get _calcState {
-    if (_result != null) {
-      if (_result == 'Error') {
-        return const CalcState(current: 'Error', history: '', isResult: true);
-      }
+    final result = _result;
+    if (result != null) {
       return CalcState(
-        current: _result!,
-        history: '$_valA ${_operator!.value} $_valB =',
+        current: result.number.text,
+        history: result.equation,
         isResult: true,
+        canUndo: canUndo,
       );
     }
-    if (_operator != null) {
-      return CalcState(
-        current: _valB ?? _valA,
-        history: '$_valA ${_operator!.value}',
-      );
-    }
-    return CalcState(current: _valA, history: '');
+    final operator = _operator;
+    final expression = operator == null
+        ? ''
+        : '${_valA.text} ${operator.value}${_percentB ? ' ${_valB!.text}%' : ''}';
+    return CalcState(
+      current: (_valB ?? _valA).text,
+      history: expression,
+      canUndo: canUndo,
+    );
   }
 
   static void dispose() => _controller.close();
 
   // ── Undo ─────────────────────────────────────────────────────────────────
 
-  static _Snapshot get _snapshot => _Snapshot(_valA, _valB, _operator, _result);
+  static _Snapshot get _snapshot => (
+    valA: _valA,
+    valB: _valB,
+    op: _operator,
+    percentB: _percentB,
+    result: _result,
+  );
 
-  static void _pushUndo([_Snapshot? snapshot]) {
-    _undoStack.add(snapshot ?? _snapshot);
+  /// Each accepted action records undo and publishes one finalized state.
+  static void _finishAction(_Snapshot before) {
+    if (before == _snapshot) return;
+    _undoStack.add(before);
     if (_undoStack.length > 30) _undoStack.removeAt(0);
-  }
-
-  /// Records [before] only when input actually changed, so Undo never spends
-  /// a step on a rejected key press (extra digits, duplicate decimal, etc.).
-  static void _pushUndoIfChanged(_Snapshot before) {
-    if (!before.matches(_snapshot)) _pushUndo(before);
+    refresh();
   }
 
   static void undo() {
@@ -118,6 +137,7 @@ abstract class Processor {
     _valA = s.valA;
     _valB = s.valB;
     _operator = s.op;
+    _percentB = s.percentB;
     _result = s.result;
     refresh();
   }
@@ -135,6 +155,8 @@ abstract class Processor {
             id: entry.id,
             equation: entry.equation,
             result: entry.result,
+            rawResult: entry.rawResult,
+            rawExpression: entry.rawExpression,
           ),
         ),
       );
@@ -153,6 +175,8 @@ abstract class Processor {
             id: entry.id,
             equation: entry.equation,
             result: entry.result,
+            rawResult: entry.rawResult,
+            rawExpression: entry.rawExpression,
           ),
         ),
       ),
@@ -196,7 +220,7 @@ abstract class Processor {
   /// Parses clipboard text as one finite number. Accepts surrounding
   /// whitespace, a leading + or Unicode minus, correctly grouped thousands
   /// ("1,234.5") and scientific notation. Returns null for anything else.
-  static String? parsePastedNumber(String text) {
+  static double? parseNumericInput(String text) {
     var value = text.trim().replaceAll('\u2212', '-');
     if (value.startsWith('+')) value = value.substring(1);
     if (value.contains(',')) {
@@ -206,59 +230,92 @@ abstract class Processor {
       value = value.replaceAll(',', '');
     }
     if (!HistoryStorage.isValidNumber(value)) return null;
-    return _formatResult(double.parse(value));
+    return double.parse(value);
+  }
+
+  static String? parsePastedNumber(String text) {
+    final value = parseNumericInput(text);
+    return value == null ? null : formatResult(value);
   }
 
   /// Enters a pasted number as the current operand. Returns false (and leaves
   /// the calculator unchanged) when [text] is not a single finite number.
   static bool paste(String text) {
-    final value = parsePastedNumber(text);
+    final value = parseNumericInput(text);
     if (value == null) return false;
     final before = _snapshot;
     if (_result != null) _clear();
+    final number = _formattedNumber(value);
     if (_operator == null) {
-      _valA = value;
+      _valA = number;
     } else {
-      _valB = value;
+      _valB = number;
+      _percentB = false;
     }
-    _pushUndoIfChanged(before);
-    refresh();
+    _finishAction(before);
     return true;
   }
 
   /// Load a history result back into the calculator as the current value.
-  static void setFromHistory(String result) {
+  static void setFromHistory(String result, {String? preciseResult}) {
     if (!HistoryStorage.isValidNumber(result)) return;
+    final preciseValue = preciseResult == null
+        ? null
+        : double.tryParse(preciseResult);
+    _useNumber(_number(result, preciseValue: preciseValue));
+  }
+
+  /// Send a result from another tool to the calculator without rounding it.
+  static void useResult(double value) {
+    if (value.isFinite) _useNumber(_formattedNumber(value));
+  }
+
+  static void _useNumber(_Number number) {
     final before = _snapshot;
     _clear();
-    _valA = result;
-    _pushUndoIfChanged(before);
-    refresh();
+    _valA = number;
+    _finishAction(before);
+  }
+
+  /// Evaluate an edited expression and save it as a separate history entry.
+  static bool rerunHistory(String expression) {
+    final normalized = HistoryExpression.normalize(expression);
+    final double value;
+    try {
+      value = HistoryExpression.evaluate(normalized);
+    } on FormatException {
+      return false;
+    }
+    final before = _snapshot;
+    _clear();
+    _completeCalculation(normalized, value);
+    _finishAction(before);
+    return true;
   }
 
   // ── Key processing ────────────────────────────────────────────────────────
 
-  static void process(dynamic event) {
+  static void process(KeyEvent event) {
     final before = _snapshot;
-    final CalculatorKey key = (event as KeyEvent).key;
-    switch (key.symbol.type) {
+    final symbol = event.key.symbol;
+    switch (symbol.type) {
       case KeyType.function:
-        _handleFunction(key);
+        _handleFunction(symbol);
         break;
       case KeyType.operator:
-        _handleOperator(key);
+        _handleOperator(symbol);
         break;
       case KeyType.integer:
-        _handleInteger(key);
+        _handleInteger(symbol.value);
         break;
     }
-    _pushUndoIfChanged(before);
+    _finishAction(before);
   }
 
-  static void _handleFunction(CalculatorKey key) {
+  static void _handleFunction(KeySymbol symbol) {
     if (_result != null) _condense();
 
-    switch (key.symbol) {
+    switch (symbol) {
       case Keys.clear:
         _clear();
         break;
@@ -272,175 +329,205 @@ abstract class Processor {
         _back();
         break;
     }
-    refresh();
   }
 
-  static void _handleOperator(CalculatorKey key) {
+  static void _handleOperator(KeySymbol symbol) {
     // "5." is complete input; tidy it so equations read "5 + 3 =".
     _valA = _trimTrailingDecimal(_valA);
     if (_valB != null) _valB = _trimTrailingDecimal(_valB!);
 
-    if (key.symbol == Keys.equals) {
+    if (symbol == Keys.equals) {
       // Pressing "=" again on a shown result must not log a duplicate entry.
       if (_result != null) return;
       _calculate();
-      refresh();
       return;
     }
-    if (_result == null && _valB != null) _calculate();
+    if (_result == null && _valB != null) {
+      _calculate();
+      if (_result == _error) return;
+    }
     if (_result != null) _condense();
 
-    _operator = key.symbol;
-    refresh();
+    _operator = symbol;
   }
 
-  static String _trimTrailingDecimal(String value) {
-    if (!value.endsWith('.')) return value;
-    final trimmed = value.substring(0, value.length - 1);
-    return (trimmed.isEmpty || trimmed == '-' || trimmed == '-0')
-        ? '0'
-        : trimmed;
+  static _Number _trimTrailingDecimal(_Number number) {
+    final text = number.text;
+    if (!text.endsWith('.')) return number;
+    final trimmed = text.substring(0, text.length - 1);
+    return trimmed == '-0'
+        ? _zero
+        : _number(trimmed, preciseValue: number.preciseValue);
   }
 
-  static void _handleInteger(CalculatorKey key) {
-    final String val = key.symbol.value;
+  static void _handleInteger(String value) {
     // Typing after "=" starts a new number, as on standard calculators.
     // Operators, % and ± still continue from the result.
     if (_result != null) _clear();
 
     if (_operator == null) {
-      if (val == '.') {
-        if (!_valA.contains('.')) _valA = '$_valA.';
-      } else {
-        if (_countDigits(_valA) >= 9) return;
-        _valA = (_valA == '0') ? val : '$_valA$val';
-      }
+      _valA = _appendInput(_valA, value);
     } else {
-      if (_valB == null) {
-        _valB = val == '.' ? '0.' : val;
-      } else {
-        if (val == '.') {
-          if (!_valB!.contains('.')) _valB = '${_valB!}.';
-        } else {
-          if (_countDigits(_valB!) >= 9) return;
-          _valB = (_valB == '0') ? val : '${_valB!}$val';
-        }
-      }
+      _valB = _appendInput(_percentB ? _zero : _valB ?? _zero, value);
+      _percentB = false;
     }
-    refresh();
+  }
+
+  static _Number _appendInput(_Number number, String value) {
+    final text = number.text;
+    if (value == '.') {
+      // Appending a decimal after a recalled exponent would corrupt the number.
+      if (text.contains(RegExp(r'[.eE]'))) return number;
+      return _number('$text.');
+    }
+    if (_countDigits(text) >= 9) return number;
+    return _number(text == '0' ? value : '$text$value');
   }
 
   static int _countDigits(String s) =>
       s.replaceAll(RegExp(r'[^0-9]'), '').length;
 
   static void _back() {
-    if (_result != null) {
-      _clear();
-      return;
-    }
-    if (_valB != null) {
+    if (_percentB) {
+      _percentB = false;
+    } else if (_valB != null) {
       _valB = _backspaceValue(_valB!);
     } else if (_operator != null) {
       _operator = null;
-    } else if (_valA != '0') {
-      _valA = _backspaceValue(_valA) ?? '0';
+    } else if (_valA.text != '0') {
+      _valA = _backspaceValue(_valA) ?? _zero;
     }
   }
 
-  static String? _backspaceValue(String value) {
+  static _Number? _backspaceValue(_Number number) {
+    final value = number.text;
     var remaining = value.substring(0, value.length - 1);
     // Never leave an unparseable sign or partial scientific exponent in an
     // operand. Percent and arithmetic must always receive a valid number.
     while (remaining.isNotEmpty && double.tryParse(remaining) == null) {
       remaining = remaining.substring(0, remaining.length - 1);
     }
-    return remaining.isEmpty ? null : remaining;
+    return remaining.isEmpty ? null : _number(remaining);
   }
 
   static void _clear() {
-    _valA = '0';
+    _valA = _zero;
     _valB = null;
-    _operator = _result = null;
+    _percentB = false;
+    _operator = null;
+    _result = null;
   }
 
   static void _sign() {
     if (_valB != null) {
-      _valB = _valB!.startsWith('-') ? _valB!.substring(1) : '-$_valB';
-    } else if (_valA != '0') {
-      _valA = _valA.startsWith('-') ? _valA.substring(1) : '-$_valA';
+      _valB = _negate(_valB!);
+    } else if (_valA.text != '0') {
+      _valA = _negate(_valA);
     }
   }
 
+  static _Number _negate(_Number number) {
+    final text = number.text;
+    final preciseValue = number.preciseValue;
+    return _number(
+      text.startsWith('-') ? text.substring(1) : '-$text',
+      preciseValue: preciseValue == null ? null : -preciseValue,
+    );
+  }
+
   static void _percent() {
-    final value = double.tryParse(_valB ?? _valA);
+    final value = _valueOf(_valB ?? _valA);
     if (value == null || !value.isFinite) {
-      _result = 'Error';
+      _result = _error;
       return;
     }
     if (_valB != null) {
-      _valB = _formatResult(value / 100);
-    } else if (_valA != '0') {
-      _valA = _formatResult(value / 100);
+      _valB = _trimTrailingDecimal(_valB!);
+      _percentB = true;
+    } else if (_valA.text != '0') {
+      _valA = _formattedNumber(value / 100);
     }
   }
 
   static void _calculate() {
-    if (_operator == null || _valB == null) return;
-
-    final a = double.tryParse(_valA);
-    final b = double.tryParse(_valB!);
-
-    if (a == null || b == null || !a.isFinite || !b.isFinite) {
-      _result = 'Error';
-      refresh();
+    final operator = _operator;
+    final right = _valB;
+    if (operator == null || right == null) return;
+    final a = _valueOf(_valA);
+    final rightValue = _valueOf(right);
+    if (a == null ||
+        rightValue == null ||
+        !a.isFinite ||
+        !rightValue.isFinite) {
+      _result = _error;
       return;
     }
 
-    if (_operator == Keys.divide && b == 0) {
-      _result = 'Error';
-      refresh();
-      return;
-    }
-
-    double result;
-    if (_operator == Keys.divide) {
-      result = a / b;
-    } else if (_operator == Keys.multiply) {
-      result = a * b;
-    } else if (_operator == Keys.subtract) {
-      result = a - b;
-    } else {
-      result = a + b;
-    }
+    final b = _percentB
+        ? HistoryExpression.percentOperand(a, operator.value, rightValue)
+        : rightValue;
+    final result = switch (operator) {
+      Keys.divide => a / b,
+      Keys.multiply => a * b,
+      Keys.subtract => a - b,
+      _ => a + b,
+    };
 
     if (!result.isFinite) {
-      _result = 'Error';
-      refresh();
+      _result = _error;
       return;
     }
 
-    _result = _formatResult(result);
+    final unit = _percentB ? '%' : '';
+    final expression = '${_valA.text} ${operator.value} ${right.text}$unit';
+    final rawExpression =
+        '${_valA.preciseValue ?? _valA.text} ${operator.value} '
+        '${right.preciseValue ?? right.text}$unit';
+    _completeCalculation(expression, result, rawExpression: rawExpression);
+  }
 
+  static void _completeCalculation(
+    String expression,
+    double value, {
+    String? rawExpression,
+  }) {
+    final equation = '$expression =';
+    final number = _formattedNumber(value);
+    _result = (equation: equation, number: number);
     _history.insert(
       0,
       HistoryEntry(
         id: _nextHistoryId(),
-        equation: '$_valA ${_operator!.value} $_valB =',
-        result: _result!,
+        equation: equation,
+        result: number.text,
+        rawResult: number.preciseValue?.toString(),
+        rawExpression: rawExpression == expression ? null : rawExpression,
       ),
     );
     if (_history.length > HistoryStorage.maxEntries) _history.removeLast();
     _saveHistory();
-
-    refresh();
   }
 
-  static String _formatResult(double value) {
+  static _Number _number(String text, {double? preciseValue}) {
+    final needsPrecision =
+        preciseValue != null &&
+        preciseValue.isFinite &&
+        preciseValue != double.tryParse(text);
+    return (text: text, preciseValue: needsPrecision ? preciseValue : null);
+  }
+
+  static _Number _formattedNumber(double value) =>
+      _number(formatResult(value), preciseValue: value);
+
+  static double? _valueOf(_Number number) =>
+      number.preciseValue ?? double.tryParse(number.text);
+
+  static String formatResult(double value) {
     // Round away binary floating-point noise (0.1 + 0.2 = 0.3, not
     // 0.30000000000000004) while keeping 15 significant digits.
     final rounded = double.parse(value.toStringAsPrecision(15));
     if (rounded == 0) return '0';
-    final str = rounded.toString();
+    final str = (rounded.isFinite ? rounded : value).toString();
     final exponentIndex = str.indexOf('e');
     var mantissa = exponentIndex < 0 ? str : str.substring(0, exponentIndex);
     final exponent = exponentIndex < 0 ? '' : str.substring(exponentIndex);
@@ -453,12 +540,12 @@ abstract class Processor {
   }
 
   static void _condense() {
-    if (_result == 'Error') {
+    if (_result == _error) {
       _clear();
       return;
     }
-    _valA = _result!;
-    _valB = null;
-    _result = _operator = null;
+    final number = _result!.number;
+    _clear();
+    _valA = number;
   }
 }

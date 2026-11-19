@@ -458,9 +458,9 @@ void main() {
       await tester.pumpAndSettle();
 
       final formulasTip = find.text(
-        'In Reusable formulas, open an example to edit its inputs and compare two scenarios.',
+        'Open a saved formula to compare inputs. Choose Edit formula to change its expression, input labels or units, or scenario names.',
       );
-      await tester.ensureVisible(formulasTip);
+      await tester.scrollUntilVisible(formulasTip, 200);
       await tester.pumpAndSettle();
 
       expect(find.text('SwiftSum Premium').hitTestable(), findsOneWidget);

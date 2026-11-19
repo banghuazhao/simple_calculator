@@ -20,6 +20,9 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static String m0(alternate, baseline) =>
+      "Difference (${alternate} − ${baseline})";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "Classic_15_Puzzle": MessageLookupByLibrary.simpleMessage(
@@ -96,6 +99,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardUnavailable": MessageLookupByLibrary.simpleMessage(
       "Clipboard is unavailable. Please try again.",
     ),
+    "converterAmount": MessageLookupByLibrary.simpleMessage("Value"),
+    "converterCelsius": MessageLookupByLibrary.simpleMessage("Celsius"),
+    "converterCentimeter": MessageLookupByLibrary.simpleMessage("Centimetres"),
+    "converterFahrenheit": MessageLookupByLibrary.simpleMessage("Fahrenheit"),
+    "converterFoot": MessageLookupByLibrary.simpleMessage("Feet"),
+    "converterFrom": MessageLookupByLibrary.simpleMessage("From"),
+    "converterGram": MessageLookupByLibrary.simpleMessage("Grams"),
+    "converterInch": MessageLookupByLibrary.simpleMessage("Inches"),
+    "converterKelvin": MessageLookupByLibrary.simpleMessage("Kelvin"),
+    "converterKilogram": MessageLookupByLibrary.simpleMessage("Kilograms"),
+    "converterKilometer": MessageLookupByLibrary.simpleMessage("Kilometres"),
+    "converterLength": MessageLookupByLibrary.simpleMessage("Length"),
+    "converterLiter": MessageLookupByLibrary.simpleMessage("Litres"),
+    "converterMass": MessageLookupByLibrary.simpleMessage("Mass"),
+    "converterMeter": MessageLookupByLibrary.simpleMessage("Metres"),
+    "converterMile": MessageLookupByLibrary.simpleMessage("Miles"),
+    "converterMilligram": MessageLookupByLibrary.simpleMessage("Milligrams"),
+    "converterMilliliter": MessageLookupByLibrary.simpleMessage("Millilitres"),
+    "converterOunce": MessageLookupByLibrary.simpleMessage("Ounces"),
+    "converterPound": MessageLookupByLibrary.simpleMessage("Pounds"),
+    "converterSwap": MessageLookupByLibrary.simpleMessage("Swap units"),
+    "converterTemperature": MessageLookupByLibrary.simpleMessage("Temperature"),
+    "converterTo": MessageLookupByLibrary.simpleMessage("To"),
+    "converterUsCup": MessageLookupByLibrary.simpleMessage("US cups"),
+    "converterUsFluidOunce": MessageLookupByLibrary.simpleMessage(
+      "US fluid ounces",
+    ),
+    "converterUsGallon": MessageLookupByLibrary.simpleMessage("US gallons"),
+    "converterVolume": MessageLookupByLibrary.simpleMessage("Volume"),
     "copied": MessageLookupByLibrary.simpleMessage("Copied"),
     "copyAllHistory": MessageLookupByLibrary.simpleMessage("Copy all history"),
     "copyCalculation": MessageLookupByLibrary.simpleMessage("Copy calculation"),
@@ -111,9 +143,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "equals": MessageLookupByLibrary.simpleMessage("Equals"),
     "error": MessageLookupByLibrary.simpleMessage("Error"),
     "formulaAlternate": MessageLookupByLibrary.simpleMessage("Alternate"),
+    "formulaAlternateName": MessageLookupByLibrary.simpleMessage(
+      "Alternate scenario name",
+    ),
     "formulaBaseline": MessageLookupByLibrary.simpleMessage("Baseline"),
+    "formulaBaselineName": MessageLookupByLibrary.simpleMessage(
+      "Baseline scenario name",
+    ),
     "formulaCopyComparison": MessageLookupByLibrary.simpleMessage(
       "Copy comparison",
+    ),
+    "formulaCustomize": MessageLookupByLibrary.simpleMessage(
+      "Customize labels and scenarios",
     ),
     "formulaDelete": MessageLookupByLibrary.simpleMessage("Delete formula"),
     "formulaDeleteMessage": MessageLookupByLibrary.simpleMessage(
@@ -138,6 +179,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "formulaExpressionHint": MessageLookupByLibrary.simpleMessage(
       "Example: price * quantity",
     ),
+    "formulaInputLabel": MessageLookupByLibrary.simpleMessage("Input label"),
+    "formulaInputUnit": MessageLookupByLibrary.simpleMessage("Unit"),
     "formulaInvalidExpression": MessageLookupByLibrary.simpleMessage(
       "Enter a valid expression.",
     ),
@@ -151,6 +194,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You can save up to 30 formulas.",
     ),
     "formulaName": MessageLookupByLibrary.simpleMessage("Formula name"),
+    "formulaNamedDifference": m0,
     "formulaNew": MessageLookupByLibrary.simpleMessage("New formula"),
     "formulaNoResult": MessageLookupByLibrary.simpleMessage("No result"),
     "formulaSave": MessageLookupByLibrary.simpleMessage("Save"),
@@ -168,21 +212,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tips and shortcuts",
     ),
     "helpBasics": MessageLookupByLibrary.simpleMessage("Using the calculator"),
+    "helpConverter": MessageLookupByLibrary.simpleMessage(
+      "Open Unit converter from the toolbar. Choose your units, enter a value, and use the result in your next calculation.",
+    ),
     "helpCopy": MessageLookupByLibrary.simpleMessage(
       "Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.",
     ),
     "helpCopyHistory": MessageLookupByLibrary.simpleMessage(
-      "In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.",
+      "Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
-      "History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.",
+      "History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.",
     ),
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("Keyboard shortcuts"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
       "Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.",
     ),
+    "helpPercent": MessageLookupByLibrary.simpleMessage(
+      "Use + or − with % to adjust a value by a percentage. For example, 200 + 10% = 220.",
+    ),
     "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage(
-      "In Reusable formulas, open an example to edit its inputs and compare two scenarios.",
+      "Open a saved formula to compare inputs. Choose Edit formula to change its expression, input labels or units, or scenario names.",
     ),
     "helpPremiumScientific": MessageLookupByLibrary.simpleMessage(
       "Choose Degrees or Radians in the scientific calculator before using trigonometric functions.",
@@ -198,11 +248,21 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use stronger contrast for numbers and controls. Your selected theme is kept.",
     ),
     "history": MessageLookupByLibrary.simpleMessage("History"),
+    "historyCopyAsTsv": MessageLookupByLibrary.simpleMessage("Copy as TSV"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage(
       "Calculation deleted",
     ),
+    "historyEditCalculation": MessageLookupByLibrary.simpleMessage(
+      "Edit calculation",
+    ),
     "historyEntryActions": MessageLookupByLibrary.simpleMessage(
       "Calculation actions",
+    ),
+    "historyExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "Try (2 + 3) × 4 or 200 + 10%.",
+    ),
+    "historyInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "Enter a valid arithmetic expression.",
     ),
     "inputSettings": MessageLookupByLibrary.simpleMessage("Input settings"),
     "invalidPaste": MessageLookupByLibrary.simpleMessage(
@@ -309,5 +369,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "subtract": MessageLookupByLibrary.simpleMessage("Subtract"),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "undo": MessageLookupByLibrary.simpleMessage("Undo"),
+    "unitConverter": MessageLookupByLibrary.simpleMessage("Unit converter"),
   };
 }

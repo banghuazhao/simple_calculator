@@ -16,6 +16,7 @@ import 'package:simple_calculator/more_page.dart';
 import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/premium/premium_page.dart';
 import 'package:simple_calculator/processor.dart';
+import 'package:simple_calculator/unit_converter_page.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/shake_listener.dart';
@@ -31,7 +32,7 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  CalcState _calcState = const CalcState(current: '0', history: '');
+  final _calcState = ValueNotifier(const CalcState(current: '0', history: ''));
 
   BannerAd? _ad;
   bool _isAdLoaded = false;
@@ -51,7 +52,7 @@ class _CalculatorState extends State<Calculator> {
     super.initState();
     _keySubscription = input.KeyController.listen(Processor.process);
     _processorSubscription = Processor.listen((state) {
-      if (mounted) setState(() => _calcState = state);
+      if (mounted) _calcState.value = state;
     });
     Processor.refresh();
 
@@ -145,6 +146,7 @@ class _CalculatorState extends State<Calculator> {
     _premium?.removeListener(_syncBanner);
     unawaited(_keySubscription?.cancel());
     unawaited(_processorSubscription?.cancel());
+    _calcState.dispose();
     final ad = _ad;
     _ad = null;
     unawaited(AdsManager.disposeAd(ad));
@@ -184,7 +186,8 @@ class _CalculatorState extends State<Calculator> {
         input.KeyEvent(CalculatorKey(symbol: symbol)),
       ),
       onUndo: Processor.undo,
-      onCopy: () => ClipboardHelper.copyNumber(context, _calcState.current),
+      onCopy: () =>
+          ClipboardHelper.copyNumber(context, _calcState.value.current),
       onPaste: () => ClipboardHelper.paste(context),
       child: Scaffold(
         backgroundColor: model.backgroundColor,
@@ -239,11 +242,23 @@ class _CalculatorState extends State<Calculator> {
                             ),
                           ),
                         IconButton(
-                          tooltip: strings.undo,
-                          onPressed: Processor.canUndo ? Processor.undo : null,
-                          color: toolbarColor,
-                          disabledColor: toolbarColor.withValues(alpha: 0.35),
-                          icon: const Icon(Icons.undo),
+                          tooltip: strings.unitConverter,
+                          onPressed: () => Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) => const UnitConverterPage(),
+                            ),
+                          ),
+                          icon: Icon(Icons.swap_horiz, color: toolbarColor),
+                        ),
+                        ValueListenableBuilder<CalcState>(
+                          valueListenable: _calcState,
+                          builder: (_, state, _) => IconButton(
+                            tooltip: strings.undo,
+                            onPressed: state.canUndo ? Processor.undo : null,
+                            color: toolbarColor,
+                            disabledColor: toolbarColor.withValues(alpha: 0.35),
+                            icon: const Icon(Icons.undo),
+                          ),
                         ),
                         IconButton(
                           tooltip: strings.pasteNumber,
@@ -263,10 +278,13 @@ class _CalculatorState extends State<Calculator> {
                   ),
                   // Display fills all available space above keypad
                   Expanded(
-                    child: Display(
-                      current: _calcState.current,
-                      history: _calcState.history,
-                      isResult: _calcState.isResult,
+                    child: ValueListenableBuilder<CalcState>(
+                      valueListenable: _calcState,
+                      builder: (_, state, _) => Display(
+                        current: state.current,
+                        history: state.history,
+                        isResult: state.isResult,
+                      ),
                     ),
                   ),
                   const KeyPad(),

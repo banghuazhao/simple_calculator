@@ -93,6 +93,119 @@ void main() {
     );
   }
 
+  for (final example in <(KeySymbol, String)>[
+    (Keys.add, '220'),
+    (Keys.subtract, '180'),
+    (Keys.multiply, '20'),
+    (Keys.divide, '2000'),
+  ]) {
+    test(
+      'percent respects ${example.$1.value} and remains in history',
+      () async {
+        await press([
+          Keys.two,
+          Keys.zero,
+          Keys.zero,
+          example.$1,
+          Keys.one,
+          Keys.zero,
+          Keys.percent,
+        ]);
+        final expression = '200 ${example.$1.value} 10%';
+        expect(state.history, expression);
+
+        await press([Keys.equals]);
+        expect(state.current, example.$2);
+        expect(state.history, '$expression =');
+        expect(Processor.historyLog.single.expression, expression);
+
+        await undo();
+        expect(state.history, expression);
+        await undo();
+        expect(state.history, '200 ${example.$1.value}');
+        expect(state.current, '10');
+      },
+    );
+  }
+
+  test('chaining a contextual percentage uses the adjusted result', () async {
+    await press([
+      Keys.two,
+      Keys.zero,
+      Keys.zero,
+      Keys.add,
+      Keys.one,
+      Keys.zero,
+      Keys.percent,
+      Keys.multiply,
+    ]);
+    expect(state.history, '220 ×');
+    expect(Processor.historyLog.single.equation, '200 + 10% =');
+
+    await press([Keys.two, Keys.equals]);
+    expect(state.current, '440');
+  });
+
+  test('chaining and recalling a result retain its precision', () async {
+    await press([Keys.one, Keys.divide, Keys.three, Keys.multiply]);
+    expect(state.current, '0.333333333333333');
+    final fraction = Processor.historyLog.single;
+    expect(fraction.preciseResult, (1 / 3).toString());
+
+    await press([Keys.three, Keys.equals]);
+    expect(state.current, '1');
+    final multiplication = Processor.historyLog.first;
+    expect(multiplication.expression, '${1 / 3} × 3');
+    expect(Processor.rerunHistory(multiplication.expression), isTrue);
+    await flushStates();
+    expect(state.current, '1');
+    expect(Processor.historyLog, hasLength(3));
+
+    Processor.setFromHistory(
+      fraction.result,
+      preciseResult: fraction.preciseResult,
+    );
+    await press([Keys.multiply, Keys.three, Keys.equals]);
+    expect(state.current, '1');
+  });
+
+  test('the largest finite pasted value remains usable', () async {
+    final maximum = double.maxFinite.toString();
+    expect(Processor.parsePastedNumber(maximum), maximum);
+    expect(Processor.paste(maximum), isTrue);
+    await press([Keys.subtract]);
+    expect(state.current, maximum);
+
+    expect(Processor.paste(maximum), isTrue);
+    await press([Keys.equals]);
+    expect(state.current, '0');
+  });
+
+  test(
+    'accepted keys publish one finalized state and no-ops publish none',
+    () async {
+      final changes = <CalcState>[];
+      final listener = Processor.listen(changes.add);
+      addTearDown(listener.cancel);
+
+      await press([Keys.one, Keys.decimal, Keys.decimal, Keys.add, Keys.two]);
+      expect(changes, hasLength(4));
+      expect(changes.every((state) => state.canUndo), isTrue);
+
+      changes.clear();
+      await press([Keys.multiply]);
+      expect(changes, hasLength(1));
+      expect(changes.single.history, '3 ×');
+      expect(changes.single.isResult, isFalse);
+
+      changes.clear();
+      await press([Keys.two, Keys.equals, Keys.equals]);
+      expect(changes, hasLength(2));
+      expect(changes.last.current, '6');
+      expect(changes.last.isResult, isTrue);
+    },
+  );
+
   test('decimal input ignores duplicate decimal points', () async {
     await press([
       Keys.one,

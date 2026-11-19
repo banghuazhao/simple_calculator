@@ -20,6 +20,8 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh';
 
+  static String m0(alternate, baseline) => "差值（${alternate} − ${baseline}）";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "Classic_15_Puzzle": MessageLookupByLibrary.simpleMessage("十五数字华容道"),
@@ -71,6 +73,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "clipboardUnavailable": MessageLookupByLibrary.simpleMessage(
       "剪贴板暂时不可用，请重试。",
     ),
+    "converterAmount": MessageLookupByLibrary.simpleMessage("数值"),
+    "converterCelsius": MessageLookupByLibrary.simpleMessage("摄氏度"),
+    "converterCentimeter": MessageLookupByLibrary.simpleMessage("厘米"),
+    "converterFahrenheit": MessageLookupByLibrary.simpleMessage("华氏度"),
+    "converterFoot": MessageLookupByLibrary.simpleMessage("英尺"),
+    "converterFrom": MessageLookupByLibrary.simpleMessage("原单位"),
+    "converterGram": MessageLookupByLibrary.simpleMessage("克"),
+    "converterInch": MessageLookupByLibrary.simpleMessage("英寸"),
+    "converterKelvin": MessageLookupByLibrary.simpleMessage("开尔文"),
+    "converterKilogram": MessageLookupByLibrary.simpleMessage("千克"),
+    "converterKilometer": MessageLookupByLibrary.simpleMessage("千米"),
+    "converterLength": MessageLookupByLibrary.simpleMessage("长度"),
+    "converterLiter": MessageLookupByLibrary.simpleMessage("升"),
+    "converterMass": MessageLookupByLibrary.simpleMessage("质量"),
+    "converterMeter": MessageLookupByLibrary.simpleMessage("米"),
+    "converterMile": MessageLookupByLibrary.simpleMessage("英里"),
+    "converterMilligram": MessageLookupByLibrary.simpleMessage("毫克"),
+    "converterMilliliter": MessageLookupByLibrary.simpleMessage("毫升"),
+    "converterOunce": MessageLookupByLibrary.simpleMessage("盎司"),
+    "converterPound": MessageLookupByLibrary.simpleMessage("磅"),
+    "converterSwap": MessageLookupByLibrary.simpleMessage("交换单位"),
+    "converterTemperature": MessageLookupByLibrary.simpleMessage("温度"),
+    "converterTo": MessageLookupByLibrary.simpleMessage("目标单位"),
+    "converterUsCup": MessageLookupByLibrary.simpleMessage("美制杯"),
+    "converterUsFluidOunce": MessageLookupByLibrary.simpleMessage("美制液体盎司"),
+    "converterUsGallon": MessageLookupByLibrary.simpleMessage("美制加仑"),
+    "converterVolume": MessageLookupByLibrary.simpleMessage("体积"),
     "copied": MessageLookupByLibrary.simpleMessage("已复制"),
     "copyAllHistory": MessageLookupByLibrary.simpleMessage("复制全部历史记录"),
     "copyCalculation": MessageLookupByLibrary.simpleMessage("复制计算过程"),
@@ -82,8 +111,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "equals": MessageLookupByLibrary.simpleMessage("等于"),
     "error": MessageLookupByLibrary.simpleMessage("错误"),
     "formulaAlternate": MessageLookupByLibrary.simpleMessage("备选方案"),
+    "formulaAlternateName": MessageLookupByLibrary.simpleMessage("备选方案名称"),
     "formulaBaseline": MessageLookupByLibrary.simpleMessage("基准方案"),
+    "formulaBaselineName": MessageLookupByLibrary.simpleMessage("基准方案名称"),
     "formulaCopyComparison": MessageLookupByLibrary.simpleMessage("复制方案比较"),
+    "formulaCustomize": MessageLookupByLibrary.simpleMessage("自定义标签和方案"),
     "formulaDelete": MessageLookupByLibrary.simpleMessage("删除公式"),
     "formulaDeleteMessage": MessageLookupByLibrary.simpleMessage("删除此已保存的公式吗？"),
     "formulaDifference": MessageLookupByLibrary.simpleMessage("差值（备选 − 基准）"),
@@ -97,6 +129,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "formulaExpressionHint": MessageLookupByLibrary.simpleMessage(
       "例如 price * quantity",
     ),
+    "formulaInputLabel": MessageLookupByLibrary.simpleMessage("输入项标签"),
+    "formulaInputUnit": MessageLookupByLibrary.simpleMessage("单位"),
     "formulaInvalidExpression": MessageLookupByLibrary.simpleMessage(
       "请输入有效的表达式。",
     ),
@@ -106,6 +140,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "最多可保存 30 个公式。",
     ),
     "formulaName": MessageLookupByLibrary.simpleMessage("公式名称"),
+    "formulaNamedDifference": m0,
     "formulaNew": MessageLookupByLibrary.simpleMessage("新建公式"),
     "formulaNoResult": MessageLookupByLibrary.simpleMessage("无结果"),
     "formulaSave": MessageLookupByLibrary.simpleMessage("保存"),
@@ -119,21 +154,27 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpAndShortcuts": MessageLookupByLibrary.simpleMessage("使用提示与快捷键"),
     "helpBasics": MessageLookupByLibrary.simpleMessage("计算器使用方法"),
+    "helpConverter": MessageLookupByLibrary.simpleMessage(
+      "从工具栏打开单位换算。选择单位并输入数值，即可将结果用于下一次计算。",
+    ),
     "helpCopy": MessageLookupByLibrary.simpleMessage(
       "点按结果可复制数字。按下等号后，点按结果上方的算式可复制算式和结果。",
     ),
     "helpCopyHistory": MessageLookupByLibrary.simpleMessage(
-      "在历史记录中，点按记录旁的复制按钮可复制该条记录的算式和结果。选择“复制全部历史记录”可复制所有记录，搜索时则可选择“复制匹配的计算记录”。",
+      "使用复制全部历史记录或复制匹配的计算来复制纯文本。选择复制为 TSV 可将相同记录粘贴到电子表格的各列中。",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
-      "历史记录最多保留100条计算。点按记录可使用其结果。滑动可删除记录，也可在操作菜单中选择“删除计算记录”。删除后可点按“撤销”恢复。",
+      "历史记录最多保存 100 条计算。点击条目可使用其结果，也可在操作菜单中选择编辑计算来重新计算。轻扫可删除，点击撤销可恢复。",
     ),
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("键盘快捷键"),
     "helpPaste": MessageLookupByLibrary.simpleMessage(
       "粘贴仅接受单个有限数值，包括分组正确的千位分隔数字或科学计数法。计算表达式和其他文本将被拒绝。",
     ),
+    "helpPercent": MessageLookupByLibrary.simpleMessage(
+      "用 + 或 − 和 % 按百分比调整数值。例如，200 + 10% = 220。",
+    ),
     "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage(
-      "在“可重用公式”中打开一个示例，即可编辑输入并比较两个方案。",
+      "打开已保存的公式来比较输入。选择编辑公式可更改表达式、输入项标签或单位以及方案名称。",
     ),
     "helpPremiumScientific": MessageLookupByLibrary.simpleMessage(
       "使用三角函数前，请在科学计算器中选择“角度”或“弧度”。",
@@ -149,8 +190,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "增强数字和控件的对比度。您选择的主题将被保留。",
     ),
     "history": MessageLookupByLibrary.simpleMessage("历史记录"),
+    "historyCopyAsTsv": MessageLookupByLibrary.simpleMessage("复制为 TSV"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage("已删除计算记录"),
+    "historyEditCalculation": MessageLookupByLibrary.simpleMessage("编辑计算"),
     "historyEntryActions": MessageLookupByLibrary.simpleMessage("计算记录操作"),
+    "historyExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "试试 (2 + 3) × 4 或 200 + 10%。",
+    ),
+    "historyInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "请输入有效的算术表达式。",
+    ),
     "inputSettings": MessageLookupByLibrary.simpleMessage("输入设置"),
     "invalidPaste": MessageLookupByLibrary.simpleMessage("请先复制有效数字再粘贴。"),
     "multiply": MessageLookupByLibrary.simpleMessage("乘以"),
@@ -230,5 +279,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "subtract": MessageLookupByLibrary.simpleMessage("减去"),
     "theme": MessageLookupByLibrary.simpleMessage("主题"),
     "undo": MessageLookupByLibrary.simpleMessage("撤销"),
+    "unitConverter": MessageLookupByLibrary.simpleMessage("单位换算"),
   };
 }

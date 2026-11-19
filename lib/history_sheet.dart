@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
+import 'package:simple_calculator/history_expression.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/input_feedback.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
-enum _HistoryEntryAction { delete }
+enum _HistoryEntryAction { edit, delete }
 
 class HistorySheet extends StatefulWidget {
   const HistorySheet({super.key});
@@ -41,6 +42,16 @@ class _HistorySheetState extends State<HistorySheet> {
       .replaceAll('×', '*')
       .replaceAll('÷', '/')
       .replaceAll('−', '-');
+
+  Future<void> _edit(BuildContext sheetContext, HistoryEntry entry) async {
+    final applied = await showDialog<bool>(
+      context: sheetContext,
+      builder: (_) => _HistoryEditor(expression: entry.expression),
+    );
+    if (applied != true || !mounted || !sheetContext.mounted) return;
+    _deletionRevision++;
+    Navigator.of(sheetContext).pop();
+  }
 
   Future<void> _clearHistory(BuildContext sheetContext) async {
     final strings = S.of(sheetContext);
@@ -127,7 +138,10 @@ class _HistorySheetState extends State<HistorySheet> {
               child: InkWell(
                 onTap: () {
                   _deletionRevision++;
-                  Processor.setFromHistory(entry.result);
+                  Processor.setFromHistory(
+                    entry.result,
+                    preciseResult: entry.preciseResult,
+                  );
                   Navigator.pop(context);
                 },
                 child: Padding(
@@ -190,11 +204,20 @@ class _HistorySheetState extends State<HistorySheet> {
                   onSelected: (action) {
                     if (!mounted || !context.mounted) return;
                     switch (action) {
+                      case _HistoryEntryAction.edit:
+                        unawaited(_edit(context, entry));
                       case _HistoryEntryAction.delete:
                         _delete(context, entry);
                     }
                   },
                   itemBuilder: (_) => [
+                    PopupMenuItem(
+                      value: _HistoryEntryAction.edit,
+                      child: Text(
+                        strings.historyEditCalculation,
+                        style: TextStyle(color: textColor),
+                      ),
+                    ),
                     PopupMenuItem(
                       value: _HistoryEntryAction.delete,
                       child: Text(
@@ -282,6 +305,27 @@ class _HistorySheetState extends State<HistorySheet> {
                     color: textColor,
                     disabledColor: textColor.withValues(alpha: 0.35),
                     icon: const Icon(Icons.copy_all_outlined),
+                  ),
+                  IconButton(
+                    key: const ValueKey('history-copy-tsv'),
+                    tooltip: strings.historyCopyAsTsv,
+                    onPressed: filtered.isEmpty
+                        ? null
+                        : () => ClipboardHelper.copy(
+                            context,
+                            filtered
+                                .map((entry) {
+                                  final expression =
+                                      HistoryExpression.fromEquation(
+                                        entry.equation,
+                                      );
+                                  return '$expression\t${entry.result}';
+                                })
+                                .join('\n'),
+                          ),
+                    color: textColor,
+                    disabledColor: textColor.withValues(alpha: 0.35),
+                    icon: const Icon(Icons.table_chart_outlined),
                   ),
                   if (entries.isNotEmpty)
                     TextButton(
@@ -419,6 +463,91 @@ class _HistorySheetState extends State<HistorySheet> {
           ),
         );
       },
+    );
+  }
+}
+
+class _HistoryEditor extends StatefulWidget {
+  const _HistoryEditor({required this.expression});
+
+  final String expression;
+
+  @override
+  State<_HistoryEditor> createState() => _HistoryEditorState();
+}
+
+class _HistoryEditorState extends State<_HistoryEditor> {
+  late final _expression = TextEditingController(text: widget.expression);
+  bool _hasError = false;
+
+  @override
+  void dispose() {
+    _expression.dispose();
+    super.dispose();
+  }
+
+  void _calculate() {
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    if (Processor.rerunHistory(_expression.text)) {
+      Navigator.of(context).pop(true);
+    } else if (!_hasError) {
+      setState(() => _hasError = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = S.of(context);
+    final model = context.watch<ThemeModel>();
+    final textStyle = TextStyle(color: model.textColor1);
+    return AlertDialog(
+      scrollable: true,
+      backgroundColor: model.backgroundColor,
+      title: Text(strings.historyEditCalculation, style: textStyle),
+      content: TextField(
+        key: const ValueKey('history-editor-expression'),
+        controller: _expression,
+        autofocus: true,
+        minLines: 1,
+        maxLines: 4,
+        autocorrect: false,
+        enableSuggestions: false,
+        smartDashesType: SmartDashesType.disabled,
+        textInputAction: TextInputAction.done,
+        style: textStyle,
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(HistoryExpression.maxLength),
+        ],
+        onChanged: (_) {
+          if (_hasError) setState(() => _hasError = false);
+        },
+        onSubmitted: (_) => _calculate(),
+        decoration: InputDecoration(
+          labelText: strings.scientificExpression,
+          labelStyle: textStyle,
+          helperText: strings.historyExpressionHelp,
+          helperStyle: textStyle,
+          helperMaxLines: 3,
+          errorText: _hasError ? strings.historyInvalidExpression : null,
+          errorStyle: textStyle,
+          errorMaxLines: 3,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(strings.cancel, style: textStyle),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: model.textColor1,
+            foregroundColor: model.backgroundColor,
+          ),
+          onPressed: _calculate,
+          child: Text(strings.scientificEvaluate),
+        ),
+      ],
     );
   }
 }

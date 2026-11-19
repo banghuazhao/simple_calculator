@@ -76,6 +76,8 @@ class HelpPage extends StatelessWidget {
                     paragraph(strings.helpUndo),
                     paragraph(strings.helpHistory),
                     paragraph(strings.helpPaste),
+                    paragraph(strings.helpPercent),
+                    paragraph(strings.helpConverter),
                     const SizedBox(height: 8),
                     heading(strings.helpKeyboard),
                     shortcut('0–9', strings.shortcutNumbers),

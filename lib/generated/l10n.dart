@@ -580,10 +580,10 @@ class S {
     );
   }
 
-  /// `In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.`
+  /// `Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.`
   String get helpCopyHistory {
     return Intl.message(
-      'In History, use the copy button beside an entry to copy that calculation. Use Copy all history to copy every entry, or Copy matching calculations to copy the search results.',
+      'Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.',
       name: 'helpCopyHistory',
       desc: '',
       args: [],
@@ -600,10 +600,10 @@ class S {
     );
   }
 
-  /// `History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.`
+  /// `History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.`
   String get helpHistory {
     return Intl.message(
-      'History keeps up to 100 calculations. Tap an entry to reuse its result. Swipe to delete it or choose Delete calculation from its actions menu. Tap Undo to restore it.',
+      'History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.',
       name: 'helpHistory',
       desc: '',
       args: [],
@@ -630,10 +630,10 @@ class S {
     );
   }
 
-  /// `In Reusable formulas, open an example to edit its inputs and compare two scenarios.`
+  /// `Open a saved formula to compare inputs. Choose Edit formula to change its expression, input labels or units, or scenario names.`
   String get helpPremiumFormulas {
     return Intl.message(
-      'In Reusable formulas, open an example to edit its inputs and compare two scenarios.',
+      'Open a saved formula to compare inputs. Choose Edit formula to change its expression, input labels or units, or scenario names.',
       name: 'helpPremiumFormulas',
       desc: '',
       args: [],
@@ -1368,6 +1368,321 @@ class S {
   /// `Save`
   String get formulaSave {
     return Intl.message('Save', name: 'formulaSave', desc: '', args: []);
+  }
+
+  /// `Unit converter`
+  String get unitConverter {
+    return Intl.message(
+      'Unit converter',
+      name: 'unitConverter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Length`
+  String get converterLength {
+    return Intl.message('Length', name: 'converterLength', desc: '', args: []);
+  }
+
+  /// `Mass`
+  String get converterMass {
+    return Intl.message('Mass', name: 'converterMass', desc: '', args: []);
+  }
+
+  /// `Volume`
+  String get converterVolume {
+    return Intl.message('Volume', name: 'converterVolume', desc: '', args: []);
+  }
+
+  /// `Temperature`
+  String get converterTemperature {
+    return Intl.message(
+      'Temperature',
+      name: 'converterTemperature',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Value`
+  String get converterAmount {
+    return Intl.message('Value', name: 'converterAmount', desc: '', args: []);
+  }
+
+  /// `From`
+  String get converterFrom {
+    return Intl.message('From', name: 'converterFrom', desc: '', args: []);
+  }
+
+  /// `To`
+  String get converterTo {
+    return Intl.message('To', name: 'converterTo', desc: '', args: []);
+  }
+
+  /// `Swap units`
+  String get converterSwap {
+    return Intl.message(
+      'Swap units',
+      name: 'converterSwap',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Metres`
+  String get converterMeter {
+    return Intl.message('Metres', name: 'converterMeter', desc: '', args: []);
+  }
+
+  /// `Feet`
+  String get converterFoot {
+    return Intl.message('Feet', name: 'converterFoot', desc: '', args: []);
+  }
+
+  /// `Centimetres`
+  String get converterCentimeter {
+    return Intl.message(
+      'Centimetres',
+      name: 'converterCentimeter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inches`
+  String get converterInch {
+    return Intl.message('Inches', name: 'converterInch', desc: '', args: []);
+  }
+
+  /// `Kilometres`
+  String get converterKilometer {
+    return Intl.message(
+      'Kilometres',
+      name: 'converterKilometer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Miles`
+  String get converterMile {
+    return Intl.message('Miles', name: 'converterMile', desc: '', args: []);
+  }
+
+  /// `Kilograms`
+  String get converterKilogram {
+    return Intl.message(
+      'Kilograms',
+      name: 'converterKilogram',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pounds`
+  String get converterPound {
+    return Intl.message('Pounds', name: 'converterPound', desc: '', args: []);
+  }
+
+  /// `Grams`
+  String get converterGram {
+    return Intl.message('Grams', name: 'converterGram', desc: '', args: []);
+  }
+
+  /// `Ounces`
+  String get converterOunce {
+    return Intl.message('Ounces', name: 'converterOunce', desc: '', args: []);
+  }
+
+  /// `Milligrams`
+  String get converterMilligram {
+    return Intl.message(
+      'Milligrams',
+      name: 'converterMilligram',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Litres`
+  String get converterLiter {
+    return Intl.message('Litres', name: 'converterLiter', desc: '', args: []);
+  }
+
+  /// `US gallons`
+  String get converterUsGallon {
+    return Intl.message(
+      'US gallons',
+      name: 'converterUsGallon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Millilitres`
+  String get converterMilliliter {
+    return Intl.message(
+      'Millilitres',
+      name: 'converterMilliliter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `US cups`
+  String get converterUsCup {
+    return Intl.message('US cups', name: 'converterUsCup', desc: '', args: []);
+  }
+
+  /// `US fluid ounces`
+  String get converterUsFluidOunce {
+    return Intl.message(
+      'US fluid ounces',
+      name: 'converterUsFluidOunce',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Celsius`
+  String get converterCelsius {
+    return Intl.message(
+      'Celsius',
+      name: 'converterCelsius',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fahrenheit`
+  String get converterFahrenheit {
+    return Intl.message(
+      'Fahrenheit',
+      name: 'converterFahrenheit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Kelvin`
+  String get converterKelvin {
+    return Intl.message('Kelvin', name: 'converterKelvin', desc: '', args: []);
+  }
+
+  /// `Edit calculation`
+  String get historyEditCalculation {
+    return Intl.message(
+      'Edit calculation',
+      name: 'historyEditCalculation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy as TSV`
+  String get historyCopyAsTsv {
+    return Intl.message(
+      'Copy as TSV',
+      name: 'historyCopyAsTsv',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid arithmetic expression.`
+  String get historyInvalidExpression {
+    return Intl.message(
+      'Enter a valid arithmetic expression.',
+      name: 'historyInvalidExpression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try (2 + 3) × 4 or 200 + 10%.`
+  String get historyExpressionHelp {
+    return Intl.message(
+      'Try (2 + 3) × 4 or 200 + 10%.',
+      name: 'historyExpressionHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Customize labels and scenarios`
+  String get formulaCustomize {
+    return Intl.message(
+      'Customize labels and scenarios',
+      name: 'formulaCustomize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Input label`
+  String get formulaInputLabel {
+    return Intl.message(
+      'Input label',
+      name: 'formulaInputLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unit`
+  String get formulaInputUnit {
+    return Intl.message('Unit', name: 'formulaInputUnit', desc: '', args: []);
+  }
+
+  /// `Baseline scenario name`
+  String get formulaBaselineName {
+    return Intl.message(
+      'Baseline scenario name',
+      name: 'formulaBaselineName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Alternate scenario name`
+  String get formulaAlternateName {
+    return Intl.message(
+      'Alternate scenario name',
+      name: 'formulaAlternateName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Difference ({alternate} − {baseline})`
+  String formulaNamedDifference(String alternate, String baseline) {
+    return Intl.message(
+      'Difference ($alternate − $baseline)',
+      name: 'formulaNamedDifference',
+      desc: '',
+      args: [alternate, baseline],
+    );
+  }
+
+  /// `Use + or − with % to adjust a value by a percentage. For example, 200 + 10% = 220.`
+  String get helpPercent {
+    return Intl.message(
+      'Use + or − with % to adjust a value by a percentage. For example, 200 + 10% = 220.',
+      name: 'helpPercent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Unit converter from the toolbar. Choose your units, enter a value, and use the result in your next calculation.`
+  String get helpConverter {
+    return Intl.message(
+      'Open Unit converter from the toolbar. Choose your units, enter a value, and use the result in your next calculation.',
+      name: 'helpConverter',
+      desc: '',
+      args: [],
+    );
   }
 }
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simple_calculator/history_expression.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 
 /// A validated completed calculation. History is optional app data, never input
@@ -12,17 +13,23 @@ class StoredCalculation {
     required this.id,
     required this.equation,
     required this.result,
+    this.rawResult,
+    this.rawExpression,
   });
 
   final int id;
   final String equation;
   final String result;
+  final String? rawResult;
+  final String? rawExpression;
 
   Map<String, Object> toJson() => {
-        'id': id,
-        'equation': equation,
-        'result': result,
-      };
+    'id': id,
+    'equation': equation,
+    'result': result,
+    'rawResult': ?rawResult,
+    'rawExpression': ?rawExpression,
+  };
 }
 
 class HistoryStorage {
@@ -35,13 +42,14 @@ class HistoryStorage {
   static const preferencesKey = 'calculator_history_v1';
   static const maxEntries = 100;
   static const maxId = 0x1fffffffffffff;
+  static const _currentVersion = 2;
   static const _maxPayloadLength = 64 * 1024;
   static const _maxNumberLength = 64;
   static const _numberPattern =
       r'-?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?';
   static final _number = RegExp('^$_numberPattern\$');
-  static final _equation = RegExp(
-    '^($_numberPattern) ([+×÷-]) ($_numberPattern) =\$',
+  static final _binaryEquation = RegExp(
+    '^($_numberPattern) [+×÷-] ($_numberPattern)(%?) =\$',
   );
 
   final SharedPreferences? Function() _preferences;
@@ -56,31 +64,67 @@ class HistoryStorage {
       _number.hasMatch(value) &&
       (double.tryParse(value)?.isFinite ?? false);
 
-  static bool _isValidEquation(String value) {
+  static bool _isBinaryEquation(String value, {required bool allowPercent}) {
     if (value.length > 140) return false;
-    final match = _equation.firstMatch(value);
+    final match = _binaryEquation.firstMatch(value);
     return match != null &&
+        (allowPercent || match.group(3)!.isEmpty) &&
         isValidNumber(match.group(1)!) &&
-        isValidNumber(match.group(3)!);
+        isValidNumber(match.group(2)!);
   }
 
-  static StoredCalculation? _decodeEntry(Object? value, Set<int> seen) {
+  static bool _isValidEquation(String value, {required bool legacy}) {
+    if (_isBinaryEquation(value, allowPercent: !legacy)) return true;
+    if (legacy ||
+        value.length > HistoryExpression.maxLength + 2 ||
+        !value.endsWith(' =')) {
+      return false;
+    }
+    final expression = HistoryExpression.fromEquation(value);
+    if (expression != HistoryExpression.normalize(expression)) return false;
+    try {
+      HistoryExpression.evaluate(expression);
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
+
+  static StoredCalculation? _decodeEntry(
+    Object? value,
+    Set<int> seen, {
+    required bool legacy,
+  }) {
     if (value is! Map) return null;
     final id = value['id'];
     final equation = value['equation'];
     final result = value['result'];
+    final rawResult = legacy ? null : value['rawResult'];
+    final rawExpression = legacy ? null : value['rawExpression'];
     if (id is! int ||
         id < 0 ||
         id > maxId ||
         seen.contains(id) ||
         equation is! String ||
-        !_isValidEquation(equation) ||
+        !_isValidEquation(equation, legacy: legacy) ||
         result is! String ||
-        !isValidNumber(result)) {
+        !isValidNumber(result) ||
+        (rawResult != null &&
+            (rawResult is! String || !isValidNumber(rawResult))) ||
+        (rawExpression != null &&
+            (rawExpression is! String ||
+                !_isBinaryEquation(equation, allowPercent: true) ||
+                !_isBinaryEquation('$rawExpression =', allowPercent: true)))) {
       return null;
     }
     seen.add(id);
-    return StoredCalculation(id: id, equation: equation, result: result);
+    return StoredCalculation(
+      id: id,
+      equation: equation,
+      result: result,
+      rawResult: rawResult as String?,
+      rawExpression: rawExpression as String?,
+    );
   }
 
   /// Reads only the already-cached preferences. No platform call or wait is
@@ -90,15 +134,15 @@ class HistoryStorage {
       final raw = _preferences()?.get(preferencesKey);
       if (raw is! String || raw.length > _maxPayloadLength) return const [];
       final decoded = jsonDecode(raw);
-      if (decoded is! Map ||
-          decoded['version'] != 1 ||
-          decoded['entries'] is! List) {
+      if (decoded is! Map || decoded['entries'] is! List) return const [];
+      final version = decoded['version'];
+      if (version is! int || (version != 1 && version != _currentVersion)) {
         return const [];
       }
       final result = <StoredCalculation>[];
       final seen = <int>{};
       for (final candidate in decoded['entries'] as List) {
-        final entry = _decodeEntry(candidate, seen);
+        final entry = _decodeEntry(candidate, seen, legacy: version == 1);
         if (entry != null) result.add(entry);
         if (result.length == maxEntries) break;
       }
@@ -118,13 +162,13 @@ class HistoryStorage {
       final validated = <Map<String, Object>>[];
       final seen = <int>{};
       for (final candidate in entries) {
-        final entry = _decodeEntry(candidate.toJson(), seen);
+        final entry = _decodeEntry(candidate.toJson(), seen, legacy: false);
         if (entry != null) validated.add(entry.toJson());
         if (validated.length == maxEntries) break;
       }
       _pending = _PendingHistoryWrite(
         preferences,
-        jsonEncode({'version': 1, 'entries': validated}),
+        jsonEncode({'version': _currentVersion, 'entries': validated}),
       );
       _idle ??= Completer<void>();
       if (!_writing) unawaited(_drain());

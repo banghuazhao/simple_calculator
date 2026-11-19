@@ -19,6 +19,7 @@ import 'package:simple_calculator/util/storage_manager.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
 const _bulkKey = ValueKey('history-copy-bulk');
+const _tsvKey = ValueKey('history-copy-tsv');
 const _allHistory = '8 ÷ 2 = 4\n4 × 5 = 20\n1 + 2 = 3';
 
 Widget _harness({Locale locale = const Locale('en')}) {
@@ -174,6 +175,74 @@ void main() {
     await tester.pumpAndSettle();
     expect(copies, ['4 × 5 = 20', _allHistory, '8 ÷ 2 = 4']);
     expect(Processor.historyLog, hasLength(3));
+    expect(state.current, '77');
+  });
+
+  testWidgets('TSV copies expression and result columns for visible rows', (
+    tester,
+  ) async {
+    final copies = <String>[];
+    mockClipboard(tester, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copies.add((call.arguments as Map)['text'] as String);
+      }
+      return null;
+    });
+    await _open(tester);
+    expect(find.byTooltip(S.current.historyCopyAsTsv), findsOneWidget);
+    await tester.tap(find.byKey(_tsvKey));
+    await tester.pumpAndSettle();
+    final search = find.byKey(const ValueKey('history-search'));
+    await tester.enterText(search, '4*5');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_tsvKey));
+    await tester.pumpAndSettle();
+    await tester.enterText(search, 'missing');
+    await tester.pumpAndSettle();
+    expect(tester.widget<IconButton>(find.byKey(_tsvKey)).onPressed, isNull);
+    expect(copies, ['8 ÷ 2\t4\n4 × 5\t20\n1 + 2\t3', '4 × 5\t20']);
+    expect(state.current, '77');
+  });
+
+  testWidgets('editing history validates and saves a separate calculation', (
+    tester,
+  ) async {
+    await _open(tester);
+    final strings = S.current;
+    await tester.enterText(find.byKey(const ValueKey('history-search')), '4*5');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(strings.historyEntryActions));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(strings.historyEditCalculation));
+    await tester.pumpAndSettle();
+
+    final editor = find.byKey(const ValueKey('history-editor-expression'));
+    final calculate = find.widgetWithText(
+      FilledButton,
+      strings.scientificEvaluate,
+    );
+    expect(tester.widget<TextField>(editor).controller!.text, '4 × 5');
+    await tester.enterText(editor, '1 / 0');
+    await tester.tap(calculate);
+    await tester.pumpAndSettle();
+    expect(find.text(strings.historyInvalidExpression), findsOneWidget);
+    expect(Processor.historyLog, hasLength(3));
+    expect(state.current, '77');
+
+    await tester.enterText(editor, '(4 + 6) ÷ 2');
+    await tester.tap(calculate);
+    await tester.pumpAndSettle();
+    expect(find.byType(HistorySheet), findsNothing);
+    expect(Processor.historyLog, hasLength(4));
+    expect(Processor.historyLog.first.equation, '(4 + 6) ÷ 2 =');
+    expect(Processor.historyLog.first.result, '5');
+    expect(
+      Processor.historyLog.map((entry) => entry.equation),
+      contains('4 × 5 ='),
+    );
+    expect(state.current, '5');
+    Processor.undo();
+    await tester.pumpAndSettle();
     expect(state.current, '77');
   });
 

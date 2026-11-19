@@ -5,25 +5,50 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_calculator/premium/expression_engine.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 
+class FormulaInputMetadata {
+  const FormulaInputMetadata({this.label = '', this.unit = ''});
+
+  final String label;
+  final String unit;
+
+  Map<String, String> toJson() => {
+    if (label.isNotEmpty) 'label': label,
+    if (unit.isNotEmpty) 'unit': unit,
+  };
+}
+
 class SavedFormula {
   SavedFormula({
     required this.name,
     required this.expression,
     required Map<String, double> baseline,
     required Map<String, double> alternate,
-  }) : baseline = Map.unmodifiable(baseline),
+    Map<String, FormulaInputMetadata> inputMetadata = const {},
+    this.baselineName = '',
+    this.alternateName = '',
+  }) : inputMetadata = Map.unmodifiable(inputMetadata),
+       baseline = Map.unmodifiable(baseline),
        alternate = Map.unmodifiable(alternate);
 
   final String name;
   final String expression;
   final Map<String, double> baseline;
   final Map<String, double> alternate;
+  final Map<String, FormulaInputMetadata> inputMetadata;
+  final String baselineName;
+  final String alternateName;
 
   Map<String, Object> toJson() => {
     'name': name,
     'expression': expression,
     'baseline': baseline,
     'alternate': alternate,
+    if (inputMetadata.isNotEmpty)
+      'inputMetadata': inputMetadata.map(
+        (name, metadata) => MapEntry(name, metadata.toJson()),
+      ),
+    if (baselineName.isNotEmpty) 'baselineName': baselineName,
+    if (alternateName.isNotEmpty) 'alternateName': alternateName,
   };
 }
 
@@ -37,6 +62,8 @@ class FormulaStorage {
   static const maxInputs = 12;
   static const maxNameLength = 80;
   static const maxValueLength = 48;
+  static const maxInputLabelLength = 60;
+  static const maxUnitLength = 24;
   static const _maxPayloadLength = 128 * 1024;
 
   final SharedPreferences? Function() _preferences;
@@ -71,13 +98,56 @@ class FormulaStorage {
 
     final baseline = _decodeValues(entry['baseline'], variables);
     final alternate = _decodeValues(entry['alternate'], variables);
-    if (baseline == null || alternate == null) return null;
+    final inputMetadata = _decodeInputMetadata(
+      entry['inputMetadata'],
+      variables,
+    );
+    final baselineName = _optionalText(entry['baselineName'], maxNameLength);
+    final alternateName = _optionalText(entry['alternateName'], maxNameLength);
+    if (baseline == null ||
+        alternate == null ||
+        inputMetadata == null ||
+        baselineName == null ||
+        alternateName == null) {
+      return null;
+    }
     return SavedFormula(
       name: name,
       expression: expression,
       baseline: baseline,
       alternate: alternate,
+      inputMetadata: inputMetadata,
+      baselineName: baselineName,
+      alternateName: alternateName,
     );
+  }
+
+  static Map<String, FormulaInputMetadata>? _decodeInputMetadata(
+    Object? input,
+    Set<String> names,
+  ) {
+    if (input == null) return const {};
+    if (input is! Map || input.length > names.length) return null;
+    final metadata = <String, FormulaInputMetadata>{};
+    for (final entry in input.entries) {
+      final name = entry.key;
+      final details = entry.value;
+      if (name is! String || !names.contains(name) || details is! Map) {
+        return null;
+      }
+      final label = _optionalText(details['label'], maxInputLabelLength);
+      final unit = _optionalText(details['unit'], maxUnitLength);
+      if (label == null || unit == null) return null;
+      if (label.isNotEmpty || unit.isNotEmpty) {
+        metadata[name] = FormulaInputMetadata(label: label, unit: unit);
+      }
+    }
+    return metadata;
+  }
+
+  static String? _optionalText(Object? value, int maxLength) {
+    if (value == null) return '';
+    return value is String && value.length <= maxLength ? value.trim() : null;
   }
 
   static Map<String, double>? _decodeValues(Object? input, Set<String> names) {

@@ -77,7 +77,7 @@ void main() {
           'not json',
           '[]',
           '{}',
-          _payload([_entry(1).toJson()], version: 2),
+          _payload([_entry(1).toJson()], version: 3),
           jsonEncode({'version': 1, 'entries': 'wrong'}),
         ]) {
           if (saved == null) {
@@ -89,6 +89,42 @@ void main() {
         }
       },
     );
+
+    test('v1 history is retained alongside edited v2 calculations', () async {
+      final legacy = _entry(1);
+      preferences.values[HistoryStorage.preferencesKey] = _payload([
+        legacy.toJson(),
+      ]);
+      await storage.save([
+        const StoredCalculation(id: 4, equation: '220 + 10% =', result: '242'),
+        const StoredCalculation(
+          id: 3,
+          equation: '(2 + 3) ÷ 9 =',
+          result: '0.555555555555556',
+          rawResult: '0.5555555555555556',
+        ),
+        const StoredCalculation(
+          id: 2,
+          equation: '0.333333333333333 × 3 =',
+          result: '1',
+          rawExpression: '0.3333333333333333 × 3',
+        ),
+        StoredCalculation(id: 5, equation: '2 + e =', result: '4'),
+        StoredCalculation(id: 6, equation: '1\t+ 2 =', result: '3'),
+        ...storage.load(),
+      ]);
+
+      final entries = storage.load();
+      expect(entries.map((entry) => entry.id), [4, 3, 2, 1]);
+      expect(entries[1].rawResult, '0.5555555555555556');
+      expect(entries[2].rawExpression, '0.3333333333333333 × 3');
+      expect(entries.last.toJson(), legacy.toJson());
+      expect(
+        (jsonDecode(preferences.values[HistoryStorage.preferencesKey] as String)
+            as Map)['version'],
+        2,
+      );
+    });
 
     test(
       'invalid records are skipped while valid finite values are retained',
