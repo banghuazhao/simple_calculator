@@ -20,14 +20,20 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(alternate, baseline) =>
+  static String m0(amount) => "1 person pays ${amount}";
+
+  static String m1(people, amount) => "${people} people pay ${amount}";
+
+  static String m2(price, unit) => "${price} per ${unit}";
+
+  static String m3(alternate, baseline) =>
       "Difference (${alternate} − ${baseline})";
 
-  static String m1(message, position) => "${message} (character ${position})";
+  static String m4(message, position) => "${message} (character ${position})";
 
-  static String m2(name) => "The function ${name} is unknown.";
+  static String m5(name) => "The function ${name} is unknown.";
 
-  static String m3(name) => "Replace ${name} with a number or Ans.";
+  static String m6(name) => "Replace ${name} with a number or Ans.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -146,8 +152,57 @@ class MessageLookup extends MessageLookupByLibrary {
       "Delete calculation",
     ),
     "divide": MessageLookupByLibrary.simpleMessage("Divide"),
+    "editFirstOperand": MessageLookupByLibrary.simpleMessage(
+      "Edit first number",
+    ),
+    "editSecondOperand": MessageLookupByLibrary.simpleMessage(
+      "Edit second number",
+    ),
     "equals": MessageLookupByLibrary.simpleMessage("Equals"),
     "error": MessageLookupByLibrary.simpleMessage("Error"),
+    "everydayBill": MessageLookupByLibrary.simpleMessage("Bill amount"),
+    "everydayBillTotal": MessageLookupByLibrary.simpleMessage("Total with tip"),
+    "everydayCount": MessageLookupByLibrary.simpleMessage("Count"),
+    "everydayCountError": MessageLookupByLibrary.simpleMessage(
+      "Enter a positive whole number.",
+    ),
+    "everydayEach": MessageLookupByLibrary.simpleMessage("item"),
+    "everydayEqualPrice": MessageLookupByLibrary.simpleMessage(
+      "Both items have the same unit price.",
+    ),
+    "everydayItemA": MessageLookupByLibrary.simpleMessage("Item A"),
+    "everydayItemACheaper": MessageLookupByLibrary.simpleMessage(
+      "Item A costs less per unit.",
+    ),
+    "everydayItemB": MessageLookupByLibrary.simpleMessage("Item B"),
+    "everydayItemBCheaper": MessageLookupByLibrary.simpleMessage(
+      "Item B costs less per unit.",
+    ),
+    "everydayMoneyError": MessageLookupByLibrary.simpleMessage(
+      "Enter a non-negative amount with up to two decimal places.",
+    ),
+    "everydayNonnegativeError": MessageLookupByLibrary.simpleMessage(
+      "Enter a non-negative number.",
+    ),
+    "everydayOnePersonPays": m0,
+    "everydayPackageSize": MessageLookupByLibrary.simpleMessage("Package size"),
+    "everydayPeople": MessageLookupByLibrary.simpleMessage("Number of people"),
+    "everydayPeoplePay": m1,
+    "everydayPerPerson": MessageLookupByLibrary.simpleMessage("Per person"),
+    "everydayPrice": MessageLookupByLibrary.simpleMessage("Price"),
+    "everydaySizeError": MessageLookupByLibrary.simpleMessage(
+      "Enter a size greater than zero.",
+    ),
+    "everydayTipAmount": MessageLookupByLibrary.simpleMessage("Tip amount"),
+    "everydayTipPercent": MessageLookupByLibrary.simpleMessage("Tip (%)"),
+    "everydayTipSplitter": MessageLookupByLibrary.simpleMessage(
+      "Tip and bill splitter",
+    ),
+    "everydayTools": MessageLookupByLibrary.simpleMessage("Everyday tools"),
+    "everydayUnitCost": m2,
+    "everydayUnitPrice": MessageLookupByLibrary.simpleMessage(
+      "Unit price comparison",
+    ),
     "formulaAlternate": MessageLookupByLibrary.simpleMessage("Alternate"),
     "formulaAlternateName": MessageLookupByLibrary.simpleMessage(
       "Alternate scenario name",
@@ -200,7 +255,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You can save up to 30 formulas.",
     ),
     "formulaName": MessageLookupByLibrary.simpleMessage("Formula name"),
-    "formulaNamedDifference": m0,
+    "formulaNamedDifference": m3,
     "formulaNew": MessageLookupByLibrary.simpleMessage("New formula"),
     "formulaNoResult": MessageLookupByLibrary.simpleMessage("No result"),
     "formulaSave": MessageLookupByLibrary.simpleMessage("Save"),
@@ -247,13 +302,19 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "helpBasics": MessageLookupByLibrary.simpleMessage("Using the calculator"),
     "helpConverter": MessageLookupByLibrary.simpleMessage(
-      "Open Unit converter from the toolbar. Choose your units, enter a value, and use the result in your next calculation.",
+      "Choose Unit converter in Everyday tools, enter a value, and send the result back to the calculator.",
     ),
     "helpCopy": MessageLookupByLibrary.simpleMessage(
-      "Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.",
+      "Tap the result to copy the number. After pressing =, use the copy button beside the equation to copy the full calculation.",
     ),
     "helpCopyHistory": MessageLookupByLibrary.simpleMessage(
       "Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.",
+    ),
+    "helpEditOperands": MessageLookupByLibrary.simpleMessage(
+      "Tap either number above the main display to correct it. Use the copy button beside a completed equation to copy the calculation.",
+    ),
+    "helpEverydayTools": MessageLookupByLibrary.simpleMessage(
+      "Open Everyday tools from the toolbar to split a bill, compare unit prices, or convert units.",
     ),
     "helpHistory": MessageLookupByLibrary.simpleMessage(
       "History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.",
@@ -285,6 +346,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Use stronger contrast for numbers and controls. Your selected theme is kept.",
     ),
     "history": MessageLookupByLibrary.simpleMessage("History"),
+    "historyCalculationName": MessageLookupByLibrary.simpleMessage(
+      "Calculation name",
+    ),
     "historyCopyAsTsv": MessageLookupByLibrary.simpleMessage("Copy as TSV"),
     "historyDeleted": MessageLookupByLibrary.simpleMessage(
       "Calculation deleted",
@@ -301,6 +365,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "historyInvalidExpression": MessageLookupByLibrary.simpleMessage(
       "Enter a valid arithmetic expression.",
     ),
+    "historyNameCalculation": MessageLookupByLibrary.simpleMessage(
+      "Name calculation",
+    ),
+    "historyNameTooLong": MessageLookupByLibrary.simpleMessage(
+      "Use a shorter name.",
+    ),
+    "historyPinCalculation": MessageLookupByLibrary.simpleMessage(
+      "Pin calculation",
+    ),
+    "historyPinLimit": MessageLookupByLibrary.simpleMessage(
+      "You can pin up to 25 calculations.",
+    ),
+    "historyPinned": MessageLookupByLibrary.simpleMessage("Pinned"),
+    "historyRenameCalculation": MessageLookupByLibrary.simpleMessage(
+      "Rename calculation",
+    ),
+    "historyUnpinCalculation": MessageLookupByLibrary.simpleMessage(
+      "Unpin calculation",
+    ),
     "inputSettings": MessageLookupByLibrary.simpleMessage("Input settings"),
     "invalidPaste": MessageLookupByLibrary.simpleMessage(
       "Copy a valid number to paste.",
@@ -311,6 +394,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noHistoryMatches": MessageLookupByLibrary.simpleMessage(
       "No matching calculations",
+    ),
+    "operandChanged": MessageLookupByLibrary.simpleMessage(
+      "The calculation changed. Close this dialog and tap the number again.",
     ),
     "pasteNumber": MessageLookupByLibrary.simpleMessage("Paste number"),
     "pasted": MessageLookupByLibrary.simpleMessage("Number pasted"),
@@ -389,7 +475,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "scientificEngineeringNotation": MessageLookupByLibrary.simpleMessage(
       "Engineering notation",
     ),
-    "scientificErrorPosition": m1,
+    "scientificErrorPosition": m4,
     "scientificEvaluate": MessageLookupByLibrary.simpleMessage("Calculate"),
     "scientificExponentEntry": MessageLookupByLibrary.simpleMessage(
       "Scientific exponent",
@@ -439,8 +525,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "scientificTooLong": MessageLookupByLibrary.simpleMessage(
       "Shorten the expression.",
     ),
-    "scientificUnknownFunction": m2,
-    "scientificUnknownVariable": m3,
+    "scientificUnknownFunction": m5,
+    "scientificUnknownVariable": m6,
     "searchHistory": MessageLookupByLibrary.simpleMessage("Search history"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
     "shakeToUndo": MessageLookupByLibrary.simpleMessage("Shake to undo"),

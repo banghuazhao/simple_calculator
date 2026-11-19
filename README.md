@@ -16,6 +16,9 @@ A clean, themeable calculator app built with Flutter — available on iOS.
 - **Copy and paste** — tap the display to copy the unformatted number, copy a full calculation from history, or paste a number (plain, thousands-grouped, or scientific notation)
 - **Bulk history copying** — copy all saved calculations or just the current search matches as plain text or spreadsheet-ready TSV
 - **Percentage adjustments** — add or subtract a percentage of a value, such as `200 + 10% = 220`
+- **Resume calculations** — continue where you left off after restarting and tap an operand to correct it
+- **Pinned history** — pin and name frequently used calculations so they're easy to find
+- **Everyday tools** — calculate a tip, split a bill to the cent, or compare unit prices across package sizes
 - **Offline unit converter** — convert length, mass, volume, and temperature and use the result in the calculator
 - **Reusable formulas** — open saved Premium formulas to compare inputs, with custom input labels, units, and scenario names
 - **Scientific calculator** — enter expressions with a touch keypad, reuse the last answer, switch angle units and engineering notation, edit past calculations, and graph functions with a value table and interval-based root finding

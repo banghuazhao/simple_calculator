@@ -2,114 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/processor.dart';
+import 'package:simple_calculator/util/measurement_units.dart';
 import 'package:simple_calculator/util/theme_model.dart';
-
-enum _Quantity {
-  length,
-  mass,
-  volume,
-  temperature;
-
-  List<_Unit> get units => switch (this) {
-    length => const [
-      _Unit.meter,
-      _Unit.foot,
-      _Unit.centimeter,
-      _Unit.inch,
-      _Unit.kilometer,
-      _Unit.mile,
-    ],
-    mass => const [
-      _Unit.kilogram,
-      _Unit.pound,
-      _Unit.gram,
-      _Unit.ounce,
-      _Unit.milligram,
-    ],
-    volume => const [
-      _Unit.liter,
-      _Unit.usGallon,
-      _Unit.milliliter,
-      _Unit.usCup,
-      _Unit.usFluidOunce,
-    ],
-    temperature => const [_Unit.celsius, _Unit.fahrenheit, _Unit.kelvin],
-  };
-
-  String label(S strings) => switch (this) {
-    length => strings.converterLength,
-    mass => strings.converterMass,
-    volume => strings.converterVolume,
-    temperature => strings.converterTemperature,
-  };
-}
-
-enum _Unit {
-  meter('m', 1),
-  foot('ft', 0.3048),
-  centimeter('cm', 0.01),
-  inch('in', 0.0254),
-  kilometer('km', 1000),
-  mile('mi', 1609.344),
-  kilogram('kg', 1),
-  pound('lb', 0.45359237),
-  gram('g', 0.001),
-  ounce('oz', 0.028349523125),
-  milligram('mg', 0.000001),
-  liter('L', 1),
-  usGallon('US gal', 3.785411784),
-  milliliter('mL', 0.001),
-  usCup('US cup', 0.2365882365),
-  usFluidOunce('US fl oz', 0.0295735295625),
-  celsius('°C'),
-  fahrenheit('°F'),
-  kelvin('K');
-
-  const _Unit(this.symbol, [this.factor = 1]);
-
-  final String symbol;
-  final double factor;
-
-  String label(S strings) => switch (this) {
-    meter => strings.converterMeter,
-    foot => strings.converterFoot,
-    centimeter => strings.converterCentimeter,
-    inch => strings.converterInch,
-    kilometer => strings.converterKilometer,
-    mile => strings.converterMile,
-    kilogram => strings.converterKilogram,
-    pound => strings.converterPound,
-    gram => strings.converterGram,
-    ounce => strings.converterOunce,
-    milligram => strings.converterMilligram,
-    liter => strings.converterLiter,
-    usGallon => strings.converterUsGallon,
-    milliliter => strings.converterMilliliter,
-    usCup => strings.converterUsCup,
-    usFluidOunce => strings.converterUsFluidOunce,
-    celsius => strings.converterCelsius,
-    fahrenheit => strings.converterFahrenheit,
-    kelvin => strings.converterKelvin,
-  };
-
-  double convertTo(double amount, _Unit target, _Quantity quantity) {
-    if (this == target) return amount;
-    if (quantity != _Quantity.temperature) {
-      return amount * (factor / target.factor);
-    }
-
-    final celsiusAmount = switch (this) {
-      fahrenheit => (amount - 32) * (5 / 9),
-      kelvin => amount - 273.15,
-      _ => amount,
-    };
-    return switch (target) {
-      fahrenheit => celsiusAmount * (9 / 5) + 32,
-      kelvin => celsiusAmount + 273.15,
-      _ => celsiusAmount,
-    };
-  }
-}
 
 class UnitConverterPage extends StatefulWidget {
   const UnitConverterPage({super.key});
@@ -120,9 +14,9 @@ class UnitConverterPage extends StatefulWidget {
 
 class _UnitConverterPageState extends State<UnitConverterPage> {
   final _amount = TextEditingController();
-  _Quantity _quantity = _Quantity.length;
-  _Unit _from = _Unit.meter;
-  _Unit _to = _Unit.foot;
+  MeasurementQuantity _quantity = MeasurementQuantity.length;
+  MeasurementUnit _from = MeasurementUnit.meter;
+  MeasurementUnit _to = MeasurementUnit.foot;
 
   @override
   void dispose() {
@@ -130,7 +24,7 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
     super.dispose();
   }
 
-  void _setQuantity(_Quantity quantity) {
+  void _setQuantity(MeasurementQuantity quantity) {
     if (_quantity == quantity) return;
     setState(() {
       _quantity = quantity;
@@ -156,14 +50,14 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
 
   Widget _unitField(
     String label,
-    _Unit value,
-    ValueChanged<_Unit> onChanged,
+    MeasurementUnit value,
+    ValueChanged<MeasurementUnit> onChanged,
     S strings,
   ) {
     return InputDecorator(
       decoration: InputDecoration(labelText: label),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<_Unit>(
+        child: DropdownButton<MeasurementUnit>(
           value: value,
           isExpanded: true,
           onChanged: (unit) {
@@ -237,7 +131,7 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
                   Wrap(
                     spacing: 8,
                     children: [
-                      for (final quantity in _Quantity.values)
+                      for (final quantity in MeasurementQuantity.values)
                         ChoiceChip(
                           label: Text(quantity.label(strings)),
                           selected: _quantity == quantity,
@@ -347,7 +241,9 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
                     onPressed: validResult
                         ? () {
                             Processor.useResult(result);
-                            Navigator.of(context).pop();
+                            Navigator.of(
+                              context,
+                            ).popUntil((route) => route.isFirst);
                           }
                         : null,
                     icon: const Icon(Icons.calculate_outlined),

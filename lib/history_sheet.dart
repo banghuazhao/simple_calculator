@@ -8,10 +8,11 @@ import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/history_expression.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/clipboard_helper.dart';
+import 'package:simple_calculator/util/history_storage.dart';
 import 'package:simple_calculator/util/input_feedback.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
-enum _HistoryEntryAction { edit, delete }
+enum _HistoryEntryAction { edit, pin, name, delete }
 
 class HistorySheet extends StatefulWidget {
   const HistorySheet({super.key});
@@ -51,6 +52,27 @@ class _HistorySheetState extends State<HistorySheet> {
     if (applied != true || !mounted || !sheetContext.mounted) return;
     _deletionRevision++;
     Navigator.of(sheetContext).pop();
+  }
+
+  void _pin(BuildContext context, HistoryEntry entry) {
+    if (!entry.isPinned && !Processor.canPinHistoryEntry) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(S.of(context).historyPinLimit)));
+      return;
+    }
+    if (Processor.setHistoryPinned(entry.id, !entry.isPinned)) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _name(BuildContext context, HistoryEntry entry) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => _HistoryNameDialog(name: entry.name),
+    );
+    if (!mounted || name == null) return;
+    if (Processor.renameHistoryEntry(entry.id, name)) setState(() {});
   }
 
   Future<void> _clearHistory(BuildContext sheetContext) async {
@@ -115,6 +137,7 @@ class _HistorySheetState extends State<HistorySheet> {
   Widget _entry(BuildContext context, HistoryEntry entry, ThemeModel model) {
     final strings = S.of(context);
     final textColor = model.textColor1;
+    final name = entry.name;
     return Dismissible(
       key: ValueKey(entry.id),
       direction: DismissDirection.endToStart,
@@ -152,6 +175,37 @@ class _HistorySheetState extends State<HistorySheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
+                      if (entry.isPinned || name != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              if (entry.isPinned)
+                                Icon(
+                                  Icons.push_pin,
+                                  size: 16,
+                                  color: textColor,
+                                  semanticLabel: strings.historyPinned,
+                                ),
+                              if (name != null) ...[
+                                if (entry.isPinned) const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.end,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       Text(
                         entry.equation,
                         style: TextStyle(
@@ -206,25 +260,38 @@ class _HistorySheetState extends State<HistorySheet> {
                     switch (action) {
                       case _HistoryEntryAction.edit:
                         unawaited(_edit(context, entry));
+                      case _HistoryEntryAction.pin:
+                        _pin(context, entry);
+                      case _HistoryEntryAction.name:
+                        unawaited(_name(context, entry));
                       case _HistoryEntryAction.delete:
                         _delete(context, entry);
                     }
                   },
                   itemBuilder: (_) => [
-                    PopupMenuItem(
-                      value: _HistoryEntryAction.edit,
-                      child: Text(
+                    for (final (action, label) in [
+                      (
+                        _HistoryEntryAction.edit,
                         strings.historyEditCalculation,
-                        style: TextStyle(color: textColor),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: _HistoryEntryAction.delete,
-                      child: Text(
-                        strings.deleteCalculation,
-                        style: TextStyle(color: textColor),
+                      (
+                        _HistoryEntryAction.pin,
+                        entry.isPinned
+                            ? strings.historyUnpinCalculation
+                            : strings.historyPinCalculation,
                       ),
-                    ),
+                      (
+                        _HistoryEntryAction.name,
+                        name == null
+                            ? strings.historyNameCalculation
+                            : strings.historyRenameCalculation,
+                      ),
+                      (_HistoryEntryAction.delete, strings.deleteCalculation),
+                    ])
+                      PopupMenuItem(
+                        value: action,
+                        child: Text(label, style: TextStyle(color: textColor)),
+                      ),
                   ],
                 ),
               ),
@@ -238,7 +305,8 @@ class _HistorySheetState extends State<HistorySheet> {
   Widget _contents(BuildContext context, ThemeModel model) {
     final strings = S.of(context);
     final entries = Processor.historyLog;
-    final query = _searchable(_query).replaceAllMapped(_searchNumber, (match) {
+    final query = _searchable(_query);
+    final numericQuery = query.replaceAllMapped(_searchNumber, (match) {
       final number = match[0]!;
       return _groupedNumber.hasMatch(number)
           ? number.replaceAll(',', '')
@@ -248,9 +316,11 @@ class _HistorySheetState extends State<HistorySheet> {
         ? entries
         : entries
               .where(
-                (entry) => _searchable(
-                  '${entry.equation} ${entry.result}',
-                ).contains(query),
+                (entry) =>
+                    _searchable(
+                      '${entry.equation} ${entry.result}',
+                    ).contains(numericQuery) ||
+                    _searchable(entry.name ?? '').contains(query),
               )
               .toList();
     final textColor = model.textColor1;
@@ -415,6 +485,12 @@ class _HistorySheetState extends State<HistorySheet> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             sliver: SliverList.separated(
               itemCount: filtered.length,
+              findItemIndexCallback: (key) {
+                final index = filtered.indexWhere(
+                  (entry) => ValueKey(entry.id) == key,
+                );
+                return index < 0 ? null : index;
+              },
               itemBuilder: (_, index) =>
                   _entry(context, filtered[index], model),
               separatorBuilder: (_, _) => Divider(
@@ -463,6 +539,82 @@ class _HistorySheetState extends State<HistorySheet> {
           ),
         );
       },
+    );
+  }
+}
+
+class _HistoryNameDialog extends StatefulWidget {
+  const _HistoryNameDialog({required this.name});
+
+  final String? name;
+
+  @override
+  State<_HistoryNameDialog> createState() => _HistoryNameDialogState();
+}
+
+class _HistoryNameDialogState extends State<_HistoryNameDialog> {
+  final _form = GlobalKey<FormState>();
+  late String _name = widget.name ?? '';
+
+  void _save() {
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    if (_form.currentState?.validate() == true) {
+      Navigator.of(context).pop(HistoryStorage.normalizeName(_name));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = S.of(context);
+    final model = context.watch<ThemeModel>();
+    final textStyle = TextStyle(color: model.readableTextColor);
+    return AlertDialog(
+      scrollable: true,
+      backgroundColor: model.backgroundColor,
+      title: Text(
+        widget.name == null
+            ? strings.historyNameCalculation
+            : strings.historyRenameCalculation,
+        style: textStyle,
+      ),
+      content: Form(
+        key: _form,
+        child: TextFormField(
+          key: const ValueKey('history-calculation-name'),
+          initialValue: _name,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+          textInputAction: TextInputAction.done,
+          style: textStyle,
+          onChanged: (value) => _name = value,
+          onFieldSubmitted: (_) => _save(),
+          validator: (value) =>
+              HistoryStorage.normalizeName(value ?? '').length >
+                  HistoryStorage.maxNameLength
+              ? strings.historyNameTooLong
+              : null,
+          decoration: InputDecoration(
+            labelText: strings.historyCalculationName,
+            labelStyle: textStyle,
+            errorStyle: textStyle,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(strings.cancel, style: textStyle),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: model.readableTextColor,
+            foregroundColor: model.backgroundColor,
+          ),
+          onPressed: _save,
+          child: Text(strings.formulaSave),
+        ),
+      ],
     );
   }
 }

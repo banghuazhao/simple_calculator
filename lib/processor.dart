@@ -4,7 +4,28 @@ import 'package:simple_calculator/calculator_key.dart';
 import 'package:simple_calculator/history_expression.dart';
 import 'package:simple_calculator/key_controller.dart';
 import 'package:simple_calculator/key_symbol.dart';
+import 'package:simple_calculator/util/calculator_draft_storage.dart';
 import 'package:simple_calculator/util/history_storage.dart';
+
+enum OperandPosition { left, right }
+
+enum OperandCorrection { applied, invalid, stale }
+
+/// The value seen when opening the number editor. The revision keeps a dialog
+/// opened for an older calculation from changing the current one.
+class OperandEdit {
+  const OperandEdit._({
+    required this.position,
+    required this.display,
+    required this.input,
+    required int revision,
+  }) : _revision = revision;
+
+  final OperandPosition position;
+  final String display;
+  final String input;
+  final int _revision;
+}
 
 /// Structured output emitted on every state change.
 class CalcState {
@@ -12,12 +33,20 @@ class CalcState {
   final String history; // small equation line above (empty when not applicable)
   final bool isResult; // true when showing a freshly computed result
   final bool canUndo;
+  final OperandEdit? leftOperand;
+  final OperandEdit? rightOperand;
+  final String? binaryOperator;
+  final bool rightOperandIsPercent;
 
   const CalcState({
     required this.current,
     required this.history,
     this.isResult = false,
     this.canUndo = false,
+    this.leftOperand,
+    this.rightOperand,
+    this.binaryOperator,
+    this.rightOperandIsPercent = false,
   });
 }
 
@@ -28,17 +57,32 @@ class HistoryEntry {
   final String result;
   final String? rawResult;
   final String? rawExpression;
+  final bool isPinned;
+  final String? name;
   const HistoryEntry({
     required this.id,
     required this.equation,
     required this.result,
     this.rawResult,
     this.rawExpression,
+    this.isPinned = false,
+    this.name,
   });
 
   String get preciseResult => rawResult ?? result;
   String get expression =>
       rawExpression ?? HistoryExpression.fromEquation(equation);
+
+  HistoryEntry _withDetails({required bool isPinned, required String? name}) =>
+      HistoryEntry(
+        id: id,
+        equation: equation,
+        result: result,
+        rawResult: rawResult,
+        rawExpression: rawExpression,
+        isPinned: isPinned,
+        name: name,
+      );
 }
 
 /// A removed history entry and where it was, so deletion can be undone.
@@ -50,27 +94,19 @@ class HistoryDeletion {
 
 // Text remains editable and readable. Keep a separate value when formatting
 // the text for the display would lose precision for the next operation.
-typedef _Number = ({String text, double? preciseValue});
-typedef _Calculation = ({String equation, _Number number});
-typedef _Snapshot = ({
-  _Number valA,
-  _Number? valB,
-  KeySymbol? op,
-  bool percentB,
-  _Calculation? result,
-});
+typedef _Number = CalculatorNumber;
+typedef _Calculation = CalculatorResult;
+typedef _Snapshot = CalculatorDraft;
 
 abstract class Processor {
   static const _Number _zero = (text: '0', preciseValue: null);
-  static const _Calculation _error = (
-    equation: '',
-    number: (text: 'Error', preciseValue: null),
-  );
+  static const _error = calculatorErrorResult;
   static KeySymbol? _operator;
   static _Number _valA = _zero;
   static _Number? _valB;
   static bool _percentB = false;
   static _Calculation? _result;
+  static int _inputRevision = 0;
 
   static final List<HistoryEntry> _history = [];
   static final List<_Snapshot> _undoStack = [];
@@ -85,31 +121,48 @@ abstract class Processor {
 
   static void refresh() => _controller.add(_calcState);
 
-  /// All completed calculations, newest first.
-  static List<HistoryEntry> get historyLog => List.unmodifiable(_history);
+  /// The latest state is also available synchronously for the first frame.
+  static CalcState get state => _calcState;
+
+  /// Pinned calculations first, newest to oldest within each group.
+  static List<HistoryEntry> get historyLog => List.unmodifiable([
+    ..._history.where((entry) => entry.isPinned),
+    ..._history.where((entry) => !entry.isPinned),
+  ]);
 
   static bool get canUndo => _undoStack.isNotEmpty;
 
   static CalcState get _calcState {
     final result = _result;
-    if (result != null) {
-      return CalcState(
-        current: result.number.text,
-        history: result.equation,
-        isResult: true,
-        canUndo: canUndo,
-      );
-    }
     final operator = _operator;
+    final right = _valB;
     final expression = operator == null
         ? ''
-        : '${_valA.text} ${operator.value}${_percentB ? ' ${_valB!.text}%' : ''}';
+        : '${_valA.text} ${operator.value}${_percentB ? ' ${right!.text}%' : ''}';
+    // A full expression recalled from history has no independently editable
+    // left or right operand. Basic results keep their original operands.
+    final editable = result == null || operator != null || result == _error;
     return CalcState(
-      current: (_valB ?? _valA).text,
-      history: expression,
+      current: result?.number.text ?? (right ?? _valA).text,
+      history: result?.equation ?? expression,
+      isResult: result != null,
       canUndo: canUndo,
+      leftOperand: editable ? _editFor(OperandPosition.left, _valA) : null,
+      rightOperand: right == null
+          ? null
+          : _editFor(OperandPosition.right, right),
+      binaryOperator: operator?.value,
+      rightOperandIsPercent: _percentB,
     );
   }
+
+  static OperandEdit _editFor(OperandPosition position, _Number number) =>
+      OperandEdit._(
+        position: position,
+        display: number.text,
+        input: number.preciseValue?.toString() ?? number.text,
+        revision: _inputRevision,
+      );
 
   static void dispose() => _controller.close();
 
@@ -128,17 +181,40 @@ abstract class Processor {
     if (before == _snapshot) return;
     _undoStack.add(before);
     if (_undoStack.length > 30) _undoStack.removeAt(0);
-    refresh();
+    _publishMutation();
   }
 
   static void undo() {
     if (_undoStack.isEmpty) return;
-    final s = _undoStack.removeLast();
-    _valA = s.valA;
-    _valB = s.valB;
-    _operator = s.op;
-    _percentB = s.percentB;
-    _result = s.result;
+    _applySnapshot(_undoStack.removeLast());
+    _publishMutation();
+  }
+
+  /// Restore the last on-screen draft without replaying its keys or writing
+  /// another history entry. Undo starts a fresh session.
+  static void restoreDraft() {
+    final draft = CalculatorDraftStorage.instance.load();
+    _undoStack.clear();
+    if (draft == null) {
+      _clear();
+    } else {
+      _applySnapshot(draft);
+    }
+    _inputRevision++;
+    refresh();
+  }
+
+  static void _applySnapshot(_Snapshot snapshot) {
+    _valA = snapshot.valA;
+    _valB = snapshot.valB;
+    _operator = snapshot.op;
+    _percentB = snapshot.percentB;
+    _result = snapshot.result;
+  }
+
+  static void _publishMutation() {
+    _inputRevision++;
+    unawaited(CalculatorDraftStorage.instance.save(_snapshot));
     refresh();
   }
 
@@ -147,18 +223,23 @@ abstract class Processor {
   /// Restore completed calculations without changing current input or undo.
   static void restoreHistory() {
     final entries = HistoryStorage.instance.load();
+    var remainingPins = HistoryStorage.maxPinnedEntries;
     _history
       ..clear()
       ..addAll(
-        entries.map(
-          (entry) => HistoryEntry(
+        entries.map((entry) {
+          final isPinned = entry.isPinned && remainingPins > 0;
+          if (isPinned) remainingPins--;
+          return HistoryEntry(
             id: entry.id,
             equation: entry.equation,
             result: entry.result,
             rawResult: entry.rawResult,
             rawExpression: entry.rawExpression,
-          ),
-        ),
+            isPinned: isPinned,
+            name: entry.name,
+          );
+        }),
       );
     _historyIdSeq = 0;
     for (final entry in _history) {
@@ -177,6 +258,8 @@ abstract class Processor {
             result: entry.result,
             rawResult: entry.rawResult,
             rawExpression: entry.rawExpression,
+            isPinned: entry.isPinned,
+            name: entry.name,
           ),
         ),
       ),
@@ -197,6 +280,45 @@ abstract class Processor {
     _saveHistory();
   }
 
+  static bool get canPinHistoryEntry =>
+      _history.where((entry) => entry.isPinned).length <
+      HistoryStorage.maxPinnedEntries;
+
+  static bool setHistoryPinned(int id, bool isPinned) {
+    final index = _history.indexWhere((entry) => entry.id == id);
+    if (index < 0) return false;
+    final entry = _history[index];
+    if (entry.isPinned == isPinned) return true;
+    if (isPinned && !canPinHistoryEntry) return false;
+    _history[index] = entry._withDetails(isPinned: isPinned, name: entry.name);
+    _saveHistory();
+    return true;
+  }
+
+  static bool renameHistoryEntry(int id, String input) {
+    final name = HistoryStorage.normalizeName(input);
+    if (name.length > HistoryStorage.maxNameLength) return false;
+    final index = _history.indexWhere((entry) => entry.id == id);
+    if (index < 0) return false;
+    final entry = _history[index];
+    final updatedName = name.isEmpty ? null : name;
+    if (entry.name == updatedName) return true;
+    _history[index] = entry._withDetails(
+      isPinned: entry.isPinned,
+      name: updatedName,
+    );
+    _saveHistory();
+    return true;
+  }
+
+  static void _trimHistory({int? keepId}) {
+    if (_history.length <= HistoryStorage.maxEntries) return;
+    final oldestUnpinned = _history.lastIndexWhere(
+      (entry) => !entry.isPinned && entry.id != keepId,
+    );
+    _history.removeAt(oldestUnpinned);
+  }
+
   static HistoryDeletion? removeHistoryEntry(int id) {
     final index = _history.indexWhere((e) => e.id == id);
     if (index < 0) return null;
@@ -211,8 +333,12 @@ abstract class Processor {
     final index = deletion.index < _history.length
         ? deletion.index
         : _history.length;
-    _history.insert(index, deletion.entry);
-    if (_history.length > HistoryStorage.maxEntries) _history.removeLast();
+    final original = deletion.entry;
+    final entry = original.isPinned && !canPinHistoryEntry
+        ? original._withDetails(isPinned: false, name: original.name)
+        : original;
+    _history.insert(index, entry);
+    _trimHistory(keepId: entry.id);
     _saveHistory();
     return true;
   }
@@ -236,6 +362,34 @@ abstract class Processor {
   static String? parsePastedNumber(String text) {
     final value = parseNumericInput(text);
     return value == null ? null : formatResult(value);
+  }
+
+  /// Replaces one operand without evaluating the expression. For a completed
+  /// binary calculation this returns to the editable expression, while the
+  /// original result remains in history.
+  static OperandCorrection correctOperand(OperandEdit edit, String text) {
+    if (edit._revision != _inputRevision) return OperandCorrection.stale;
+    final previous = switch (edit.position) {
+      OperandPosition.left => _valA,
+      OperandPosition.right => _valB,
+    };
+    if (previous == null) return OperandCorrection.stale;
+
+    final value = parseNumericInput(text);
+    if (value == null) return OperandCorrection.invalid;
+    if (value == _valueOf(previous)) return OperandCorrection.applied;
+
+    final before = _snapshot;
+    final number = _formattedNumber(value);
+    switch (edit.position) {
+      case OperandPosition.left:
+        _valA = number;
+      case OperandPosition.right:
+        _valB = number;
+    }
+    _result = null;
+    _finishAction(before);
+    return OperandCorrection.applied;
   }
 
   /// Enters a pasted number as the current operand. Returns false (and leaves
@@ -504,7 +658,7 @@ abstract class Processor {
         rawExpression: rawExpression == expression ? null : rawExpression,
       ),
     );
-    if (_history.length > HistoryStorage.maxEntries) _history.removeLast();
+    _trimHistory();
     _saveHistory();
   }
 

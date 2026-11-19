@@ -6,6 +6,13 @@ import 'package:simple_calculator/main.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
+Future<void> _openConverter(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Everyday tools'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(ListTile, 'Unit converter'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('conversion, swap, result reuse, and undo on a phone', (
     tester,
@@ -20,8 +27,7 @@ void main() {
     await tester.tap(find.text('7'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Unit converter'));
-    await tester.pumpAndSettle();
+    await _openConverter(tester);
     await tester.tap(find.text('Temperature'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), '-40');
@@ -63,8 +69,7 @@ void main() {
       );
       await tester.pumpWidget(const CalculatorApp());
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Unit converter'));
-      await tester.pumpAndSettle();
+      await _openConverter(tester);
 
       final field = find.byType(TextField);
     final useResult = find.byWidgetPredicate((widget) => widget is FilledButton);

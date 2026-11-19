@@ -350,29 +350,22 @@ void main() {
       await tester.pumpWidget(const CalculatorApp());
       await tester.pumpAndSettle();
 
-      final copyEquation = find.bySemanticsLabel('Copy calculation');
+      final copyEquation = find.byTooltip('Copy calculation');
       for (final symbol in ['1', '2', '0', '0', '+', '3', '4']) {
         await press(tester, symbol);
       }
       expect(copyEquation, findsNothing);
-      await tester.tap(find.text('1200 +'));
-      await tester.pumpAndSettle();
       expect(clipboardWrites, isEmpty);
 
       await press(tester, '=');
-      final equation = find.text('1200 + 34 =');
-      final equationPosition = tester.getCenter(equation);
       final history = Processor.historyLog;
-      await tester.tap(equation);
+      await tester.tap(copyEquation);
       await tester.pumpAndSettle();
       expect(clipboardWrites, ['1200 + 34 = 1234']);
       expect(find.text('Copied'), findsOneWidget);
 
       final node = tester.getSemantics(copyEquation);
-      expect(
-        node,
-        isSemantics(value: '1200 + 34 =', isButton: true, hasTapAction: true),
-      );
+      expect(node, isSemantics(isButton: true, hasTapAction: true));
       node.owner!.performAction(node.id, SemanticsAction.tap);
       await tester.pumpAndSettle();
       await tester.tap(find.text('1,234'));
@@ -381,13 +374,9 @@ void main() {
       expect(clipboardWrites, expectedCopies);
       expect(Processor.historyLog, history);
 
-      await tester.tap(find.text('÷'));
-      await tester.pump();
-      expect(find.text('1234 ÷'), findsOneWidget);
-      expect(equation, findsOneWidget);
+      await press(tester, '÷');
+      expect(tester.widget<Display>(find.byType(Display)).history, '1234 ÷');
       expect(copyEquation, findsNothing);
-      await tester.tapAt(equationPosition);
-      await tester.pumpAndSettle();
       expect(clipboardWrites, expectedCopies);
 
       await press(tester, '0');
@@ -397,6 +386,92 @@ void main() {
       await tester.tap(find.text('Error'));
       await tester.pumpAndSettle();
       expect(clipboardWrites, expectedCopies);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('an unfinished calculation accepts a corrected operand', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+      for (final symbol in ['1', '2', '+', '3']) {
+        await press(tester, symbol);
+      }
+
+      final editFirst = find.byTooltip('Edit first number');
+      final dialog = find.byType(AlertDialog);
+      final field = find.descendant(
+        of: dialog,
+        matching: find.byType(TextField),
+      );
+      final save = find.descendant(of: dialog, matching: find.text('Save'));
+      await tester.tap(editFirst);
+      await tester.pumpAndSettle();
+      expect(tester.widget<TextField>(field).controller!.text, '12');
+
+      await tester.enterText(field, 'not a number');
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      expect(find.text(S.current.formulaInvalidInput), findsOneWidget);
+      expect(Processor.state.history, '12 +');
+      expect(Processor.historyLog, isEmpty);
+
+      await tester.enterText(field, '21');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(dialog, findsNothing);
+      expect(current(tester), '3');
+      expect(
+        find.descendant(of: editFirst, matching: find.text('21')),
+        findsOneWidget,
+      );
+      expect(Processor.historyLog, isEmpty);
+      await press(tester, '=');
+      expect(current(tester), '24');
+      expect(Processor.historyLog.single.equation, '21 + 3 =');
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('correcting a completed expression keeps its history entry', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const CalculatorApp());
+      await tester.pumpAndSettle();
+      for (final symbol in ['2', '0', '0', '+', '1', '0', '%', '=']) {
+        await press(tester, symbol);
+      }
+      final original = Processor.historyLog.single;
+      expect(current(tester), '220');
+
+      final editSecond = find.byTooltip('Edit second number');
+      final dialog = find.byType(AlertDialog);
+      final field = find.descendant(
+        of: dialog,
+        matching: find.byType(TextField),
+      );
+      final save = find.descendant(of: dialog, matching: find.text('Save'));
+      await tester.tap(editSecond);
+      await tester.pumpAndSettle();
+      expect(tester.widget<TextField>(field).controller!.text, '10');
+      expect(tester.widget<TextField>(field).decoration!.suffixText, '%');
+      await tester.enterText(field, '12');
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+
+      expect(dialog, findsNothing);
+      expect(current(tester), '12');
+      expect(find.byTooltip('Copy calculation'), findsNothing);
+      expect(Processor.historyLog, [original]);
+      await press(tester, '=');
+      expect(current(tester), '224');
+      expect(Processor.historyLog.map((entry) => entry.equation), [
+        '200 + 12% =',
+        '200 + 10% =',
+      ]);
+      await tester.tap(find.byTooltip('Undo'));
+      await tester.pumpAndSettle();
+      expect(current(tester), '12');
+      expect(Processor.historyLog, hasLength(2));
       expect(tester.takeException(), isNull);
     });
 

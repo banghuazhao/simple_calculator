@@ -333,6 +333,60 @@ void main() {
     expect(state.current, '77');
   });
 
+  testWidgets('history pins, names, searches, renames and unpins a row', (
+    tester,
+  ) async {
+    await _open(tester);
+    final strings = S.current;
+    final original = Processor.historyLog.last;
+    final row = find.byKey(ValueKey(original.id));
+    final editName = find.byKey(const ValueKey('history-calculation-name'));
+    final search = find.byKey(const ValueKey('history-search'));
+
+    Future<void> selectAction(String label) async {
+      final actions = find.descendant(
+        of: row,
+        matching: find.byTooltip(strings.historyEntryActions),
+      );
+      await tester.ensureVisible(actions);
+      await tester.pumpAndSettle();
+      await tester.tap(actions);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> saveName(String label) async {
+      await tester.enterText(editName, label);
+      await tester.tap(find.text(strings.formulaSave));
+      await tester.pumpAndSettle();
+    }
+
+    await selectAction(strings.historyPinCalculation);
+    expect(Processor.historyLog.first.id, original.id);
+    expect(find.byIcon(Icons.push_pin), findsOneWidget);
+
+    await selectAction(strings.historyNameCalculation);
+    await saveName('  Weekly groceries  ');
+    expect(find.text('Weekly groceries'), findsOneWidget);
+    await tester.enterText(search, 'WEEKLY GROCERIES');
+    await tester.pumpAndSettle();
+    expect(find.byType(Dismissible), findsOneWidget);
+
+    await selectAction(strings.historyRenameCalculation);
+    await saveName('Shopping');
+    expect(find.text(strings.noHistoryMatches), findsOneWidget);
+    await tester.tap(find.byTooltip(strings.clearSearch));
+    await tester.pumpAndSettle();
+    expect(find.text('Shopping'), findsOneWidget);
+
+    await selectAction(strings.historyUnpinCalculation);
+    expect(find.byIcon(Icons.push_pin), findsNothing);
+    expect(Processor.historyLog.last.name, 'Shopping');
+    expect(Processor.historyLog.last.isPinned, isFalse);
+    expect(state.current, '77');
+  });
+
   testWidgets('empty history and no matches disable bulk copying', (
     tester,
   ) async {

@@ -126,6 +126,36 @@ void main() {
       );
     });
 
+    test('v2 pin metadata is optional and never hides valid math', () async {
+      const pinned = StoredCalculation(
+        id: 3,
+        equation: '1 ÷ 3 =',
+        result: '0.333333333333333',
+        rawResult: '0.3333333333333333',
+        isPinned: true,
+        name: '  Weekly\t groceries  ',
+      );
+      await storage.save([pinned, _entry(1)]);
+      final entries = storage.load();
+      expect(entries.first.name, 'Weekly groceries');
+      expect(entries.first.isPinned, isTrue);
+      expect(entries.first.rawResult, '0.3333333333333333');
+      expect(entries.last.name, isNull);
+      expect(entries.last.isPinned, isFalse);
+
+      preferences.values[HistoryStorage.preferencesKey] = _payload([
+        {
+          ..._entry(2).toJson(),
+          'name': 'a' * (HistoryStorage.maxNameLength + 1),
+          'pinned': 'true',
+        },
+      ], version: 2);
+      final malformed = storage.load().single;
+      expect(malformed.id, 2);
+      expect(malformed.name, isNull);
+      expect(malformed.isPinned, isFalse);
+    });
+
     test(
       'invalid records are skipped while valid finite values are retained',
       () {
@@ -162,7 +192,7 @@ void main() {
     );
 
     test('oversized JSON is ignored before parsing', () {
-      preferences.values[HistoryStorage.preferencesKey] = ' ' * (64 * 1024 + 1);
+      preferences.values[HistoryStorage.preferencesKey] = ' ' * (80 * 1024 + 1);
       expect(storage.load(), isEmpty);
     });
 
@@ -337,6 +367,48 @@ void main() {
         expect(Processor.historyLog.single.id, 10);
       },
     );
+
+    test('pinned calculations survive ordinary eviction and restore', () async {
+      final max = HistoryStorage.maxEntries;
+      preferences.values[HistoryStorage.preferencesKey] = _payload([
+          for (var id = max - 1; id > 0; id--) _entry(id).toJson(),
+        const StoredCalculation(
+          id: 0,
+          equation: '1 ÷ 3 =',
+          result: '0.333333333333333',
+          rawResult: '0.3333333333333333',
+        ).toJson(),
+      ], version: 2);
+      Processor.restoreHistory();
+      final oldest = Processor.historyLog.last.id;
+      expect(Processor.renameHistoryEntry(oldest, 'Groceries'), isTrue);
+      expect(Processor.setHistoryPinned(oldest, true), isTrue);
+
+      expect(Processor.rerunHistory('9 + 8'), isTrue);
+      expect(Processor.historyLog.first.id, oldest);
+      expect(Processor.historyLog[1].equation, '9 + 8 =');
+      expect(Processor.historyLog, hasLength(max));
+      expect(
+        Processor.historyLog.any((entry) => entry.id == oldest + 1),
+        isFalse,
+      );
+
+      await HistoryStorage.instance.flush();
+      Processor.restoreHistory();
+      final pinned = Processor.historyLog.first;
+      expect(pinned.id, oldest);
+      expect(pinned.name, 'Groceries');
+      expect(pinned.isPinned, isTrue);
+      expect(pinned.preciseResult, '0.3333333333333333');
+
+      final deletion = Processor.removeHistoryEntry(oldest)!;
+      expect(Processor.restoreHistoryEntry(deletion), isTrue);
+      expect(Processor.historyLog.first, pinned);
+      expect(Processor.setHistoryPinned(oldest, false), isTrue);
+      expect(Processor.historyLog.last.name, 'Groceries');
+      expect(Processor.rerunHistory('4 + 6'), isTrue);
+      expect(Processor.historyLog.any((entry) => entry.id == oldest), isFalse);
+    });
 
     test(
       'deleted entries and cleared history stay absent after restoration',

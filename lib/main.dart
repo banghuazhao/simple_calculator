@@ -26,6 +26,7 @@ Future<void> main() async {
   SharedPreferencesHelper.localStorage = StorageManager.sharedPreferences;
   InputSettings.instance.load();
   Processor.restoreHistory();
+  Processor.restoreDraft();
   final premium = PremiumController();
   unawaited(premium.initialize());
   runApp(CalculatorApp(premiumController: premium));

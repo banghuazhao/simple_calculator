@@ -570,10 +570,10 @@ class S {
     );
   }
 
-  /// `Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.`
+  /// `Tap the result to copy the number. After pressing =, use the copy button beside the equation to copy the full calculation.`
   String get helpCopy {
     return Intl.message(
-      'Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.',
+      'Tap the result to copy the number. After pressing =, use the copy button beside the equation to copy the full calculation.',
       name: 'helpCopy',
       desc: '',
       args: [],
@@ -1675,10 +1675,10 @@ class S {
     );
   }
 
-  /// `Open Unit converter from the toolbar. Choose your units, enter a value, and use the result in your next calculation.`
+  /// `Choose Unit converter in Everyday tools, enter a value, and send the result back to the calculator.`
   String get helpConverter {
     return Intl.message(
-      'Open Unit converter from the toolbar. Choose your units, enter a value, and use the result in your next calculation.',
+      'Choose Unit converter in Everyday tools, enter a value, and send the result back to the calculator.',
       name: 'helpConverter',
       desc: '',
       args: [],
@@ -2030,6 +2030,356 @@ class S {
     return Intl.message(
       'Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.',
       name: 'helpScientificAdvanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit first number`
+  String get editFirstOperand {
+    return Intl.message(
+      'Edit first number',
+      name: 'editFirstOperand',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit second number`
+  String get editSecondOperand {
+    return Intl.message(
+      'Edit second number',
+      name: 'editSecondOperand',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The calculation changed. Close this dialog and tap the number again.`
+  String get operandChanged {
+    return Intl.message(
+      'The calculation changed. Close this dialog and tap the number again.',
+      name: 'operandChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap either number above the main display to correct it. Use the copy button beside a completed equation to copy the calculation.`
+  String get helpEditOperands {
+    return Intl.message(
+      'Tap either number above the main display to correct it. Use the copy button beside a completed equation to copy the calculation.',
+      name: 'helpEditOperands',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Everyday tools from the toolbar to split a bill, compare unit prices, or convert units.`
+  String get helpEverydayTools {
+    return Intl.message(
+      'Open Everyday tools from the toolbar to split a bill, compare unit prices, or convert units.',
+      name: 'helpEverydayTools',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pin calculation`
+  String get historyPinCalculation {
+    return Intl.message(
+      'Pin calculation',
+      name: 'historyPinCalculation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unpin calculation`
+  String get historyUnpinCalculation {
+    return Intl.message(
+      'Unpin calculation',
+      name: 'historyUnpinCalculation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name calculation`
+  String get historyNameCalculation {
+    return Intl.message(
+      'Name calculation',
+      name: 'historyNameCalculation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename calculation`
+  String get historyRenameCalculation {
+    return Intl.message(
+      'Rename calculation',
+      name: 'historyRenameCalculation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculation name`
+  String get historyCalculationName {
+    return Intl.message(
+      'Calculation name',
+      name: 'historyCalculationName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pinned`
+  String get historyPinned {
+    return Intl.message('Pinned', name: 'historyPinned', desc: '', args: []);
+  }
+
+  /// `You can pin up to 25 calculations.`
+  String get historyPinLimit {
+    return Intl.message(
+      'You can pin up to 25 calculations.',
+      name: 'historyPinLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use a shorter name.`
+  String get historyNameTooLong {
+    return Intl.message(
+      'Use a shorter name.',
+      name: 'historyNameTooLong',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Everyday tools`
+  String get everydayTools {
+    return Intl.message(
+      'Everyday tools',
+      name: 'everydayTools',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tip and bill splitter`
+  String get everydayTipSplitter {
+    return Intl.message(
+      'Tip and bill splitter',
+      name: 'everydayTipSplitter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unit price comparison`
+  String get everydayUnitPrice {
+    return Intl.message(
+      'Unit price comparison',
+      name: 'everydayUnitPrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bill amount`
+  String get everydayBill {
+    return Intl.message(
+      'Bill amount',
+      name: 'everydayBill',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tip (%)`
+  String get everydayTipPercent {
+    return Intl.message(
+      'Tip (%)',
+      name: 'everydayTipPercent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Number of people`
+  String get everydayPeople {
+    return Intl.message(
+      'Number of people',
+      name: 'everydayPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tip amount`
+  String get everydayTipAmount {
+    return Intl.message(
+      'Tip amount',
+      name: 'everydayTipAmount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total with tip`
+  String get everydayBillTotal {
+    return Intl.message(
+      'Total with tip',
+      name: 'everydayBillTotal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Per person`
+  String get everydayPerPerson {
+    return Intl.message(
+      'Per person',
+      name: 'everydayPerPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1 person pays {amount}`
+  String everydayOnePersonPays(String amount) {
+    return Intl.message(
+      '1 person pays $amount',
+      name: 'everydayOnePersonPays',
+      desc: '',
+      args: [amount],
+    );
+  }
+
+  /// `{people} people pay {amount}`
+  String everydayPeoplePay(String people, String amount) {
+    return Intl.message(
+      '$people people pay $amount',
+      name: 'everydayPeoplePay',
+      desc: '',
+      args: [people, amount],
+    );
+  }
+
+  /// `Enter a non-negative amount with up to two decimal places.`
+  String get everydayMoneyError {
+    return Intl.message(
+      'Enter a non-negative amount with up to two decimal places.',
+      name: 'everydayMoneyError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a non-negative number.`
+  String get everydayNonnegativeError {
+    return Intl.message(
+      'Enter a non-negative number.',
+      name: 'everydayNonnegativeError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a positive whole number.`
+  String get everydayCountError {
+    return Intl.message(
+      'Enter a positive whole number.',
+      name: 'everydayCountError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a size greater than zero.`
+  String get everydaySizeError {
+    return Intl.message(
+      'Enter a size greater than zero.',
+      name: 'everydaySizeError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Count`
+  String get everydayCount {
+    return Intl.message('Count', name: 'everydayCount', desc: '', args: []);
+  }
+
+  /// `Item A`
+  String get everydayItemA {
+    return Intl.message('Item A', name: 'everydayItemA', desc: '', args: []);
+  }
+
+  /// `Item B`
+  String get everydayItemB {
+    return Intl.message('Item B', name: 'everydayItemB', desc: '', args: []);
+  }
+
+  /// `Price`
+  String get everydayPrice {
+    return Intl.message('Price', name: 'everydayPrice', desc: '', args: []);
+  }
+
+  /// `Package size`
+  String get everydayPackageSize {
+    return Intl.message(
+      'Package size',
+      name: 'everydayPackageSize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `item`
+  String get everydayEach {
+    return Intl.message('item', name: 'everydayEach', desc: '', args: []);
+  }
+
+  /// `{price} per {unit}`
+  String everydayUnitCost(String price, String unit) {
+    return Intl.message(
+      '$price per $unit',
+      name: 'everydayUnitCost',
+      desc: '',
+      args: [price, unit],
+    );
+  }
+
+  /// `Item A costs less per unit.`
+  String get everydayItemACheaper {
+    return Intl.message(
+      'Item A costs less per unit.',
+      name: 'everydayItemACheaper',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Item B costs less per unit.`
+  String get everydayItemBCheaper {
+    return Intl.message(
+      'Item B costs less per unit.',
+      name: 'everydayItemBCheaper',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Both items have the same unit price.`
+  String get everydayEqualPrice {
+    return Intl.message(
+      'Both items have the same unit price.',
+      name: 'everydayEqualPrice',
       desc: '',
       args: [],
     );

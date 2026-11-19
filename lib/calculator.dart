@@ -8,6 +8,7 @@ import 'package:sensors_plus/sensors_plus.dart';
 import 'package:simple_calculator/calculator_key.dart';
 import 'package:simple_calculator/calculator_shortcuts.dart';
 import 'package:simple_calculator/display.dart';
+import 'package:simple_calculator/everyday_tools_page.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/history_sheet.dart';
 import 'package:simple_calculator/key_controller.dart' as input;
@@ -16,7 +17,6 @@ import 'package:simple_calculator/more_page.dart';
 import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/premium/premium_page.dart';
 import 'package:simple_calculator/processor.dart';
-import 'package:simple_calculator/unit_converter_page.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/shake_listener.dart';
@@ -32,7 +32,7 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
-  final _calcState = ValueNotifier(const CalcState(current: '0', history: ''));
+  final _calcState = ValueNotifier(Processor.state);
 
   BannerAd? _ad;
   bool _isAdLoaded = false;
@@ -168,6 +168,18 @@ class _CalculatorState extends State<Calculator> {
     );
   }
 
+  void _correctOperand(OperandEdit operand) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => _CorrectOperandDialog(
+        operand: operand,
+        percent:
+            operand.position == OperandPosition.right &&
+            _calcState.value.rightOperandIsPercent,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final model = Provider.of<ThemeModel>(context);
@@ -242,13 +254,16 @@ class _CalculatorState extends State<Calculator> {
                             ),
                           ),
                         IconButton(
-                          tooltip: strings.unitConverter,
+                          tooltip: strings.everydayTools,
                           onPressed: () => Navigator.of(context).push<void>(
                             MaterialPageRoute(
-                              builder: (_) => const UnitConverterPage(),
+                              builder: (_) => const EverydayToolsPage(),
                             ),
                           ),
-                          icon: Icon(Icons.swap_horiz, color: toolbarColor),
+                          icon: Icon(
+                            Icons.grid_view_rounded,
+                            color: toolbarColor,
+                          ),
                         ),
                         ValueListenableBuilder<CalcState>(
                           valueListenable: _calcState,
@@ -284,6 +299,11 @@ class _CalculatorState extends State<Calculator> {
                         current: state.current,
                         history: state.history,
                         isResult: state.isResult,
+                        leftOperand: state.leftOperand,
+                        rightOperand: state.rightOperand,
+                        binaryOperator: state.binaryOperator,
+                        rightOperandIsPercent: state.rightOperandIsPercent,
+                        onCorrectOperand: _correctOperand,
                       ),
                     ),
                   ),
@@ -306,6 +326,93 @@ class _CalculatorState extends State<Calculator> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CorrectOperandDialog extends StatefulWidget {
+  const _CorrectOperandDialog({required this.operand, required this.percent});
+
+  final OperandEdit operand;
+  final bool percent;
+
+  @override
+  State<_CorrectOperandDialog> createState() => _CorrectOperandDialogState();
+}
+
+class _CorrectOperandDialogState extends State<_CorrectOperandDialog> {
+  late final _input = TextEditingController.fromValue(
+    TextEditingValue(
+      text: widget.operand.input,
+      selection: TextSelection(
+        baseOffset: 0,
+        extentOffset: widget.operand.input.length,
+      ),
+    ),
+  );
+  OperandCorrection? _failure;
+
+  @override
+  void dispose() {
+    _input.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    final outcome = Processor.correctOperand(widget.operand, _input.text);
+    if (outcome == OperandCorrection.applied) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() => _failure = outcome);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = S.of(context);
+    final stale = _failure == OperandCorrection.stale;
+    return AlertDialog(
+      scrollable: true,
+      title: Text(
+        widget.operand.position == OperandPosition.left
+            ? strings.editFirstOperand
+            : strings.editSecondOperand,
+      ),
+      content: TextField(
+        controller: _input,
+        autofocus: true,
+        enabled: !stale,
+        keyboardType: const TextInputType.numberWithOptions(
+          signed: true,
+          decimal: true,
+        ),
+        textInputAction: TextInputAction.done,
+        onChanged: (_) {
+          if (_failure != null) setState(() => _failure = null);
+        },
+        onSubmitted: (_) => _save(),
+        decoration: InputDecoration(
+          labelText: strings.converterAmount,
+          suffixText: widget.percent ? '%' : null,
+          errorText: switch (_failure) {
+            OperandCorrection.invalid => strings.formulaInvalidInput,
+            OperandCorrection.stale => strings.operandChanged,
+            _ => null,
+          },
+          errorMaxLines: 3,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(strings.cancel),
+        ),
+        FilledButton(
+          onPressed: stale ? null : _save,
+          child: Text(strings.formulaSave),
+        ),
+      ],
     );
   }
 }

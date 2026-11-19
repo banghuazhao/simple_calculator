@@ -65,7 +65,7 @@
   "shakeToUndoDescription": "Undo the last input by shaking your phone",
   "helpAndShortcuts": "Tips and shortcuts",
   "helpBasics": "Using the calculator",
-  "helpCopy": "Tap the result to copy the number. After pressing =, tap the equation above the result to copy the full calculation.",
+  "helpCopy": "Tap the result to copy the number. After pressing =, use the copy button beside the equation to copy the full calculation.",
   "helpCopyHistory": "Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.",
   "helpUndo": "Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.",
   "helpHistory": "History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.",
@@ -187,7 +187,7 @@
   "formulaAlternateName": "Alternate scenario name",
   "formulaNamedDifference": "Difference ({alternate} − {baseline})",
   "helpPercent": "Use + or − with % to adjust a value by a percentage. For example, 200 + 10% = 220.",
-  "helpConverter": "Open Unit converter from the toolbar. Choose your units, enter a value, and use the result in your next calculation.",
+  "helpConverter": "Choose Unit converter in Everyday tools, enter a value, and send the result back to the calculator.",
   "@formulaNamedDifference": {
     "placeholders": {
       "alternate": {
@@ -257,6 +257,71 @@
       },
       "position": {
         "type": "int"
+      }
+    }
+  },
+  "editFirstOperand": "Edit first number",
+  "editSecondOperand": "Edit second number",
+  "operandChanged": "The calculation changed. Close this dialog and tap the number again.",
+  "helpEditOperands": "Tap either number above the main display to correct it. Use the copy button beside a completed equation to copy the calculation.",
+  "helpEverydayTools": "Open Everyday tools from the toolbar to split a bill, compare unit prices, or convert units.",
+  "historyPinCalculation": "Pin calculation",
+  "historyUnpinCalculation": "Unpin calculation",
+  "historyNameCalculation": "Name calculation",
+  "historyRenameCalculation": "Rename calculation",
+  "historyCalculationName": "Calculation name",
+  "historyPinned": "Pinned",
+  "historyPinLimit": "You can pin up to 25 calculations.",
+  "historyNameTooLong": "Use a shorter name.",
+  "everydayTools": "Everyday tools",
+  "everydayTipSplitter": "Tip and bill splitter",
+  "everydayUnitPrice": "Unit price comparison",
+  "everydayBill": "Bill amount",
+  "everydayTipPercent": "Tip (%)",
+  "everydayPeople": "Number of people",
+  "everydayTipAmount": "Tip amount",
+  "everydayBillTotal": "Total with tip",
+  "everydayPerPerson": "Per person",
+  "everydayOnePersonPays": "1 person pays {amount}",
+  "everydayPeoplePay": "{people} people pay {amount}",
+  "everydayMoneyError": "Enter a non-negative amount with up to two decimal places.",
+  "everydayNonnegativeError": "Enter a non-negative number.",
+  "everydayCountError": "Enter a positive whole number.",
+  "everydaySizeError": "Enter a size greater than zero.",
+  "everydayCount": "Count",
+  "everydayItemA": "Item A",
+  "everydayItemB": "Item B",
+  "everydayPrice": "Price",
+  "everydayPackageSize": "Package size",
+  "everydayEach": "item",
+  "everydayUnitCost": "{price} per {unit}",
+  "everydayItemACheaper": "Item A costs less per unit.",
+  "everydayItemBCheaper": "Item B costs less per unit.",
+  "everydayEqualPrice": "Both items have the same unit price.",
+  "@everydayOnePersonPays": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@everydayPeoplePay": {
+    "placeholders": {
+      "people": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@everydayUnitCost": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
       }
     }
   }

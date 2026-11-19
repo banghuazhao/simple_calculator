@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
+import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
@@ -11,11 +12,21 @@ class Display extends StatelessWidget {
     required this.current,
     required this.history,
     this.isResult = false,
+    this.leftOperand,
+    this.rightOperand,
+    this.binaryOperator,
+    this.rightOperandIsPercent = false,
+    this.onCorrectOperand,
   });
 
   final String current;
   final String history;
   final bool isResult;
+  final OperandEdit? leftOperand;
+  final OperandEdit? rightOperand;
+  final String? binaryOperator;
+  final bool rightOperandIsPercent;
+  final ValueChanged<OperandEdit>? onCorrectOperand;
 
   String _formatForDisplay(String s) {
     if (s == 'Error') return s;
@@ -34,6 +45,28 @@ class Display extends StatelessWidget {
     }
 
     return (isNeg ? '-' : '') + buf.toString() + decStr;
+  }
+
+  Widget _operand(OperandEdit operand, String label, TextStyle style) {
+    final percent =
+        operand.position == OperandPosition.right && rightOperandIsPercent;
+    final value = '${_formatForDisplay(operand.display)}${percent ? '%' : ''}';
+    return Flexible(
+      child: Tooltip(
+        message: label,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: style.color,
+            minimumSize: const Size(48, 48),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            visualDensity: VisualDensity.standard,
+            textStyle: style.copyWith(decoration: TextDecoration.underline),
+          ),
+          onPressed: () => onCorrectOperand!(operand),
+          child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+      ),
+    );
   }
 
   @override
@@ -75,6 +108,9 @@ class Display extends StatelessWidget {
     final copyCalculation = isResult && !isError && history.isNotEmpty
         ? () => ClipboardHelper.copy(context, '$history $current')
         : null;
+    final left = leftOperand;
+    final right = rightOperand;
+    final operator = binaryOperator;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
@@ -93,7 +129,32 @@ class Display extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (history.isNotEmpty)
+                if (left != null &&
+                    operator != null &&
+                    onCorrectOperand != null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _operand(left, strings.editFirstOperand, historyStyle),
+                      Text(operator, style: historyStyle),
+                      if (right != null)
+                        _operand(
+                          right,
+                          strings.editSecondOperand,
+                          historyStyle,
+                        ),
+                      if (copyCalculation != null) ...[
+                        Text('=', style: historyStyle),
+                        IconButton(
+                          tooltip: strings.copyCalculation,
+                          color: textColor,
+                          onPressed: copyCalculation,
+                          icon: const Icon(Icons.copy_outlined, size: 18),
+                        ),
+                      ],
+                    ],
+                  )
+                else if (history.isNotEmpty)
                   Semantics(
                     label: copyCalculation == null
                         ? history

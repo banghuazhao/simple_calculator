@@ -15,6 +15,8 @@ class StoredCalculation {
     required this.result,
     this.rawResult,
     this.rawExpression,
+    this.isPinned = false,
+    this.name,
   });
 
   final int id;
@@ -22,6 +24,8 @@ class StoredCalculation {
   final String result;
   final String? rawResult;
   final String? rawExpression;
+  final bool isPinned;
+  final String? name;
 
   Map<String, Object> toJson() => {
     'id': id,
@@ -29,6 +33,8 @@ class StoredCalculation {
     'result': result,
     'rawResult': ?rawResult,
     'rawExpression': ?rawExpression,
+    if (isPinned) 'pinned': true,
+    'name': ?name,
   };
 }
 
@@ -41,10 +47,14 @@ class HistoryStorage {
   static final HistoryStorage instance = HistoryStorage();
   static const preferencesKey = 'calculator_history_v1';
   static const maxEntries = 100;
+  static const maxPinnedEntries = 25;
+  static const maxNameLength = 60;
   static const maxId = 0x1fffffffffffff;
   static const _currentVersion = 2;
-  static const _maxPayloadLength = 64 * 1024;
+  // Include escaped names in the bound for a full history of long expressions.
+  static const _maxPayloadLength = 80 * 1024;
   static const _maxNumberLength = 64;
+  static final _nameSeparators = RegExp(r'[\s\x00-\x1f\x7f]+');
   static const _numberPattern =
       r'-?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?';
   static final _number = RegExp('^$_numberPattern\$');
@@ -63,6 +73,9 @@ class HistoryStorage {
       value.length <= _maxNumberLength &&
       _number.hasMatch(value) &&
       (double.tryParse(value)?.isFinite ?? false);
+
+  static String normalizeName(String name) =>
+      name.replaceAll(_nameSeparators, ' ').trim();
 
   static bool _isBinaryEquation(String value, {required bool allowPercent}) {
     if (value.length > 140) return false;
@@ -101,6 +114,7 @@ class HistoryStorage {
     final result = value['result'];
     final rawResult = legacy ? null : value['rawResult'];
     final rawExpression = legacy ? null : value['rawExpression'];
+    final savedName = legacy ? null : value['name'];
     if (id is! int ||
         id < 0 ||
         id > maxId ||
@@ -118,12 +132,15 @@ class HistoryStorage {
       return null;
     }
     seen.add(id);
+    final name = savedName is String ? normalizeName(savedName) : '';
     return StoredCalculation(
       id: id,
       equation: equation,
       result: result,
       rawResult: rawResult as String?,
       rawExpression: rawExpression as String?,
+      isPinned: !legacy && value['pinned'] == true,
+      name: name.isNotEmpty && name.length <= maxNameLength ? name : null,
     );
   }
 
