@@ -1,0 +1,4 @@
+- Added a Currency converter with offline and refreshable exchange rates, plus Loan and interest calculations in Everyday tools.
+- Added JSON backup and restore for history, formulas, themes, and settings, along with home screen quick actions and pinned unit presets.
+- Added support for 6 new languages (German, Spanish, French, Japanese, Korean, and Portuguese) and a Keep window on top option on macOS.
+- Fixed the calculator display height shifting when toggling live preview.
