@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_calculator/currency_converter_page.dart';
 import 'package:simple_calculator/everyday_calculations.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/processor.dart';
@@ -65,6 +66,18 @@ class EverydayToolsPage extends StatelessWidget {
           strings.everydayDateCalculator,
           Icons.calendar_today_outlined,
           const _DateCalculatorPage(),
+        ),
+        const SizedBox(height: 8),
+        tool(
+          strings.everydayLoanCompound,
+          Icons.account_balance_outlined,
+          const _LoanCompoundPage(),
+        ),
+        const SizedBox(height: 8),
+        tool(
+          strings.currencyConverter,
+          Icons.currency_exchange,
+          const CurrencyConverterPage(),
         ),
       ],
     );
@@ -1273,6 +1286,360 @@ class _DateCalculatorPageState extends State<_DateCalculatorPage> {
                   child: _ResultAmount(
                     label: strings.everydayResultDate,
                     amount: _formatDate(context, targetDate),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+class _LoanCompoundPage extends StatefulWidget {
+  const _LoanCompoundPage();
+
+  @override
+  State<_LoanCompoundPage> createState() => _LoanCompoundPageState();
+}
+
+class _LoanCompoundPageState extends State<_LoanCompoundPage> {
+  bool _compoundTab = false;
+
+  // Loan inputs
+  final _principal = TextEditingController(text: '250000');
+  final _loanRate = TextEditingController(text: '6.5');
+  final _loanYears = TextEditingController(text: '30');
+
+  // Compound inputs
+  final _starting = TextEditingController(text: '10000');
+  final _monthly = TextEditingController(text: '200');
+  final _compoundRate = TextEditingController(text: '7');
+  final _compoundYears = TextEditingController(text: '10');
+  CompoundFrequency _frequency = CompoundFrequency.monthly;
+
+  @override
+  void dispose() {
+    _principal.dispose();
+    _loanRate.dispose();
+    _loanYears.dispose();
+    _starting.dispose();
+    _monthly.dispose();
+    _compoundRate.dispose();
+    _compoundYears.dispose();
+    super.dispose();
+  }
+
+  void _update(String _) => setState(() {});
+
+  void _useInCalculator(double value) {
+    Processor.useResult(value);
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  String _formatMoney(double value) => value.toStringAsFixed(2);
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = S.of(context);
+    final model = context.watch<ThemeModel>();
+    final displayValue = Processor.currentNumericValue;
+    final canPullDisplay =
+        displayValue != null && displayValue > 0 && displayValue < 1e12;
+
+    final principal = Processor.parseNumericInput(_principal.text);
+    final loanRate = Processor.parseNumericInput(_loanRate.text);
+    final loanYears = Processor.parseNumericInput(_loanYears.text);
+    final validLoan =
+        principal != null &&
+        principal > 0 &&
+        loanRate != null &&
+        loanRate >= 0 &&
+        loanRate <= 1000 &&
+        loanYears != null &&
+        loanYears > 0 &&
+        loanYears <= 100;
+    final loan = validLoan
+        ? LoanCalculation(
+            principal: principal,
+            annualRatePercent: loanRate,
+            termYears: loanYears,
+          )
+        : null;
+
+    final starting = Processor.parseNumericInput(_starting.text);
+    final monthly = _monthly.text.trim().isEmpty
+        ? 0.0
+        : Processor.parseNumericInput(_monthly.text);
+    final compoundRate = Processor.parseNumericInput(_compoundRate.text);
+    final compoundYears = Processor.parseNumericInput(_compoundYears.text);
+    final validCompound =
+        starting != null &&
+        starting >= 0 &&
+        monthly != null &&
+        monthly >= 0 &&
+        compoundRate != null &&
+        compoundRate >= 0 &&
+        compoundRate <= 1000 &&
+        compoundYears != null &&
+        compoundYears > 0 &&
+        compoundYears <= 100;
+    final compound = validCompound
+        ? CompoundInterestCalculation(
+            principal: starting,
+            monthlyContribution: monthly,
+            annualRatePercent: compoundRate,
+            years: compoundYears,
+            frequency: _frequency,
+          )
+        : null;
+
+    return _ToolPage(
+      title: strings.everydayLoanCompound,
+      children: [
+        Wrap(
+          spacing: 8,
+          children: [
+            ChoiceChip(
+              label: Text(strings.everydayLoanTab),
+              selected: !_compoundTab,
+              onSelected: (_) => setState(() => _compoundTab = false),
+            ),
+            ChoiceChip(
+              label: Text(strings.everydayCompoundTab),
+              selected: _compoundTab,
+              onSelected: (_) => setState(() => _compoundTab = true),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (!_compoundTab) ...[
+          _NumberField(
+            key: const ValueKey('loan-principal-field'),
+            controller: _principal,
+            label: strings.everydayPrincipal,
+            error: principal == null || principal <= 0
+                ? strings.everydaySizeError
+                : null,
+            onChanged: _update,
+          ),
+          if (canPullDisplay) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: ActionChip(
+                avatar: Icon(
+                  Icons.calculate_outlined,
+                  size: 16,
+                  color: model.panelTextColor,
+                ),
+                label: Text(
+                  strings.useCurrentDisplay(
+                    Processor.formatResult(displayValue),
+                  ),
+                ),
+                onPressed: () => setState(() {
+                  _principal.text = Processor.formatResult(displayValue);
+                }),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          _NumberField(
+            key: const ValueKey('loan-rate-field'),
+            controller: _loanRate,
+            label: strings.everydayAnnualRate,
+            error: loanRate == null || loanRate < 0
+                ? strings.everydayNonnegativeError
+                : null,
+            onChanged: _update,
+          ),
+          const SizedBox(height: 12),
+          _NumberField(
+            key: const ValueKey('loan-years-field'),
+            controller: _loanYears,
+            label: strings.everydayTermYears,
+            error: loanYears == null || loanYears <= 0
+                ? strings.everydaySizeError
+                : null,
+            onChanged: _update,
+            last: true,
+          ),
+          if (loan != null && loan.monthlyPayment.isFinite) ...[
+            const SizedBox(height: 16),
+            _ToolPanel(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _ResultAmount(
+                        label: strings.everydayMonthlyPayment,
+                        amount: _formatMoney(loan.monthlyPayment),
+                      ),
+                      const SizedBox(height: 12),
+                      _ResultAmount(
+                        label: strings.everydayTotalPayment,
+                        amount: _formatMoney(loan.totalPayment),
+                      ),
+                      const SizedBox(height: 12),
+                      _ResultAmount(
+                        label: strings.everydayTotalInterest,
+                        amount: _formatMoney(loan.totalInterest),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => ClipboardHelper.copy(
+                              context,
+                              '${strings.everydayMonthlyPayment}: ${_formatMoney(loan.monthlyPayment)}\n'
+                              '${strings.everydayTotalPayment}: ${_formatMoney(loan.totalPayment)}\n'
+                              '${strings.everydayTotalInterest}: ${_formatMoney(loan.totalInterest)}',
+                            ),
+                            icon: const Icon(Icons.copy_outlined, size: 18),
+                            label: Text(strings.copySummary),
+                          ),
+                          FilledButton.icon(
+                            onPressed: () =>
+                                _useInCalculator(loan.monthlyPayment),
+                            icon: const Icon(
+                              Icons.calculate_outlined,
+                              size: 18,
+                            ),
+                            label: Text(strings.reuseResult),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ] else ...[
+          _NumberField(
+            key: const ValueKey('compound-starting-field'),
+            controller: _starting,
+            label: strings.everydayStartingBalance,
+            error: starting == null || starting < 0
+                ? strings.everydayNonnegativeError
+                : null,
+            onChanged: _update,
+          ),
+          const SizedBox(height: 12),
+          _NumberField(
+            key: const ValueKey('compound-monthly-field'),
+            controller: _monthly,
+            label: strings.everydayMonthlyContribution,
+            error: monthly == null || monthly < 0
+                ? strings.everydayNonnegativeError
+                : null,
+            onChanged: _update,
+          ),
+          const SizedBox(height: 12),
+          _NumberField(
+            key: const ValueKey('compound-rate-field'),
+            controller: _compoundRate,
+            label: strings.everydayAnnualRate,
+            error: compoundRate == null || compoundRate < 0
+                ? strings.everydayNonnegativeError
+                : null,
+            onChanged: _update,
+          ),
+          const SizedBox(height: 12),
+          _NumberField(
+            key: const ValueKey('compound-years-field'),
+            controller: _compoundYears,
+            label: strings.everydayTermYears,
+            error: compoundYears == null || compoundYears <= 0
+                ? strings.everydaySizeError
+                : null,
+            onChanged: _update,
+            last: true,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            strings.everydayCompoundingFrequency,
+            style: TextStyle(
+              color: model.readableTextColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final freq in CompoundFrequency.values)
+                ChoiceChip(
+                  label: Text(switch (freq) {
+                    CompoundFrequency.monthly =>
+                      strings.everydayCompoundMonthly,
+                    CompoundFrequency.quarterly =>
+                      strings.everydayCompoundQuarterly,
+                    CompoundFrequency.yearly => strings.everydayCompoundYearly,
+                  }),
+                  selected: _frequency == freq,
+                  onSelected: (_) => setState(() => _frequency = freq),
+                ),
+            ],
+          ),
+          if (compound != null && compound.finalBalance.isFinite) ...[
+            const SizedBox(height: 16),
+            _ToolPanel(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _ResultAmount(
+                        label: strings.everydayFinalBalance,
+                        amount: _formatMoney(compound.finalBalance),
+                      ),
+                      const SizedBox(height: 12),
+                      _ResultAmount(
+                        label: strings.everydayTotalContributions,
+                        amount: _formatMoney(compound.totalContributions),
+                      ),
+                      const SizedBox(height: 12),
+                      _ResultAmount(
+                        label: strings.everydayInterestEarned,
+                        amount: _formatMoney(compound.interestEarned),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => ClipboardHelper.copy(
+                              context,
+                              '${strings.everydayFinalBalance}: ${_formatMoney(compound.finalBalance)}\n'
+                              '${strings.everydayTotalContributions}: ${_formatMoney(compound.totalContributions)}\n'
+                              '${strings.everydayInterestEarned}: ${_formatMoney(compound.interestEarned)}',
+                            ),
+                            icon: const Icon(Icons.copy_outlined, size: 18),
+                            label: Text(strings.copySummary),
+                          ),
+                          FilledButton.icon(
+                            onPressed: () =>
+                                _useInCalculator(compound.finalBalance),
+                            icon: const Icon(
+                              Icons.calculate_outlined,
+                              size: 18,
+                            ),
+                            label: Text(strings.reuseResult),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="unit_converter"
+        android:enabled="true"
+        android:icon="@mipmap/launcher_icon"
+        android:shortcutShortLabel="@string/shortcut_unit_converter"
+        android:shortcutLongLabel="@string/shortcut_unit_converter">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.appsbay.simple_calculator"
+            android:targetClass="com.appsbay.simple_calculator.MainActivity">
+            <extra android:name="shortcut_action" android:value="unit_converter" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="everyday_tools"
+        android:enabled="true"
+        android:icon="@mipmap/launcher_icon"
+        android:shortcutShortLabel="@string/shortcut_everyday_tools"
+        android:shortcutLongLabel="@string/shortcut_everyday_tools">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.appsbay.simple_calculator"
+            android:targetClass="com.appsbay.simple_calculator.MainActivity">
+            <extra android:name="shortcut_action" android:value="everyday_tools" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="history"
+        android:enabled="true"
+        android:icon="@mipmap/launcher_icon"
+        android:shortcutShortLabel="@string/shortcut_history"
+        android:shortcutLongLabel="@string/shortcut_history">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.appsbay.simple_calculator"
+            android:targetClass="com.appsbay.simple_calculator.MainActivity">
+            <extra android:name="shortcut_action" android:value="history" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="scientific"
+        android:enabled="true"
+        android:icon="@mipmap/launcher_icon"
+        android:shortcutShortLabel="@string/shortcut_scientific"
+        android:shortcutLongLabel="@string/shortcut_scientific">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.appsbay.simple_calculator"
+            android:targetClass="com.appsbay.simple_calculator.MainActivity">
+            <extra android:name="shortcut_action" android:value="scientific" />
+        </intent>
+    </shortcut>
+</shortcuts>

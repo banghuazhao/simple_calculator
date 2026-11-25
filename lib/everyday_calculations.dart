@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:simple_calculator/processor.dart';
 
 /// A non-negative decimal value retained as a fraction for cent rounding and
@@ -220,6 +222,92 @@ class DateDifference {
 }
 
 String formatCents(BigInt cents) => _fixed(cents, 2);
+
+class LoanCalculation {
+  LoanCalculation({
+    required this.principal,
+    required this.annualRatePercent,
+    required this.termYears,
+  }) : months = (termYears * 12).round() {
+    if (months <= 0) {
+      monthlyPayment = principal;
+      totalPayment = principal;
+      totalInterest = 0;
+      return;
+    }
+    if (annualRatePercent == 0) {
+      monthlyPayment = principal / months;
+    } else {
+      final monthlyRate = annualRatePercent / 100 / 12;
+      final factor = math.pow(1 + monthlyRate, months).toDouble();
+      monthlyPayment = principal * monthlyRate * factor / (factor - 1);
+    }
+    totalPayment = monthlyPayment * months;
+    totalInterest = totalPayment - principal;
+  }
+
+  final double principal;
+  final double annualRatePercent;
+  final double termYears;
+  final int months;
+  late final double monthlyPayment;
+  late final double totalPayment;
+  late final double totalInterest;
+}
+
+enum CompoundFrequency {
+  monthly(12),
+  quarterly(4),
+  yearly(1);
+
+  const CompoundFrequency(this.periodsPerYear);
+
+  final int periodsPerYear;
+}
+
+class CompoundInterestCalculation {
+  CompoundInterestCalculation({
+    required this.principal,
+    required this.monthlyContribution,
+    required this.annualRatePercent,
+    required this.years,
+    required this.frequency,
+  }) : months = (years * 12).round() {
+    totalContributions = principal + monthlyContribution * months;
+    if (years <= 0) {
+      finalBalance = principal;
+      interestEarned = 0;
+      return;
+    }
+    if (annualRatePercent == 0) {
+      finalBalance = totalContributions;
+      interestEarned = 0;
+      return;
+    }
+    final rate = annualRatePercent / 100;
+    final n = frequency.periodsPerYear;
+    final principalGrowth =
+        principal * math.pow(1 + rate / n, n * years).toDouble();
+    final effectiveMonthlyRate = math.pow(1 + rate / n, n / 12).toDouble() - 1;
+    final contributionGrowth = monthlyContribution == 0 || months <= 0
+        ? 0.0
+        : monthlyContribution *
+              (math.pow(1 + effectiveMonthlyRate, months).toDouble() - 1) /
+              effectiveMonthlyRate;
+    finalBalance = principalGrowth + contributionGrowth;
+    interestEarned = finalBalance - totalContributions;
+  }
+
+  final double principal;
+  final double monthlyContribution;
+  final double annualRatePercent;
+  final double years;
+  final CompoundFrequency frequency;
+  final int months;
+  late final double finalBalance;
+  late final double totalContributions;
+  late final double interestEarned;
+}
 
 String _fixed(BigInt value, int fractionDigits) {
   final digits = value.toString().padLeft(fractionDigits + 1, '0');

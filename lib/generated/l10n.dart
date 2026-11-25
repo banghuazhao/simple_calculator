@@ -11,7 +11,7 @@ import 'intl/messages_all.dart';
 
 // ignore_for_file: non_constant_identifier_names, lines_longer_than_80_chars
 // ignore_for_file: join_return_with_assignment, prefer_final_in_for_each
-// ignore_for_file: avoid_redundant_argument_values, avoid_escaping_inner_quotes, unnecessary_brace_in_string_interps
+// ignore_for_file: avoid_redundant_argument_values, avoid_escaping_inner_quotes
 
 class S {
   S();
@@ -67,7 +67,12 @@ class S {
 
   /// `Classic Memory Game`
   String get Classic_Memory_Game {
-    return Intl.message('Classic Memory Game', name: 'Classic_Memory_Game', desc: '', args: []);
+    return Intl.message(
+      'Classic Memory Game',
+      name: 'Classic_Memory_Game',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Shows`
@@ -77,7 +82,12 @@ class S {
 
   /// `Classic 15 Puzzle`
   String get Classic_15_Puzzle {
-    return Intl.message('Classic 15 Puzzle', name: 'Classic_15_Puzzle', desc: '', args: []);
+    return Intl.message(
+      'Classic 15 Puzzle',
+      name: 'Classic_15_Puzzle',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Relaxing Up`
@@ -87,7 +97,12 @@ class S {
 
   /// `Falling Block Puzzle`
   String get Falling_Block_Puzzle {
-    return Intl.message('Falling Block Puzzle', name: 'Falling_Block_Puzzle', desc: '', args: []);
+    return Intl.message(
+      'Falling Block Puzzle',
+      name: 'Falling_Block_Puzzle',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Onlynote`
@@ -102,47 +117,92 @@ class S {
 
   /// `World Weather Live`
   String get World_Weather_Live {
-    return Intl.message('World Weather Live', name: 'World_Weather_Live', desc: '', args: []);
+    return Intl.message(
+      'World Weather Live',
+      name: 'World_Weather_Live',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Simple Calculator`
   String get Simple_Calculator {
-    return Intl.message('Simple Calculator', name: 'Simple_Calculator', desc: '', args: []);
+    return Intl.message(
+      'Simple Calculator',
+      name: 'Simple_Calculator',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Simple English Dictionary`
   String get Simple_English_Dictionary {
-    return Intl.message('Simple English Dictionary', name: 'Simple_English_Dictionary', desc: '', args: []);
+    return Intl.message(
+      'Simple English Dictionary',
+      name: 'Simple_English_Dictionary',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Classic Reversi`
   String get Classic_Reversi {
-    return Intl.message('Classic Reversi', name: 'Classic_Reversi', desc: '', args: []);
+    return Intl.message(
+      'Classic Reversi',
+      name: 'Classic_Reversi',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Garden: Catch Bugs`
   String get Garden_Catch_Bugs {
-    return Intl.message('Garden: Catch Bugs', name: 'Garden_Catch_Bugs', desc: '', args: []);
+    return Intl.message(
+      'Garden: Catch Bugs',
+      name: 'Garden_Catch_Bugs',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Space Jumper`
   String get Space_Jumper {
-    return Intl.message('Space Jumper', name: 'Space_Jumper', desc: '', args: []);
+    return Intl.message(
+      'Space Jumper',
+      name: 'Space_Jumper',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Crazy Pyramid`
   String get Crazy_Pyramid {
-    return Intl.message('Crazy Pyramid', name: 'Crazy_Pyramid', desc: '', args: []);
+    return Intl.message(
+      'Crazy Pyramid',
+      name: 'Crazy_Pyramid',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Classic 2048`
   String get Classic_2048 {
-    return Intl.message('Classic 2048', name: 'Classic_2048', desc: '', args: []);
+    return Intl.message(
+      'Classic 2048',
+      name: 'Classic_2048',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Classic Minesweeper`
   String get Classic_Minesweeper {
-    return Intl.message('Classic Minesweeper', name: 'Classic_Minesweeper', desc: '', args: []);
+    return Intl.message(
+      'Classic Minesweeper',
+      name: 'Classic_Minesweeper',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Image Guru`
@@ -152,7 +212,12 @@ class S {
 
   /// `Solitaire Guru`
   String get Solitaire_Guru {
-    return Intl.message('Solitaire Guru', name: 'Solitaire_Guru', desc: '', args: []);
+    return Intl.message(
+      'Solitaire Guru',
+      name: 'Solitaire_Guru',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Yes Habit`
@@ -162,12 +227,22 @@ class S {
 
   /// `Instant Face`
   String get Instant_Face {
-    return Intl.message('Instant Face', name: 'Instant_Face', desc: '', args: []);
+    return Intl.message(
+      'Instant Face',
+      name: 'Instant_Face',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Saving Ambulance`
   String get Saving_Ambulance {
-    return Intl.message('Saving Ambulance', name: 'Saving_Ambulance', desc: '', args: []);
+    return Intl.message(
+      'Saving Ambulance',
+      name: 'Saving_Ambulance',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Fling Knife`
@@ -187,37 +262,72 @@ class S {
 
   /// `Sudoku Lovers`
   String get Sudoku_Lovers {
-    return Intl.message('Sudoku Lovers', name: 'Sudoku_Lovers', desc: '', args: []);
+    return Intl.message(
+      'Sudoku Lovers',
+      name: 'Sudoku_Lovers',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Classic Tic Tac Toe`
   String get Classic_Tic_Tac_Toe {
-    return Intl.message('Classic Tic Tac Toe', name: 'Classic_Tic_Tac_Toe', desc: '', args: []);
+    return Intl.message(
+      'Classic Tic Tac Toe',
+      name: 'Classic_Tic_Tac_Toe',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `We Play Piano`
   String get We_Play_Piano {
-    return Intl.message('We Play Piano', name: 'We_Play_Piano', desc: '', args: []);
+    return Intl.message(
+      'We Play Piano',
+      name: 'We_Play_Piano',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Minesweeper Go`
   String get Minesweeper_Go {
-    return Intl.message('Minesweeper Go', name: 'Minesweeper_Go', desc: '', args: []);
+    return Intl.message(
+      'Minesweeper Go',
+      name: 'Minesweeper_Go',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `How to change the level?`
   String get How_to_change_level {
-    return Intl.message('How to change the level?', name: 'How_to_change_level', desc: '', args: []);
+    return Intl.message(
+      'How to change the level?',
+      name: 'How_to_change_level',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `You can change the level by taping the right/left button before the game start or after click Reset button.`
   String get How_to_change_level_explain {
-    return Intl.message('You can change the level by taping the right/left button before the game start or after click Reset button.', name: 'How_to_change_level_explain', desc: '', args: []);
+    return Intl.message(
+      'You can change the level by taping the right/left button before the game start or after click Reset button.',
+      name: 'How_to_change_level_explain',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Background Music`
   String get background_music {
-    return Intl.message('Background Music', name: 'background_music', desc: '', args: []);
+    return Intl.message(
+      'Background Music',
+      name: 'background_music',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Theme`
@@ -232,12 +342,22 @@ class S {
 
   /// `Clear history?`
   String get clearHistoryTitle {
-    return Intl.message('Clear history?', name: 'clearHistoryTitle', desc: '', args: []);
+    return Intl.message(
+      'Clear history?',
+      name: 'clearHistoryTitle',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `This will remove all saved calculations.`
   String get clearHistoryMessage {
-    return Intl.message('This will remove all saved calculations.', name: 'clearHistoryMessage', desc: '', args: []);
+    return Intl.message(
+      'This will remove all saved calculations.',
+      name: 'clearHistoryMessage',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Cancel`
@@ -252,7 +372,12 @@ class S {
 
   /// `No calculations yet`
   String get noCalculationsYet {
-    return Intl.message('No calculations yet', name: 'noCalculationsYet', desc: '', args: []);
+    return Intl.message(
+      'No calculations yet',
+      name: 'noCalculationsYet',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Copied`
@@ -312,7 +437,12 @@ class S {
 
   /// `Decimal point`
   String get decimalPoint {
-    return Intl.message('Decimal point', name: 'decimalPoint', desc: '', args: []);
+    return Intl.message(
+      'Decimal point',
+      name: 'decimalPoint',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Backspace`
@@ -332,122 +462,242 @@ class S {
 
   /// `Use this result`
   String get reuseResult {
-    return Intl.message('Use this result', name: 'reuseResult', desc: '', args: []);
+    return Intl.message(
+      'Use this result',
+      name: 'reuseResult',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Delete calculation`
   String get deleteCalculation {
-    return Intl.message('Delete calculation', name: 'deleteCalculation', desc: '', args: []);
+    return Intl.message(
+      'Delete calculation',
+      name: 'deleteCalculation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Copy calculation`
   String get copyCalculation {
-    return Intl.message('Copy calculation', name: 'copyCalculation', desc: '', args: []);
+    return Intl.message(
+      'Copy calculation',
+      name: 'copyCalculation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Calculation actions`
   String get historyEntryActions {
-    return Intl.message('Calculation actions', name: 'historyEntryActions', desc: '', args: []);
+    return Intl.message(
+      'Calculation actions',
+      name: 'historyEntryActions',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Input settings`
   String get inputSettings {
-    return Intl.message('Input settings', name: 'inputSettings', desc: '', args: []);
+    return Intl.message(
+      'Input settings',
+      name: 'inputSettings',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Haptic feedback`
   String get hapticFeedback {
-    return Intl.message('Haptic feedback', name: 'hapticFeedback', desc: '', args: []);
+    return Intl.message(
+      'Haptic feedback',
+      name: 'hapticFeedback',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Vibrate when using calculator controls`
   String get hapticFeedbackDescription {
-    return Intl.message('Vibrate when using calculator controls', name: 'hapticFeedbackDescription', desc: '', args: []);
+    return Intl.message(
+      'Vibrate when using calculator controls',
+      name: 'hapticFeedbackDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Shake to undo`
   String get shakeToUndo {
-    return Intl.message('Shake to undo', name: 'shakeToUndo', desc: '', args: []);
+    return Intl.message(
+      'Shake to undo',
+      name: 'shakeToUndo',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Undo the last input by shaking your phone`
   String get shakeToUndoDescription {
-    return Intl.message('Undo the last input by shaking your phone', name: 'shakeToUndoDescription', desc: '', args: []);
+    return Intl.message(
+      'Undo the last input by shaking your phone',
+      name: 'shakeToUndoDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tips and shortcuts`
   String get helpAndShortcuts {
-    return Intl.message('Tips and shortcuts', name: 'helpAndShortcuts', desc: '', args: []);
+    return Intl.message(
+      'Tips and shortcuts',
+      name: 'helpAndShortcuts',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Using the calculator`
   String get helpBasics {
-    return Intl.message('Using the calculator', name: 'helpBasics', desc: '', args: []);
+    return Intl.message(
+      'Using the calculator',
+      name: 'helpBasics',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tap the result to copy the number. After pressing =, use the copy button beside the equation to copy the full calculation.`
   String get helpCopy {
-    return Intl.message('Tap the result to copy the number. After pressing =, use the copy button beside the equation to copy the full calculation.', name: 'helpCopy', desc: '', args: []);
+    return Intl.message(
+      'Tap the result to copy the number. After pressing =, use the copy button beside the equation to copy the full calculation.',
+      name: 'helpCopy',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.`
   String get helpCopyHistory {
-    return Intl.message('Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.', name: 'helpCopyHistory', desc: '', args: []);
+    return Intl.message(
+      'Use Copy all history or Copy matching calculations for plain text. Choose Copy as TSV to paste the same entries into spreadsheet columns.',
+      name: 'helpCopyHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.`
   String get helpUndo {
-    return Intl.message('Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.', name: 'helpUndo', desc: '', args: []);
+    return Intl.message(
+      'Use Undo to restore recent input. Shake-to-undo and haptic feedback can be changed in Input settings.',
+      name: 'helpUndo',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.`
   String get helpHistory {
-    return Intl.message('History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.', name: 'helpHistory', desc: '', args: []);
+    return Intl.message(
+      'History keeps up to 100 calculations. Tap an entry to reuse its result, or choose Edit calculation from its actions menu to recalculate it. Swipe to delete, then tap Undo to restore it.',
+      name: 'helpHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.`
   String get helpPremiumShortcut {
-    return Intl.message('Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.', name: 'helpPremiumShortcut', desc: '', args: []);
+    return Intl.message(
+      'Tap Premium tools in the calculator toolbar to open the scientific calculator or reusable formulas.',
+      name: 'helpPremiumShortcut',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Choose Degrees or Radians in the scientific calculator before using trigonometric functions.`
   String get helpPremiumScientific {
-    return Intl.message('Choose Degrees or Radians in the scientific calculator before using trigonometric functions.', name: 'helpPremiumScientific', desc: '', args: []);
+    return Intl.message(
+      'Choose Degrees or Radians in the scientific calculator before using trigonometric functions.',
+      name: 'helpPremiumScientific',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Open a saved formula to compare inputs. Choose Edit formula to change its expression, input labels or units, or scenario names.`
   String get helpPremiumFormulas {
-    return Intl.message('Open a saved formula to compare inputs. Choose Edit formula to change its expression, input labels or units, or scenario names.', name: 'helpPremiumFormulas', desc: '', args: []);
+    return Intl.message(
+      'Open a saved formula to compare inputs. Choose Edit formula to change its expression, input labels or units, or scenario names.',
+      name: 'helpPremiumFormulas',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Keyboard shortcuts`
   String get helpKeyboard {
-    return Intl.message('Keyboard shortcuts', name: 'helpKeyboard', desc: '', args: []);
+    return Intl.message(
+      'Keyboard shortcuts',
+      name: 'helpKeyboard',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Numbers and numeric keypad`
   String get shortcutNumbers {
-    return Intl.message('Numbers and numeric keypad', name: 'shortcutNumbers', desc: '', args: []);
+    return Intl.message(
+      'Numbers and numeric keypad',
+      name: 'shortcutNumbers',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add, subtract, multiply, divide, percent, and decimal point`
   String get shortcutOperators {
-    return Intl.message('Add, subtract, multiply, divide, percent, and decimal point', name: 'shortcutOperators', desc: '', args: []);
+    return Intl.message(
+      'Add, subtract, multiply, divide, percent, and decimal point',
+      name: 'shortcutOperators',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Calculate`
   String get shortcutEquals {
-    return Intl.message('Calculate', name: 'shortcutEquals', desc: '', args: []);
+    return Intl.message(
+      'Calculate',
+      name: 'shortcutEquals',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Delete the last digit`
   String get shortcutBackspace {
-    return Intl.message('Delete the last digit', name: 'shortcutBackspace', desc: '', args: []);
+    return Intl.message(
+      'Delete the last digit',
+      name: 'shortcutBackspace',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Clear input`
   String get shortcutClear {
-    return Intl.message('Clear input', name: 'shortcutClear', desc: '', args: []);
+    return Intl.message(
+      'Clear input',
+      name: 'shortcutClear',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Undo input`
@@ -457,42 +707,82 @@ class S {
 
   /// `Paste a number`
   String get shortcutPaste {
-    return Intl.message('Paste a number', name: 'shortcutPaste', desc: '', args: []);
+    return Intl.message(
+      'Paste a number',
+      name: 'shortcutPaste',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.`
   String get helpPaste {
-    return Intl.message('Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.', name: 'helpPaste', desc: '', args: []);
+    return Intl.message(
+      'Paste accepts a single finite number, including correctly grouped thousands or scientific notation. Expressions and other text are rejected.',
+      name: 'helpPaste',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Search history`
   String get searchHistory {
-    return Intl.message('Search history', name: 'searchHistory', desc: '', args: []);
+    return Intl.message(
+      'Search history',
+      name: 'searchHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Clear search`
   String get clearSearch {
-    return Intl.message('Clear search', name: 'clearSearch', desc: '', args: []);
+    return Intl.message(
+      'Clear search',
+      name: 'clearSearch',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `No matching calculations`
   String get noHistoryMatches {
-    return Intl.message('No matching calculations', name: 'noHistoryMatches', desc: '', args: []);
+    return Intl.message(
+      'No matching calculations',
+      name: 'noHistoryMatches',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Clear all`
   String get clearAllHistory {
-    return Intl.message('Clear all', name: 'clearAllHistory', desc: '', args: []);
+    return Intl.message(
+      'Clear all',
+      name: 'clearAllHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Calculation deleted`
   String get historyDeleted {
-    return Intl.message('Calculation deleted', name: 'historyDeleted', desc: '', args: []);
+    return Intl.message(
+      'Calculation deleted',
+      name: 'historyDeleted',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Paste number`
   String get pasteNumber {
-    return Intl.message('Paste number', name: 'pasteNumber', desc: '', args: []);
+    return Intl.message(
+      'Paste number',
+      name: 'pasteNumber',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Number pasted`
@@ -502,82 +792,162 @@ class S {
 
   /// `Copy a valid number to paste.`
   String get invalidPaste {
-    return Intl.message('Copy a valid number to paste.', name: 'invalidPaste', desc: '', args: []);
+    return Intl.message(
+      'Copy a valid number to paste.',
+      name: 'invalidPaste',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Clipboard is unavailable. Please try again.`
   String get clipboardUnavailable {
-    return Intl.message('Clipboard is unavailable. Please try again.', name: 'clipboardUnavailable', desc: '', args: []);
+    return Intl.message(
+      'Clipboard is unavailable. Please try again.',
+      name: 'clipboardUnavailable',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Copy all history`
   String get copyAllHistory {
-    return Intl.message('Copy all history', name: 'copyAllHistory', desc: '', args: []);
+    return Intl.message(
+      'Copy all history',
+      name: 'copyAllHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Copy matching calculations`
   String get copyMatchingHistory {
-    return Intl.message('Copy matching calculations', name: 'copyMatchingHistory', desc: '', args: []);
+    return Intl.message(
+      'Copy matching calculations',
+      name: 'copyMatchingHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `High contrast`
   String get highContrast {
-    return Intl.message('High contrast', name: 'highContrast', desc: '', args: []);
+    return Intl.message(
+      'High contrast',
+      name: 'highContrast',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use stronger contrast for numbers and controls. Your selected theme is kept.`
   String get highContrastDescription {
-    return Intl.message('Use stronger contrast for numbers and controls. Your selected theme is kept.', name: 'highContrastDescription', desc: '', args: []);
+    return Intl.message(
+      'Use stronger contrast for numbers and controls. Your selected theme is kept.',
+      name: 'highContrastDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `SwiftSum Premium`
   String get premium {
-    return Intl.message('SwiftSum Premium', name: 'premium', desc: '', args: []);
+    return Intl.message(
+      'SwiftSum Premium',
+      name: 'premium',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Premium tools`
   String get premiumTools {
-    return Intl.message('Premium tools', name: 'premiumTools', desc: '', args: []);
+    return Intl.message(
+      'Premium tools',
+      name: 'premiumTools',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Premium is active.`
   String get premiumActive {
-    return Intl.message('Premium is active.', name: 'premiumActive', desc: '', args: []);
+    return Intl.message(
+      'Premium is active.',
+      name: 'premiumActive',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `A one-time purchase unlocks both tools and removes ads.`
   String get premiumOffer {
-    return Intl.message('A one-time purchase unlocks both tools and removes ads.', name: 'premiumOffer', desc: '', args: []);
+    return Intl.message(
+      'A one-time purchase unlocks both tools and removes ads.',
+      name: 'premiumOffer',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `A one-time purchase unlocks the scientific calculator and reusable formulas.`
   String get premiumOfferToolsOnly {
-    return Intl.message('A one-time purchase unlocks the scientific calculator and reusable formulas.', name: 'premiumOfferToolsOnly', desc: '', args: []);
+    return Intl.message(
+      'A one-time purchase unlocks the scientific calculator and reusable formulas.',
+      name: 'premiumOfferToolsOnly',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `What-if preview`
   String get premiumWhatIfPreview {
-    return Intl.message('What-if preview', name: 'premiumWhatIfPreview', desc: '', args: []);
+    return Intl.message(
+      'What-if preview',
+      name: 'premiumWhatIfPreview',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Start with a price of $100.`
   String get premiumWhatIfPrice {
-    return Intl.message('Start with a price of \$100.', name: 'premiumWhatIfPrice', desc: '', args: []);
+    return Intl.message(
+      'Start with a price of \$100.',
+      name: 'premiumWhatIfPrice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `With 10% off, you pay $90.`
   String get premiumWhatIfBaseline {
-    return Intl.message('With 10% off, you pay \$90.', name: 'premiumWhatIfBaseline', desc: '', args: []);
+    return Intl.message(
+      'With 10% off, you pay \$90.',
+      name: 'premiumWhatIfBaseline',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `With 25% off, you pay $75.`
   String get premiumWhatIfAlternate {
-    return Intl.message('With 25% off, you pay \$75.', name: 'premiumWhatIfAlternate', desc: '', args: []);
+    return Intl.message(
+      'With 25% off, you pay \$75.',
+      name: 'premiumWhatIfAlternate',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Ad-free calculator`
   String get premiumAdFree {
-    return Intl.message('Ad-free calculator', name: 'premiumAdFree', desc: '', args: []);
+    return Intl.message(
+      'Ad-free calculator',
+      name: 'premiumAdFree',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Buy Premium`
@@ -587,82 +957,162 @@ class S {
 
   /// `Check App Store price`
   String get premiumCheckPrice {
-    return Intl.message('Check App Store price', name: 'premiumCheckPrice', desc: '', args: []);
+    return Intl.message(
+      'Check App Store price',
+      name: 'premiumCheckPrice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Check Google Play price`
   String get premiumCheckPriceGooglePlay {
-    return Intl.message('Check Google Play price', name: 'premiumCheckPriceGooglePlay', desc: '', args: []);
+    return Intl.message(
+      'Check Google Play price',
+      name: 'premiumCheckPriceGooglePlay',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Restore purchases`
   String get premiumRestore {
-    return Intl.message('Restore purchases', name: 'premiumRestore', desc: '', args: []);
+    return Intl.message(
+      'Restore purchases',
+      name: 'premiumRestore',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Premium purchase restored.`
   String get premiumRestored {
-    return Intl.message('Premium purchase restored.', name: 'premiumRestored', desc: '', args: []);
+    return Intl.message(
+      'Premium purchase restored.',
+      name: 'premiumRestored',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `The purchase is waiting for approval.`
   String get premiumPending {
-    return Intl.message('The purchase is waiting for approval.', name: 'premiumPending', desc: '', args: []);
+    return Intl.message(
+      'The purchase is waiting for approval.',
+      name: 'premiumPending',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `No Premium purchase was found for this Apple Account.`
   String get premiumNotPurchased {
-    return Intl.message('No Premium purchase was found for this Apple Account.', name: 'premiumNotPurchased', desc: '', args: []);
+    return Intl.message(
+      'No Premium purchase was found for this Apple Account.',
+      name: 'premiumNotPurchased',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `No Premium purchase was found for this Google account.`
   String get premiumNotPurchasedGooglePlay {
-    return Intl.message('No Premium purchase was found for this Google account.', name: 'premiumNotPurchasedGooglePlay', desc: '', args: []);
+    return Intl.message(
+      'No Premium purchase was found for this Google account.',
+      name: 'premiumNotPurchasedGooglePlay',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Premium is temporarily unavailable.`
   String get premiumUnavailable {
-    return Intl.message('Premium is temporarily unavailable.', name: 'premiumUnavailable', desc: '', args: []);
+    return Intl.message(
+      'Premium is temporarily unavailable.',
+      name: 'premiumUnavailable',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `The App Store couldn’t complete the request. Try again.`
   String get premiumFailed {
-    return Intl.message('The App Store couldn’t complete the request. Try again.', name: 'premiumFailed', desc: '', args: []);
+    return Intl.message(
+      'The App Store couldn’t complete the request. Try again.',
+      name: 'premiumFailed',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Google Play couldn’t complete the request. Try again.`
   String get premiumFailedGooglePlay {
-    return Intl.message('Google Play couldn’t complete the request. Try again.', name: 'premiumFailedGooglePlay', desc: '', args: []);
+    return Intl.message(
+      'Google Play couldn’t complete the request. Try again.',
+      name: 'premiumFailedGooglePlay',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Scientific calculator`
   String get scientificCalculator {
-    return Intl.message('Scientific calculator', name: 'scientificCalculator', desc: '', args: []);
+    return Intl.message(
+      'Scientific calculator',
+      name: 'scientificCalculator',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Expression`
   String get scientificExpression {
-    return Intl.message('Expression', name: 'scientificExpression', desc: '', args: []);
+    return Intl.message(
+      'Expression',
+      name: 'scientificExpression',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use * for multiplication. Try 2 * sin(30) + sqrt(9).`
   String get scientificExpressionHelp {
-    return Intl.message('Use * for multiplication. Try 2 * sin(30) + sqrt(9).', name: 'scientificExpressionHelp', desc: '', args: []);
+    return Intl.message(
+      'Use * for multiplication. Try 2 * sin(30) + sqrt(9).',
+      name: 'scientificExpressionHelp',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Degrees`
   String get scientificDegrees {
-    return Intl.message('Degrees', name: 'scientificDegrees', desc: '', args: []);
+    return Intl.message(
+      'Degrees',
+      name: 'scientificDegrees',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Radians`
   String get scientificRadians {
-    return Intl.message('Radians', name: 'scientificRadians', desc: '', args: []);
+    return Intl.message(
+      'Radians',
+      name: 'scientificRadians',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Calculate`
   String get scientificEvaluate {
-    return Intl.message('Calculate', name: 'scientificEvaluate', desc: '', args: []);
+    return Intl.message(
+      'Calculate',
+      name: 'scientificEvaluate',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Result`
@@ -672,12 +1122,22 @@ class S {
 
   /// `Enter a valid expression with a finite result.`
   String get scientificInvalidExpression {
-    return Intl.message('Enter a valid expression with a finite result.', name: 'scientificInvalidExpression', desc: '', args: []);
+    return Intl.message(
+      'Enter a valid expression with a finite result.',
+      name: 'scientificInvalidExpression',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Reusable formulas`
   String get reusableFormulas {
-    return Intl.message('Reusable formulas', name: 'reusableFormulas', desc: '', args: []);
+    return Intl.message(
+      'Reusable formulas',
+      name: 'reusableFormulas',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `New formula`
@@ -687,112 +1147,222 @@ class S {
 
   /// `Formula examples`
   String get formulaExamples {
-    return Intl.message('Formula examples', name: 'formulaExamples', desc: '', args: []);
+    return Intl.message(
+      'Formula examples',
+      name: 'formulaExamples',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Order total`
   String get formulaExampleOrderTotal {
-    return Intl.message('Order total', name: 'formulaExampleOrderTotal', desc: '', args: []);
+    return Intl.message(
+      'Order total',
+      name: 'formulaExampleOrderTotal',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Discounted price`
   String get formulaExampleDiscount {
-    return Intl.message('Discounted price', name: 'formulaExampleDiscount', desc: '', args: []);
+    return Intl.message(
+      'Discounted price',
+      name: 'formulaExampleDiscount',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Price with tax`
   String get formulaExampleTax {
-    return Intl.message('Price with tax', name: 'formulaExampleTax', desc: '', args: []);
+    return Intl.message(
+      'Price with tax',
+      name: 'formulaExampleTax',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Edit formula`
   String get formulaEdit {
-    return Intl.message('Edit formula', name: 'formulaEdit', desc: '', args: []);
+    return Intl.message(
+      'Edit formula',
+      name: 'formulaEdit',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Formula name`
   String get formulaName {
-    return Intl.message('Formula name', name: 'formulaName', desc: '', args: []);
+    return Intl.message(
+      'Formula name',
+      name: 'formulaName',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Expression`
   String get formulaExpression {
-    return Intl.message('Expression', name: 'formulaExpression', desc: '', args: []);
+    return Intl.message(
+      'Expression',
+      name: 'formulaExpression',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Example: price * quantity`
   String get formulaExpressionHint {
-    return Intl.message('Example: price * quantity', name: 'formulaExpressionHint', desc: '', args: []);
+    return Intl.message(
+      'Example: price * quantity',
+      name: 'formulaExpressionHint',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Baseline`
   String get formulaBaseline {
-    return Intl.message('Baseline', name: 'formulaBaseline', desc: '', args: []);
+    return Intl.message(
+      'Baseline',
+      name: 'formulaBaseline',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Alternate`
   String get formulaAlternate {
-    return Intl.message('Alternate', name: 'formulaAlternate', desc: '', args: []);
+    return Intl.message(
+      'Alternate',
+      name: 'formulaAlternate',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Difference (alternate − baseline)`
   String get formulaDifference {
-    return Intl.message('Difference (alternate − baseline)', name: 'formulaDifference', desc: '', args: []);
+    return Intl.message(
+      'Difference (alternate − baseline)',
+      name: 'formulaDifference',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Copy comparison`
   String get formulaCopyComparison {
-    return Intl.message('Copy comparison', name: 'formulaCopyComparison', desc: '', args: []);
+    return Intl.message(
+      'Copy comparison',
+      name: 'formulaCopyComparison',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `No formulas saved yet.`
   String get formulaEmpty {
-    return Intl.message('No formulas saved yet.', name: 'formulaEmpty', desc: '', args: []);
+    return Intl.message(
+      'No formulas saved yet.',
+      name: 'formulaEmpty',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a valid expression.`
   String get formulaInvalidExpression {
-    return Intl.message('Enter a valid expression.', name: 'formulaInvalidExpression', desc: '', args: []);
+    return Intl.message(
+      'Enter a valid expression.',
+      name: 'formulaInvalidExpression',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a valid number.`
   String get formulaInvalidInput {
-    return Intl.message('Enter a valid number.', name: 'formulaInvalidInput', desc: '', args: []);
+    return Intl.message(
+      'Enter a valid number.',
+      name: 'formulaInvalidInput',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a formula name.`
   String get formulaInvalidName {
-    return Intl.message('Enter a formula name.', name: 'formulaInvalidName', desc: '', args: []);
+    return Intl.message(
+      'Enter a formula name.',
+      name: 'formulaInvalidName',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `No result`
   String get formulaNoResult {
-    return Intl.message('No result', name: 'formulaNoResult', desc: '', args: []);
+    return Intl.message(
+      'No result',
+      name: 'formulaNoResult',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Could not save formulas.`
   String get formulaSaveFailed {
-    return Intl.message('Could not save formulas.', name: 'formulaSaveFailed', desc: '', args: []);
+    return Intl.message(
+      'Could not save formulas.',
+      name: 'formulaSaveFailed',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `You can save up to 30 formulas.`
   String get formulaLimitReached {
-    return Intl.message('You can save up to 30 formulas.', name: 'formulaLimitReached', desc: '', args: []);
+    return Intl.message(
+      'You can save up to 30 formulas.',
+      name: 'formulaLimitReached',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use at most 12 named inputs.`
   String get formulaTooManyInputs {
-    return Intl.message('Use at most 12 named inputs.', name: 'formulaTooManyInputs', desc: '', args: []);
+    return Intl.message(
+      'Use at most 12 named inputs.',
+      name: 'formulaTooManyInputs',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Delete formula`
   String get formulaDelete {
-    return Intl.message('Delete formula', name: 'formulaDelete', desc: '', args: []);
+    return Intl.message(
+      'Delete formula',
+      name: 'formulaDelete',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Delete this saved formula?`
   String get formulaDeleteMessage {
-    return Intl.message('Delete this saved formula?', name: 'formulaDeleteMessage', desc: '', args: []);
+    return Intl.message(
+      'Delete this saved formula?',
+      name: 'formulaDeleteMessage',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Save`
@@ -802,7 +1372,12 @@ class S {
 
   /// `Unit converter`
   String get unitConverter {
-    return Intl.message('Unit converter', name: 'unitConverter', desc: '', args: []);
+    return Intl.message(
+      'Unit converter',
+      name: 'unitConverter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Length`
@@ -822,7 +1397,12 @@ class S {
 
   /// `Temperature`
   String get converterTemperature {
-    return Intl.message('Temperature', name: 'converterTemperature', desc: '', args: []);
+    return Intl.message(
+      'Temperature',
+      name: 'converterTemperature',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Value`
@@ -842,7 +1422,12 @@ class S {
 
   /// `Swap units`
   String get converterSwap {
-    return Intl.message('Swap units', name: 'converterSwap', desc: '', args: []);
+    return Intl.message(
+      'Swap units',
+      name: 'converterSwap',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Metres`
@@ -857,7 +1442,12 @@ class S {
 
   /// `Centimetres`
   String get converterCentimeter {
-    return Intl.message('Centimetres', name: 'converterCentimeter', desc: '', args: []);
+    return Intl.message(
+      'Centimetres',
+      name: 'converterCentimeter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Inches`
@@ -867,7 +1457,12 @@ class S {
 
   /// `Kilometres`
   String get converterKilometer {
-    return Intl.message('Kilometres', name: 'converterKilometer', desc: '', args: []);
+    return Intl.message(
+      'Kilometres',
+      name: 'converterKilometer',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Miles`
@@ -877,7 +1472,12 @@ class S {
 
   /// `Kilograms`
   String get converterKilogram {
-    return Intl.message('Kilograms', name: 'converterKilogram', desc: '', args: []);
+    return Intl.message(
+      'Kilograms',
+      name: 'converterKilogram',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Pounds`
@@ -897,7 +1497,12 @@ class S {
 
   /// `Milligrams`
   String get converterMilligram {
-    return Intl.message('Milligrams', name: 'converterMilligram', desc: '', args: []);
+    return Intl.message(
+      'Milligrams',
+      name: 'converterMilligram',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Litres`
@@ -907,12 +1512,22 @@ class S {
 
   /// `US gallons`
   String get converterUsGallon {
-    return Intl.message('US gallons', name: 'converterUsGallon', desc: '', args: []);
+    return Intl.message(
+      'US gallons',
+      name: 'converterUsGallon',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Millilitres`
   String get converterMilliliter {
-    return Intl.message('Millilitres', name: 'converterMilliliter', desc: '', args: []);
+    return Intl.message(
+      'Millilitres',
+      name: 'converterMilliliter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `US cups`
@@ -922,17 +1537,32 @@ class S {
 
   /// `US fluid ounces`
   String get converterUsFluidOunce {
-    return Intl.message('US fluid ounces', name: 'converterUsFluidOunce', desc: '', args: []);
+    return Intl.message(
+      'US fluid ounces',
+      name: 'converterUsFluidOunce',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Celsius`
   String get converterCelsius {
-    return Intl.message('Celsius', name: 'converterCelsius', desc: '', args: []);
+    return Intl.message(
+      'Celsius',
+      name: 'converterCelsius',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Fahrenheit`
   String get converterFahrenheit {
-    return Intl.message('Fahrenheit', name: 'converterFahrenheit', desc: '', args: []);
+    return Intl.message(
+      'Fahrenheit',
+      name: 'converterFahrenheit',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Kelvin`
@@ -942,32 +1572,62 @@ class S {
 
   /// `Edit calculation`
   String get historyEditCalculation {
-    return Intl.message('Edit calculation', name: 'historyEditCalculation', desc: '', args: []);
+    return Intl.message(
+      'Edit calculation',
+      name: 'historyEditCalculation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Copy as TSV`
   String get historyCopyAsTsv {
-    return Intl.message('Copy as TSV', name: 'historyCopyAsTsv', desc: '', args: []);
+    return Intl.message(
+      'Copy as TSV',
+      name: 'historyCopyAsTsv',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a valid arithmetic expression.`
   String get historyInvalidExpression {
-    return Intl.message('Enter a valid arithmetic expression.', name: 'historyInvalidExpression', desc: '', args: []);
+    return Intl.message(
+      'Enter a valid arithmetic expression.',
+      name: 'historyInvalidExpression',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Try (2 + 3) × 4 or 200 + 10%.`
   String get historyExpressionHelp {
-    return Intl.message('Try (2 + 3) × 4 or 200 + 10%.', name: 'historyExpressionHelp', desc: '', args: []);
+    return Intl.message(
+      'Try (2 + 3) × 4 or 200 + 10%.',
+      name: 'historyExpressionHelp',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Customize labels and scenarios`
   String get formulaCustomize {
-    return Intl.message('Customize labels and scenarios', name: 'formulaCustomize', desc: '', args: []);
+    return Intl.message(
+      'Customize labels and scenarios',
+      name: 'formulaCustomize',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Input label`
   String get formulaInputLabel {
-    return Intl.message('Input label', name: 'formulaInputLabel', desc: '', args: []);
+    return Intl.message(
+      'Input label',
+      name: 'formulaInputLabel',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Unit`
@@ -977,32 +1637,62 @@ class S {
 
   /// `Baseline scenario name`
   String get formulaBaselineName {
-    return Intl.message('Baseline scenario name', name: 'formulaBaselineName', desc: '', args: []);
+    return Intl.message(
+      'Baseline scenario name',
+      name: 'formulaBaselineName',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Alternate scenario name`
   String get formulaAlternateName {
-    return Intl.message('Alternate scenario name', name: 'formulaAlternateName', desc: '', args: []);
+    return Intl.message(
+      'Alternate scenario name',
+      name: 'formulaAlternateName',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Difference ({alternate} − {baseline})`
   String formulaNamedDifference(String alternate, String baseline) {
-    return Intl.message('Difference (${alternate} − ${baseline})', name: 'formulaNamedDifference', desc: '', args: [alternate, baseline]);
+    return Intl.message(
+      'Difference ($alternate − $baseline)',
+      name: 'formulaNamedDifference',
+      desc: '',
+      args: [alternate, baseline],
+    );
   }
 
   /// `Use + or − with % to adjust a value by a percentage. For example, 200 + 10% = 220.`
   String get helpPercent {
-    return Intl.message('Use + or − with % to adjust a value by a percentage. For example, 200 + 10% = 220.', name: 'helpPercent', desc: '', args: []);
+    return Intl.message(
+      'Use + or − with % to adjust a value by a percentage. For example, 200 + 10% = 220.',
+      name: 'helpPercent',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Choose Unit converter in Everyday tools, enter a value, and send the result back to the calculator.`
   String get helpConverter {
-    return Intl.message('Choose Unit converter in Everyday tools, enter a value, and send the result back to the calculator.', name: 'helpConverter', desc: '', args: []);
+    return Intl.message(
+      'Choose Unit converter in Everyday tools, enter a value, and send the result back to the calculator.',
+      name: 'helpConverter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Scientific history`
   String get scientificHistory {
-    return Intl.message('Scientific history', name: 'scientificHistory', desc: '', args: []);
+    return Intl.message(
+      'Scientific history',
+      name: 'scientificHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Graph`
@@ -1012,37 +1702,72 @@ class S {
 
   /// `Engineering notation`
   String get scientificEngineeringNotation {
-    return Intl.message('Engineering notation', name: 'scientificEngineeringNotation', desc: '', args: []);
+    return Intl.message(
+      'Engineering notation',
+      name: 'scientificEngineeringNotation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Show system keyboard`
   String get scientificShowKeyboard {
-    return Intl.message('Show system keyboard', name: 'scientificShowKeyboard', desc: '', args: []);
+    return Intl.message(
+      'Show system keyboard',
+      name: 'scientificShowKeyboard',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Hide system keyboard`
   String get scientificHideKeyboard {
-    return Intl.message('Hide system keyboard', name: 'scientificHideKeyboard', desc: '', args: []);
+    return Intl.message(
+      'Hide system keyboard',
+      name: 'scientificHideKeyboard',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Open parenthesis`
   String get scientificOpenParenthesis {
-    return Intl.message('Open parenthesis', name: 'scientificOpenParenthesis', desc: '', args: []);
+    return Intl.message(
+      'Open parenthesis',
+      name: 'scientificOpenParenthesis',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Close parenthesis`
   String get scientificCloseParenthesis {
-    return Intl.message('Close parenthesis', name: 'scientificCloseParenthesis', desc: '', args: []);
+    return Intl.message(
+      'Close parenthesis',
+      name: 'scientificCloseParenthesis',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Previous answer`
   String get scientificPreviousAnswer {
-    return Intl.message('Previous answer', name: 'scientificPreviousAnswer', desc: '', args: []);
+    return Intl.message(
+      'Previous answer',
+      name: 'scientificPreviousAnswer',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Scientific exponent`
   String get scientificExponentEntry {
-    return Intl.message('Scientific exponent', name: 'scientificExponentEntry', desc: '', args: []);
+    return Intl.message(
+      'Scientific exponent',
+      name: 'scientificExponentEntry',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Power`
@@ -1052,72 +1777,142 @@ class S {
 
   /// `Factorial`
   String get scientificFactorial {
-    return Intl.message('Factorial', name: 'scientificFactorial', desc: '', args: []);
+    return Intl.message(
+      'Factorial',
+      name: 'scientificFactorial',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Argument separator`
   String get scientificArgumentSeparator {
-    return Intl.message('Argument separator', name: 'scientificArgumentSeparator', desc: '', args: []);
+    return Intl.message(
+      'Argument separator',
+      name: 'scientificArgumentSeparator',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Check the expression near the cursor.`
   String get scientificSyntaxError {
-    return Intl.message('Check the expression near the cursor.', name: 'scientificSyntaxError', desc: '', args: []);
+    return Intl.message(
+      'Check the expression near the cursor.',
+      name: 'scientificSyntaxError',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add a closing parenthesis.`
   String get scientificMissingParen {
-    return Intl.message('Add a closing parenthesis.', name: 'scientificMissingParen', desc: '', args: []);
+    return Intl.message(
+      'Add a closing parenthesis.',
+      name: 'scientificMissingParen',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `The function {name} is unknown.`
   String scientificUnknownFunction(String name) {
-    return Intl.message('The function ${name} is unknown.', name: 'scientificUnknownFunction', desc: '', args: [name]);
+    return Intl.message(
+      'The function $name is unknown.',
+      name: 'scientificUnknownFunction',
+      desc: '',
+      args: [name],
+    );
   }
 
   /// `Replace {name} with a number or Ans.`
   String scientificUnknownVariable(String name) {
-    return Intl.message('Replace ${name} with a number or Ans.', name: 'scientificUnknownVariable', desc: '', args: [name]);
+    return Intl.message(
+      'Replace $name with a number or Ans.',
+      name: 'scientificUnknownVariable',
+      desc: '',
+      args: [name],
+    );
   }
 
   /// `Calculate a result before using Ans.`
   String get scientificNoAnswer {
-    return Intl.message('Calculate a result before using Ans.', name: 'scientificNoAnswer', desc: '', args: []);
+    return Intl.message(
+      'Calculate a result before using Ans.',
+      name: 'scientificNoAnswer',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Change the divisor to a nonzero value.`
   String get scientificDivideByZero {
-    return Intl.message('Change the divisor to a nonzero value.', name: 'scientificDivideByZero', desc: '', args: []);
+    return Intl.message(
+      'Change the divisor to a nonzero value.',
+      name: 'scientificDivideByZero',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Check the allowed values for this operation.`
   String get scientificDomainError {
-    return Intl.message('Check the allowed values for this operation.', name: 'scientificDomainError', desc: '', args: []);
+    return Intl.message(
+      'Check the allowed values for this operation.',
+      name: 'scientificDomainError',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `The result is outside the supported range.`
   String get scientificOverflow {
-    return Intl.message('The result is outside the supported range.', name: 'scientificOverflow', desc: '', args: []);
+    return Intl.message(
+      'The result is outside the supported range.',
+      name: 'scientificOverflow',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Shorten the expression.`
   String get scientificTooLong {
-    return Intl.message('Shorten the expression.', name: 'scientificTooLong', desc: '', args: []);
+    return Intl.message(
+      'Shorten the expression.',
+      name: 'scientificTooLong',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use fewer nested operations.`
   String get scientificTooDeep {
-    return Intl.message('Use fewer nested operations.', name: 'scientificTooDeep', desc: '', args: []);
+    return Intl.message(
+      'Use fewer nested operations.',
+      name: 'scientificTooDeep',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `{message} (character {position})`
   String scientificErrorPosition(String message, int position) {
-    return Intl.message('${message} (character ${position})', name: 'scientificErrorPosition', desc: '', args: [message, position]);
+    return Intl.message(
+      '$message (character $position)',
+      name: 'scientificErrorPosition',
+      desc: '',
+      args: [message, position],
+    );
   }
 
   /// `Enter a function of x, such as x^2 − 4.`
   String get graphExpressionHelp {
-    return Intl.message('Enter a function of x, such as x^2 − 4.', name: 'graphExpressionHelp', desc: '', args: []);
+    return Intl.message(
+      'Enter a function of x, such as x^2 − 4.',
+      name: 'graphExpressionHelp',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Minimum x`
@@ -1142,102 +1937,202 @@ class S {
 
   /// `Value table`
   String get graphValueTable {
-    return Intl.message('Value table', name: 'graphValueTable', desc: '', args: []);
+    return Intl.message(
+      'Value table',
+      name: 'graphValueTable',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tap or drag on the curve to inspect values.`
   String get graphPlotHint {
-    return Intl.message('Tap or drag on the curve to inspect values.', name: 'graphPlotHint', desc: '', args: []);
+    return Intl.message(
+      'Tap or drag on the curve to inspect values.',
+      name: 'graphPlotHint',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a finite interval with minimum below maximum.`
   String get graphInvalidRange {
-    return Intl.message('Enter a finite interval with minimum below maximum.', name: 'graphInvalidRange', desc: '', args: []);
+    return Intl.message(
+      'Enter a finite interval with minimum below maximum.',
+      name: 'graphInvalidRange',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use x and a previous answer (Ans) as variables.`
   String get graphInvalidVariables {
-    return Intl.message('Use x and a previous answer (Ans) as variables.', name: 'graphInvalidVariables', desc: '', args: []);
+    return Intl.message(
+      'Use x and a previous answer (Ans) as variables.',
+      name: 'graphInvalidVariables',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `The function has no finite values in this interval.`
   String get graphNoValues {
-    return Intl.message('The function has no finite values in this interval.', name: 'graphNoValues', desc: '', args: []);
+    return Intl.message(
+      'The function has no finite values in this interval.',
+      name: 'graphNoValues',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Choose an interval with opposite signs at its ends, or a root at an endpoint.`
   String get graphRootNeedsBracket {
-    return Intl.message('Choose an interval with opposite signs at its ends, or a root at an endpoint.', name: 'graphRootNeedsBracket', desc: '', args: []);
+    return Intl.message(
+      'Choose an interval with opposite signs at its ends, or a root at an endpoint.',
+      name: 'graphRootNeedsBracket',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `A root could not be verified. Try a smaller interval where the function is continuous.`
   String get graphRootNotFound {
-    return Intl.message('A root could not be verified. Try a smaller interval where the function is continuous.', name: 'graphRootNotFound', desc: '', args: []);
+    return Intl.message(
+      'A root could not be verified. Try a smaller interval where the function is continuous.',
+      name: 'graphRootNotFound',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Undefined`
   String get graphUndefined {
-    return Intl.message('Undefined', name: 'graphUndefined', desc: '', args: []);
+    return Intl.message(
+      'Undefined',
+      name: 'graphUndefined',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Approximate root`
   String get graphRootResult {
-    return Intl.message('Approximate root', name: 'graphRootResult', desc: '', args: []);
+    return Intl.message(
+      'Approximate root',
+      name: 'graphRootResult',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.`
   String get helpScientificAdvanced {
-    return Intl.message('Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.', name: 'helpScientificAdvanced', desc: '', args: []);
+    return Intl.message(
+      'Use Ans to reuse your last scientific result, EXP to enter an exponent, and ENG to change the result format. Open Graph to plot a function, view its values, or find a root over an interval.',
+      name: 'helpScientificAdvanced',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Edit first number`
   String get editFirstOperand {
-    return Intl.message('Edit first number', name: 'editFirstOperand', desc: '', args: []);
+    return Intl.message(
+      'Edit first number',
+      name: 'editFirstOperand',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Edit second number`
   String get editSecondOperand {
-    return Intl.message('Edit second number', name: 'editSecondOperand', desc: '', args: []);
+    return Intl.message(
+      'Edit second number',
+      name: 'editSecondOperand',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `The calculation changed. Close this dialog and tap the number again.`
   String get operandChanged {
-    return Intl.message('The calculation changed. Close this dialog and tap the number again.', name: 'operandChanged', desc: '', args: []);
+    return Intl.message(
+      'The calculation changed. Close this dialog and tap the number again.',
+      name: 'operandChanged',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tap either number above the main display to correct it. Use the copy button beside a completed equation to copy the calculation.`
   String get helpEditOperands {
-    return Intl.message('Tap either number above the main display to correct it. Use the copy button beside a completed equation to copy the calculation.', name: 'helpEditOperands', desc: '', args: []);
+    return Intl.message(
+      'Tap either number above the main display to correct it. Use the copy button beside a completed equation to copy the calculation.',
+      name: 'helpEditOperands',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Open Everyday tools from the toolbar to split a bill, compare unit prices, or convert units.`
   String get helpEverydayTools {
-    return Intl.message('Open Everyday tools from the toolbar to split a bill, compare unit prices, or convert units.', name: 'helpEverydayTools', desc: '', args: []);
+    return Intl.message(
+      'Open Everyday tools from the toolbar to split a bill, compare unit prices, or convert units.',
+      name: 'helpEverydayTools',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Pin calculation`
   String get historyPinCalculation {
-    return Intl.message('Pin calculation', name: 'historyPinCalculation', desc: '', args: []);
+    return Intl.message(
+      'Pin calculation',
+      name: 'historyPinCalculation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Unpin calculation`
   String get historyUnpinCalculation {
-    return Intl.message('Unpin calculation', name: 'historyUnpinCalculation', desc: '', args: []);
+    return Intl.message(
+      'Unpin calculation',
+      name: 'historyUnpinCalculation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Name calculation`
   String get historyNameCalculation {
-    return Intl.message('Name calculation', name: 'historyNameCalculation', desc: '', args: []);
+    return Intl.message(
+      'Name calculation',
+      name: 'historyNameCalculation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Rename calculation`
   String get historyRenameCalculation {
-    return Intl.message('Rename calculation', name: 'historyRenameCalculation', desc: '', args: []);
+    return Intl.message(
+      'Rename calculation',
+      name: 'historyRenameCalculation',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Calculation name`
   String get historyCalculationName {
-    return Intl.message('Calculation name', name: 'historyCalculationName', desc: '', args: []);
+    return Intl.message(
+      'Calculation name',
+      name: 'historyCalculationName',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Pinned`
@@ -1247,87 +2142,172 @@ class S {
 
   /// `You can pin up to 25 calculations.`
   String get historyPinLimit {
-    return Intl.message('You can pin up to 25 calculations.', name: 'historyPinLimit', desc: '', args: []);
+    return Intl.message(
+      'You can pin up to 25 calculations.',
+      name: 'historyPinLimit',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use a shorter name.`
   String get historyNameTooLong {
-    return Intl.message('Use a shorter name.', name: 'historyNameTooLong', desc: '', args: []);
+    return Intl.message(
+      'Use a shorter name.',
+      name: 'historyNameTooLong',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Everyday tools`
   String get everydayTools {
-    return Intl.message('Everyday tools', name: 'everydayTools', desc: '', args: []);
+    return Intl.message(
+      'Everyday tools',
+      name: 'everydayTools',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tip and bill splitter`
   String get everydayTipSplitter {
-    return Intl.message('Tip and bill splitter', name: 'everydayTipSplitter', desc: '', args: []);
+    return Intl.message(
+      'Tip and bill splitter',
+      name: 'everydayTipSplitter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Unit price comparison`
   String get everydayUnitPrice {
-    return Intl.message('Unit price comparison', name: 'everydayUnitPrice', desc: '', args: []);
+    return Intl.message(
+      'Unit price comparison',
+      name: 'everydayUnitPrice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Bill amount`
   String get everydayBill {
-    return Intl.message('Bill amount', name: 'everydayBill', desc: '', args: []);
+    return Intl.message(
+      'Bill amount',
+      name: 'everydayBill',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tip (%)`
   String get everydayTipPercent {
-    return Intl.message('Tip (%)', name: 'everydayTipPercent', desc: '', args: []);
+    return Intl.message(
+      'Tip (%)',
+      name: 'everydayTipPercent',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Number of people`
   String get everydayPeople {
-    return Intl.message('Number of people', name: 'everydayPeople', desc: '', args: []);
+    return Intl.message(
+      'Number of people',
+      name: 'everydayPeople',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tip amount`
   String get everydayTipAmount {
-    return Intl.message('Tip amount', name: 'everydayTipAmount', desc: '', args: []);
+    return Intl.message(
+      'Tip amount',
+      name: 'everydayTipAmount',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Total with tip`
   String get everydayBillTotal {
-    return Intl.message('Total with tip', name: 'everydayBillTotal', desc: '', args: []);
+    return Intl.message(
+      'Total with tip',
+      name: 'everydayBillTotal',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Per person`
   String get everydayPerPerson {
-    return Intl.message('Per person', name: 'everydayPerPerson', desc: '', args: []);
+    return Intl.message(
+      'Per person',
+      name: 'everydayPerPerson',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `1 person pays {amount}`
   String everydayOnePersonPays(String amount) {
-    return Intl.message('1 person pays ${amount}', name: 'everydayOnePersonPays', desc: '', args: [amount]);
+    return Intl.message(
+      '1 person pays $amount',
+      name: 'everydayOnePersonPays',
+      desc: '',
+      args: [amount],
+    );
   }
 
   /// `{people} people pay {amount}`
   String everydayPeoplePay(String people, String amount) {
-    return Intl.message('${people} people pay ${amount}', name: 'everydayPeoplePay', desc: '', args: [people, amount]);
+    return Intl.message(
+      '$people people pay $amount',
+      name: 'everydayPeoplePay',
+      desc: '',
+      args: [people, amount],
+    );
   }
 
   /// `Enter a non-negative amount with up to two decimal places.`
   String get everydayMoneyError {
-    return Intl.message('Enter a non-negative amount with up to two decimal places.', name: 'everydayMoneyError', desc: '', args: []);
+    return Intl.message(
+      'Enter a non-negative amount with up to two decimal places.',
+      name: 'everydayMoneyError',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a non-negative number.`
   String get everydayNonnegativeError {
-    return Intl.message('Enter a non-negative number.', name: 'everydayNonnegativeError', desc: '', args: []);
+    return Intl.message(
+      'Enter a non-negative number.',
+      name: 'everydayNonnegativeError',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a positive whole number.`
   String get everydayCountError {
-    return Intl.message('Enter a positive whole number.', name: 'everydayCountError', desc: '', args: []);
+    return Intl.message(
+      'Enter a positive whole number.',
+      name: 'everydayCountError',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Enter a size greater than zero.`
   String get everydaySizeError {
-    return Intl.message('Enter a size greater than zero.', name: 'everydaySizeError', desc: '', args: []);
+    return Intl.message(
+      'Enter a size greater than zero.',
+      name: 'everydaySizeError',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Count`
@@ -1352,7 +2332,12 @@ class S {
 
   /// `Package size`
   String get everydayPackageSize {
-    return Intl.message('Package size', name: 'everydayPackageSize', desc: '', args: []);
+    return Intl.message(
+      'Package size',
+      name: 'everydayPackageSize',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `item`
@@ -1362,52 +2347,102 @@ class S {
 
   /// `{price} per {unit}`
   String everydayUnitCost(String price, String unit) {
-    return Intl.message('${price} per ${unit}', name: 'everydayUnitCost', desc: '', args: [price, unit]);
+    return Intl.message(
+      '$price per $unit',
+      name: 'everydayUnitCost',
+      desc: '',
+      args: [price, unit],
+    );
   }
 
   /// `Item A costs less per unit.`
   String get everydayItemACheaper {
-    return Intl.message('Item A costs less per unit.', name: 'everydayItemACheaper', desc: '', args: []);
+    return Intl.message(
+      'Item A costs less per unit.',
+      name: 'everydayItemACheaper',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Item B costs less per unit.`
   String get everydayItemBCheaper {
-    return Intl.message('Item B costs less per unit.', name: 'everydayItemBCheaper', desc: '', args: []);
+    return Intl.message(
+      'Item B costs less per unit.',
+      name: 'everydayItemBCheaper',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Both items have the same unit price.`
   String get everydayEqualPrice {
-    return Intl.message('Both items have the same unit price.', name: 'everydayEqualPrice', desc: '', args: []);
+    return Intl.message(
+      'Both items have the same unit price.',
+      name: 'everydayEqualPrice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Key click sound`
   String get soundEffects {
-    return Intl.message('Key click sound', name: 'soundEffects', desc: '', args: []);
+    return Intl.message(
+      'Key click sound',
+      name: 'soundEffects',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Play a subtle click when pressing calculator keys`
   String get soundEffectsDescription {
-    return Intl.message('Play a subtle click when pressing calculator keys', name: 'soundEffectsDescription', desc: '', args: []);
+    return Intl.message(
+      'Play a subtle click when pressing calculator keys',
+      name: 'soundEffectsDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Thousands separator`
   String get thousandsSeparator {
-    return Intl.message('Thousands separator', name: 'thousandsSeparator', desc: '', args: []);
+    return Intl.message(
+      'Thousands separator',
+      name: 'thousandsSeparator',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Group digits in large numbers, such as 1,234.56`
   String get thousandsSeparatorDescription {
-    return Intl.message('Group digits in large numbers, such as 1,234.56', name: 'thousandsSeparatorDescription', desc: '', args: []);
+    return Intl.message(
+      'Group digits in large numbers, such as 1,234.56',
+      name: 'thousandsSeparatorDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Comma decimal separator`
   String get commaDecimal {
-    return Intl.message('Comma decimal separator', name: 'commaDecimal', desc: '', args: []);
+    return Intl.message(
+      'Comma decimal separator',
+      name: 'commaDecimal',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Use a comma for decimals, such as 1.234,56`
   String get commaDecimalDescription {
-    return Intl.message('Use a comma for decimals, such as 1.234,56', name: 'commaDecimalDescription', desc: '', args: []);
+    return Intl.message(
+      'Use a comma for decimals, such as 1.234,56',
+      name: 'commaDecimalDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Memory keys`
@@ -1417,17 +2452,32 @@ class S {
 
   /// `Show MC, MR, M+, and M− above the keypad`
   String get memoryBarDescription {
-    return Intl.message('Show MC, MR, M+, and M− above the keypad', name: 'memoryBarDescription', desc: '', args: []);
+    return Intl.message(
+      'Show MC, MR, M+, and M− above the keypad',
+      name: 'memoryBarDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Repeat equals`
   String get repeatEquals {
-    return Intl.message('Repeat equals', name: 'repeatEquals', desc: '', args: []);
+    return Intl.message(
+      'Repeat equals',
+      name: 'repeatEquals',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Pressing = again repeats the last operation`
   String get repeatEqualsDescription {
-    return Intl.message('Pressing = again repeats the last operation', name: 'repeatEqualsDescription', desc: '', args: []);
+    return Intl.message(
+      'Pressing = again repeats the last operation',
+      name: 'repeatEqualsDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Redo`
@@ -1437,12 +2487,22 @@ class S {
 
   /// `Clear memory`
   String get memoryClear {
-    return Intl.message('Clear memory', name: 'memoryClear', desc: '', args: []);
+    return Intl.message(
+      'Clear memory',
+      name: 'memoryClear',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Recall memory`
   String get memoryRecall {
-    return Intl.message('Recall memory', name: 'memoryRecall', desc: '', args: []);
+    return Intl.message(
+      'Recall memory',
+      name: 'memoryRecall',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add to memory`
@@ -1452,7 +2512,12 @@ class S {
 
   /// `Subtract from memory`
   String get memorySubtract {
-    return Intl.message('Subtract from memory', name: 'memorySubtract', desc: '', args: []);
+    return Intl.message(
+      'Subtract from memory',
+      name: 'memorySubtract',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Redo input`
@@ -1462,12 +2527,22 @@ class S {
 
   /// `Toggle history`
   String get shortcutHistory {
-    return Intl.message('Toggle history', name: 'shortcutHistory', desc: '', args: []);
+    return Intl.message(
+      'Toggle history',
+      name: 'shortcutHistory',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Open everyday tools`
   String get shortcutTools {
-    return Intl.message('Open everyday tools', name: 'shortcutTools', desc: '', args: []);
+    return Intl.message(
+      'Open everyday tools',
+      name: 'shortcutTools',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Today`
@@ -1477,7 +2552,12 @@ class S {
 
   /// `Yesterday`
   String get historyYesterday {
-    return Intl.message('Yesterday', name: 'historyYesterday', desc: '', args: []);
+    return Intl.message(
+      'Yesterday',
+      name: 'historyYesterday',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Earlier`
@@ -1487,12 +2567,22 @@ class S {
 
   /// `Pinned only`
   String get historyPinnedOnly {
-    return Intl.message('Pinned only', name: 'historyPinnedOnly', desc: '', args: []);
+    return Intl.message(
+      'Pinned only',
+      name: 'historyPinnedOnly',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Sum ({count}): {total}`
   String historyVisibleSum(int count, String total) {
-    return Intl.message('Sum (${count}): ${total}', name: 'historyVisibleSum', desc: '', args: [count, total]);
+    return Intl.message(
+      'Sum ($count): $total',
+      name: 'historyVisibleSum',
+      desc: '',
+      args: [count, total],
+    );
   }
 
   /// `Use sum`
@@ -1502,132 +2592,262 @@ class S {
 
   /// `Use display ({value})`
   String useCurrentDisplay(String value) {
-    return Intl.message('Use display (${value})', name: 'useCurrentDisplay', desc: '', args: [value]);
+    return Intl.message(
+      'Use display ($value)',
+      name: 'useCurrentDisplay',
+      desc: '',
+      args: [value],
+    );
   }
 
   /// `Copy summary`
   String get copySummary {
-    return Intl.message('Copy summary', name: 'copySummary', desc: '', args: []);
+    return Intl.message(
+      'Copy summary',
+      name: 'copySummary',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Round up per person`
   String get roundUpPerPerson {
-    return Intl.message('Round up per person', name: 'roundUpPerPerson', desc: '', args: []);
+    return Intl.message(
+      'Round up per person',
+      name: 'roundUpPerPerson',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Decrease people`
   String get decreasePeople {
-    return Intl.message('Decrease people', name: 'decreasePeople', desc: '', args: []);
+    return Intl.message(
+      'Decrease people',
+      name: 'decreasePeople',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Increase people`
   String get increasePeople {
-    return Intl.message('Increase people', name: 'increasePeople', desc: '', args: []);
+    return Intl.message(
+      'Increase people',
+      name: 'increasePeople',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Pack count`
   String get everydayPackCount {
-    return Intl.message('Pack count', name: 'everydayPackCount', desc: '', args: []);
+    return Intl.message(
+      'Pack count',
+      name: 'everydayPackCount',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add item`
   String get everydayAddItem {
-    return Intl.message('Add item', name: 'everydayAddItem', desc: '', args: []);
+    return Intl.message(
+      'Add item',
+      name: 'everydayAddItem',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Remove item`
   String get everydayRemoveItem {
-    return Intl.message('Remove item', name: 'everydayRemoveItem', desc: '', args: []);
+    return Intl.message(
+      'Remove item',
+      name: 'everydayRemoveItem',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Item {letter}`
   String everydayItemLabel(String letter) {
-    return Intl.message('Item ${letter}', name: 'everydayItemLabel', desc: '', args: [letter]);
+    return Intl.message(
+      'Item $letter',
+      name: 'everydayItemLabel',
+      desc: '',
+      args: [letter],
+    );
   }
 
   /// `{item} is the best value.`
   String everydayBestValue(String item) {
-    return Intl.message('${item} is the best value.', name: 'everydayBestValue', desc: '', args: [item]);
+    return Intl.message(
+      '$item is the best value.',
+      name: 'everydayBestValue',
+      desc: '',
+      args: [item],
+    );
   }
 
   /// `Saves {percent}% ({savings} per {unit})`
   String everydaySavesPercent(String percent, String savings, String unit) {
-    return Intl.message('Saves ${percent}% (${savings} per ${unit})', name: 'everydaySavesPercent', desc: '', args: [percent, savings, unit]);
+    return Intl.message(
+      'Saves $percent% ($savings per $unit)',
+      name: 'everydaySavesPercent',
+      desc: '',
+      args: [percent, savings, unit],
+    );
   }
 
   /// `Discount and tax`
   String get everydayDiscountTax {
-    return Intl.message('Discount and tax', name: 'everydayDiscountTax', desc: '', args: []);
+    return Intl.message(
+      'Discount and tax',
+      name: 'everydayDiscountTax',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Original price`
   String get everydayOriginalPrice {
-    return Intl.message('Original price', name: 'everydayOriginalPrice', desc: '', args: []);
+    return Intl.message(
+      'Original price',
+      name: 'everydayOriginalPrice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Discount (%)`
   String get everydayDiscountPercent {
-    return Intl.message('Discount (%)', name: 'everydayDiscountPercent', desc: '', args: []);
+    return Intl.message(
+      'Discount (%)',
+      name: 'everydayDiscountPercent',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Extra discount (%)`
   String get everydayExtraDiscountPercent {
-    return Intl.message('Extra discount (%)', name: 'everydayExtraDiscountPercent', desc: '', args: []);
+    return Intl.message(
+      'Extra discount (%)',
+      name: 'everydayExtraDiscountPercent',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Sales tax (%)`
   String get everydayTaxPercent {
-    return Intl.message('Sales tax (%)', name: 'everydayTaxPercent', desc: '', args: []);
+    return Intl.message(
+      'Sales tax (%)',
+      name: 'everydayTaxPercent',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `You save`
   String get everydayYouSave {
-    return Intl.message('You save', name: 'everydayYouSave', desc: '', args: []);
+    return Intl.message(
+      'You save',
+      name: 'everydayYouSave',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tax amount`
   String get everydayTaxAmount {
-    return Intl.message('Tax amount', name: 'everydayTaxAmount', desc: '', args: []);
+    return Intl.message(
+      'Tax amount',
+      name: 'everydayTaxAmount',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Final price`
   String get everydayFinalPrice {
-    return Intl.message('Final price', name: 'everydayFinalPrice', desc: '', args: []);
+    return Intl.message(
+      'Final price',
+      name: 'everydayFinalPrice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Percentage change and margin`
   String get everydayPercentTools {
-    return Intl.message('Percentage change and margin', name: 'everydayPercentTools', desc: '', args: []);
+    return Intl.message(
+      'Percentage change and margin',
+      name: 'everydayPercentTools',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Change`
   String get everydayPercentChangeTab {
-    return Intl.message('Change', name: 'everydayPercentChangeTab', desc: '', args: []);
+    return Intl.message(
+      'Change',
+      name: 'everydayPercentChangeTab',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Margin`
   String get everydayMarginTab {
-    return Intl.message('Margin', name: 'everydayMarginTab', desc: '', args: []);
+    return Intl.message(
+      'Margin',
+      name: 'everydayMarginTab',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `From value`
   String get everydayFromValue {
-    return Intl.message('From value', name: 'everydayFromValue', desc: '', args: []);
+    return Intl.message(
+      'From value',
+      name: 'everydayFromValue',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `To value`
   String get everydayToValue {
-    return Intl.message('To value', name: 'everydayToValue', desc: '', args: []);
+    return Intl.message(
+      'To value',
+      name: 'everydayToValue',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Change`
   String get everydayAbsoluteChange {
-    return Intl.message('Change', name: 'everydayAbsoluteChange', desc: '', args: []);
+    return Intl.message(
+      'Change',
+      name: 'everydayAbsoluteChange',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Percentage change`
   String get everydayPercentChange {
-    return Intl.message('Percentage change', name: 'everydayPercentChange', desc: '', args: []);
+    return Intl.message(
+      'Percentage change',
+      name: 'everydayPercentChange',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Cost`
@@ -1637,7 +2857,12 @@ class S {
 
   /// `Selling price`
   String get everydaySellingPrice {
-    return Intl.message('Selling price', name: 'everydaySellingPrice', desc: '', args: []);
+    return Intl.message(
+      'Selling price',
+      name: 'everydaySellingPrice',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Profit`
@@ -1652,62 +2877,122 @@ class S {
 
   /// `Profit margin`
   String get everydayMargin {
-    return Intl.message('Profit margin', name: 'everydayMargin', desc: '', args: []);
+    return Intl.message(
+      'Profit margin',
+      name: 'everydayMargin',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Date calculator`
   String get everydayDateCalculator {
-    return Intl.message('Date calculator', name: 'everydayDateCalculator', desc: '', args: []);
+    return Intl.message(
+      'Date calculator',
+      name: 'everydayDateCalculator',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Between dates`
   String get everydayDateDifferenceTab {
-    return Intl.message('Between dates', name: 'everydayDateDifferenceTab', desc: '', args: []);
+    return Intl.message(
+      'Between dates',
+      name: 'everydayDateDifferenceTab',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Add or subtract`
   String get everydayDateAddTab {
-    return Intl.message('Add or subtract', name: 'everydayDateAddTab', desc: '', args: []);
+    return Intl.message(
+      'Add or subtract',
+      name: 'everydayDateAddTab',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Start date`
   String get everydayStartDate {
-    return Intl.message('Start date', name: 'everydayStartDate', desc: '', args: []);
+    return Intl.message(
+      'Start date',
+      name: 'everydayStartDate',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `End date`
   String get everydayEndDate {
-    return Intl.message('End date', name: 'everydayEndDate', desc: '', args: []);
+    return Intl.message(
+      'End date',
+      name: 'everydayEndDate',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Total days`
   String get everydayTotalDays {
-    return Intl.message('Total days', name: 'everydayTotalDays', desc: '', args: []);
+    return Intl.message(
+      'Total days',
+      name: 'everydayTotalDays',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Weeks and days`
   String get everydayWeeksAndDays {
-    return Intl.message('Weeks and days', name: 'everydayWeeksAndDays', desc: '', args: []);
+    return Intl.message(
+      'Weeks and days',
+      name: 'everydayWeeksAndDays',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Business days (Mon–Fri)`
   String get everydayBusinessDays {
-    return Intl.message('Business days (Mon–Fri)', name: 'everydayBusinessDays', desc: '', args: []);
+    return Intl.message(
+      'Business days (Mon–Fri)',
+      name: 'everydayBusinessDays',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Days (negative to subtract)`
   String get everydayDaysOffset {
-    return Intl.message('Days (negative to subtract)', name: 'everydayDaysOffset', desc: '', args: []);
+    return Intl.message(
+      'Days (negative to subtract)',
+      name: 'everydayDaysOffset',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Result date`
   String get everydayResultDate {
-    return Intl.message('Result date', name: 'everydayResultDate', desc: '', args: []);
+    return Intl.message(
+      'Result date',
+      name: 'everydayResultDate',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `All conversions`
   String get converterAllUnits {
-    return Intl.message('All conversions', name: 'converterAllUnits', desc: '', args: []);
+    return Intl.message(
+      'All conversions',
+      name: 'converterAllUnits',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Area`
@@ -1732,7 +3017,12 @@ class S {
 
   /// `Millimetres`
   String get converterMillimeter {
-    return Intl.message('Millimetres', name: 'converterMillimeter', desc: '', args: []);
+    return Intl.message(
+      'Millimetres',
+      name: 'converterMillimeter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Yards`
@@ -1742,52 +3032,102 @@ class S {
 
   /// `Metric tonnes`
   String get converterTonne {
-    return Intl.message('Metric tonnes', name: 'converterTonne', desc: '', args: []);
+    return Intl.message(
+      'Metric tonnes',
+      name: 'converterTonne',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Imperial gallons`
   String get converterUkGallon {
-    return Intl.message('Imperial gallons', name: 'converterUkGallon', desc: '', args: []);
+    return Intl.message(
+      'Imperial gallons',
+      name: 'converterUkGallon',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Imperial fluid ounces`
   String get converterUkFluidOunce {
-    return Intl.message('Imperial fluid ounces', name: 'converterUkFluidOunce', desc: '', args: []);
+    return Intl.message(
+      'Imperial fluid ounces',
+      name: 'converterUkFluidOunce',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Tablespoons`
   String get converterTablespoon {
-    return Intl.message('Tablespoons', name: 'converterTablespoon', desc: '', args: []);
+    return Intl.message(
+      'Tablespoons',
+      name: 'converterTablespoon',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Teaspoons`
   String get converterTeaspoon {
-    return Intl.message('Teaspoons', name: 'converterTeaspoon', desc: '', args: []);
+    return Intl.message(
+      'Teaspoons',
+      name: 'converterTeaspoon',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Square metres`
   String get converterSquareMeter {
-    return Intl.message('Square metres', name: 'converterSquareMeter', desc: '', args: []);
+    return Intl.message(
+      'Square metres',
+      name: 'converterSquareMeter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Square feet`
   String get converterSquareFoot {
-    return Intl.message('Square feet', name: 'converterSquareFoot', desc: '', args: []);
+    return Intl.message(
+      'Square feet',
+      name: 'converterSquareFoot',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Square centimetres`
   String get converterSquareCentimeter {
-    return Intl.message('Square centimetres', name: 'converterSquareCentimeter', desc: '', args: []);
+    return Intl.message(
+      'Square centimetres',
+      name: 'converterSquareCentimeter',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Square inches`
   String get converterSquareInch {
-    return Intl.message('Square inches', name: 'converterSquareInch', desc: '', args: []);
+    return Intl.message(
+      'Square inches',
+      name: 'converterSquareInch',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Hectares`
   String get converterHectare {
-    return Intl.message('Hectares', name: 'converterHectare', desc: '', args: []);
+    return Intl.message(
+      'Hectares',
+      name: 'converterHectare',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Acres`
@@ -1797,27 +3137,52 @@ class S {
 
   /// `Square kilometres`
   String get converterSquareKilometer {
-    return Intl.message('Square kilometres', name: 'converterSquareKilometer', desc: '', args: []);
+    return Intl.message(
+      'Square kilometres',
+      name: 'converterSquareKilometer',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Square miles`
   String get converterSquareMile {
-    return Intl.message('Square miles', name: 'converterSquareMile', desc: '', args: []);
+    return Intl.message(
+      'Square miles',
+      name: 'converterSquareMile',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Kilometres per hour`
   String get converterKmPerHour {
-    return Intl.message('Kilometres per hour', name: 'converterKmPerHour', desc: '', args: []);
+    return Intl.message(
+      'Kilometres per hour',
+      name: 'converterKmPerHour',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Miles per hour`
   String get converterMilesPerHour {
-    return Intl.message('Miles per hour', name: 'converterMilesPerHour', desc: '', args: []);
+    return Intl.message(
+      'Miles per hour',
+      name: 'converterMilesPerHour',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Metres per second`
   String get converterMetersPerSecond {
-    return Intl.message('Metres per second', name: 'converterMetersPerSecond', desc: '', args: []);
+    return Intl.message(
+      'Metres per second',
+      name: 'converterMetersPerSecond',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Knots`
@@ -1832,22 +3197,42 @@ class S {
 
   /// `Kilobytes`
   String get converterKilobyte {
-    return Intl.message('Kilobytes', name: 'converterKilobyte', desc: '', args: []);
+    return Intl.message(
+      'Kilobytes',
+      name: 'converterKilobyte',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Megabytes`
   String get converterMegabyte {
-    return Intl.message('Megabytes', name: 'converterMegabyte', desc: '', args: []);
+    return Intl.message(
+      'Megabytes',
+      name: 'converterMegabyte',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Gigabytes`
   String get converterGigabyte {
-    return Intl.message('Gigabytes', name: 'converterGigabyte', desc: '', args: []);
+    return Intl.message(
+      'Gigabytes',
+      name: 'converterGigabyte',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Terabytes`
   String get converterTerabyte {
-    return Intl.message('Terabytes', name: 'converterTerabyte', desc: '', args: []);
+    return Intl.message(
+      'Terabytes',
+      name: 'converterTerabyte',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Seconds`
@@ -1877,57 +3262,112 @@ class S {
 
   /// `Fraction`
   String get scientificFraction {
-    return Intl.message('Fraction', name: 'scientificFraction', desc: '', args: []);
+    return Intl.message(
+      'Fraction',
+      name: 'scientificFraction',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Preview`
   String get scientificPreview {
-    return Intl.message('Preview', name: 'scientificPreview', desc: '', args: []);
+    return Intl.message(
+      'Preview',
+      name: 'scientificPreview',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Programmer base converter`
   String get programmerMode {
-    return Intl.message('Programmer base converter', name: 'programmerMode', desc: '', args: []);
+    return Intl.message(
+      'Programmer base converter',
+      name: 'programmerMode',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Input base`
   String get programmerInputBase {
-    return Intl.message('Input base', name: 'programmerInputBase', desc: '', args: []);
+    return Intl.message(
+      'Input base',
+      name: 'programmerInputBase',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Integer value`
   String get programmerValue {
-    return Intl.message('Integer value', name: 'programmerValue', desc: '', args: []);
+    return Intl.message(
+      'Integer value',
+      name: 'programmerValue',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Bitwise operation`
   String get programmerBitwise {
-    return Intl.message('Bitwise operation', name: 'programmerBitwise', desc: '', args: []);
+    return Intl.message(
+      'Bitwise operation',
+      name: 'programmerBitwise',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Second integer`
   String get programmerSecondValue {
-    return Intl.message('Second integer', name: 'programmerSecondValue', desc: '', args: []);
+    return Intl.message(
+      'Second integer',
+      name: 'programmerSecondValue',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Second function g(x) (optional)`
   String get graphSecondFunction {
-    return Intl.message('Second function g(x) (optional)', name: 'graphSecondFunction', desc: '', args: []);
+    return Intl.message(
+      'Second function g(x) (optional)',
+      name: 'graphSecondFunction',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Intersection`
   String get graphFindIntersection {
-    return Intl.message('Intersection', name: 'graphFindIntersection', desc: '', args: []);
+    return Intl.message(
+      'Intersection',
+      name: 'graphFindIntersection',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Approximate intersection`
   String get graphIntersectionResult {
-    return Intl.message('Approximate intersection', name: 'graphIntersectionResult', desc: '', args: []);
+    return Intl.message(
+      'Approximate intersection',
+      name: 'graphIntersectionResult',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `No intersection found in this interval.`
   String get graphIntersectionNotFound {
-    return Intl.message('No intersection found in this interval.', name: 'graphIntersectionNotFound', desc: '', args: []);
+    return Intl.message(
+      'No intersection found in this interval.',
+      name: 'graphIntersectionNotFound',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Zoom in`
@@ -1942,17 +3382,32 @@ class S {
 
   /// `Reset view`
   String get graphResetView {
-    return Intl.message('Reset view', name: 'graphResetView', desc: '', args: []);
+    return Intl.message(
+      'Reset view',
+      name: 'graphResetView',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Key points`
   String get graphKeyPoints {
-    return Intl.message('Key points', name: 'graphKeyPoints', desc: '', args: []);
+    return Intl.message(
+      'Key points',
+      name: 'graphKeyPoints',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `y-intercept`
   String get graphYIntercept {
-    return Intl.message('y-intercept', name: 'graphYIntercept', desc: '', args: []);
+    return Intl.message(
+      'y-intercept',
+      name: 'graphYIntercept',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Minimum`
@@ -1967,12 +3422,22 @@ class S {
 
   /// `Duplicate formula`
   String get formulaDuplicate {
-    return Intl.message('Duplicate formula', name: 'formulaDuplicate', desc: '', args: []);
+    return Intl.message(
+      'Duplicate formula',
+      name: 'formulaDuplicate',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Search formulas`
   String get formulaSearch {
-    return Intl.message('Search formulas', name: 'formulaSearch', desc: '', args: []);
+    return Intl.message(
+      'Search formulas',
+      name: 'formulaSearch',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Move up`
@@ -1982,22 +3447,42 @@ class S {
 
   /// `Move down`
   String get formulaMoveDown {
-    return Intl.message('Move down', name: 'formulaMoveDown', desc: '', args: []);
+    return Intl.message(
+      'Move down',
+      name: 'formulaMoveDown',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Monthly loan payment`
   String get formulaExampleLoan {
-    return Intl.message('Monthly loan payment', name: 'formulaExampleLoan', desc: '', args: []);
+    return Intl.message(
+      'Monthly loan payment',
+      name: 'formulaExampleLoan',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Compound interest`
   String get formulaExampleCompound {
-    return Intl.message('Compound interest', name: 'formulaExampleCompound', desc: '', args: []);
+    return Intl.message(
+      'Compound interest',
+      name: 'formulaExampleCompound',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Profit margin (%)`
   String get formulaExampleMargin {
-    return Intl.message('Profit margin (%)', name: 'formulaExampleMargin', desc: '', args: []);
+    return Intl.message(
+      'Profit margin (%)',
+      name: 'formulaExampleMargin',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `BMI`
@@ -2007,17 +3492,32 @@ class S {
 
   /// `Trip fuel cost`
   String get formulaExampleFuel {
-    return Intl.message('Trip fuel cost', name: 'formulaExampleFuel', desc: '', args: []);
+    return Intl.message(
+      'Trip fuel cost',
+      name: 'formulaExampleFuel',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Follow system appearance`
   String get followSystemTheme {
-    return Intl.message('Follow system appearance', name: 'followSystemTheme', desc: '', args: []);
+    return Intl.message(
+      'Follow system appearance',
+      name: 'followSystemTheme',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Automatically switch between your chosen light and dark themes`
   String get followSystemThemeDescription {
-    return Intl.message('Automatically switch between your chosen light and dark themes', name: 'followSystemThemeDescription', desc: '', args: []);
+    return Intl.message(
+      'Automatically switch between your chosen light and dark themes',
+      name: 'followSystemThemeDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Light theme`
@@ -2032,44 +3532,518 @@ class S {
 
   /// `Custom theme`
   String get customTheme {
-    return Intl.message('Custom theme', name: 'customTheme', desc: '', args: []);
+    return Intl.message(
+      'Custom theme',
+      name: 'customTheme',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Build your own palette with live contrast checks`
   String get customThemeDescription {
-    return Intl.message('Build your own palette with live contrast checks', name: 'customThemeDescription', desc: '', args: []);
+    return Intl.message(
+      'Build your own palette with live contrast checks',
+      name: 'customThemeDescription',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Background`
   String get customThemeBackground {
-    return Intl.message('Background', name: 'customThemeBackground', desc: '', args: []);
+    return Intl.message(
+      'Background',
+      name: 'customThemeBackground',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Number keys`
   String get customThemeNumberKeys {
-    return Intl.message('Number keys', name: 'customThemeNumberKeys', desc: '', args: []);
+    return Intl.message(
+      'Number keys',
+      name: 'customThemeNumberKeys',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Operator keys`
   String get customThemeOperatorKeys {
-    return Intl.message('Operator keys', name: 'customThemeOperatorKeys', desc: '', args: []);
+    return Intl.message(
+      'Operator keys',
+      name: 'customThemeOperatorKeys',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Function keys`
   String get customThemeFunctionKeys {
-    return Intl.message('Function keys', name: 'customThemeFunctionKeys', desc: '', args: []);
+    return Intl.message(
+      'Function keys',
+      name: 'customThemeFunctionKeys',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Apply custom theme`
   String get customThemeApply {
-    return Intl.message('Apply custom theme', name: 'customThemeApply', desc: '', args: []);
+    return Intl.message(
+      'Apply custom theme',
+      name: 'customThemeApply',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Contrast check: WCAG AA passed`
   String get customThemeContrastGood {
-    return Intl.message('Contrast check: WCAG AA passed', name: 'customThemeContrastGood', desc: '', args: []);
+    return Intl.message(
+      'Contrast check: WCAG AA passed',
+      name: 'customThemeContrastGood',
+      desc: '',
+      args: [],
+    );
   }
 
+  /// `Clear entry`
+  String get clearEntry {
+    return Intl.message('Clear entry', name: 'clearEntry', desc: '', args: []);
+  }
+
+  /// `All clear`
+  String get allClear {
+    return Intl.message('All clear', name: 'allClear', desc: '', args: []);
+  }
+
+  /// `Loan and interest`
+  String get everydayLoanCompound {
+    return Intl.message(
+      'Loan and interest',
+      name: 'everydayLoanCompound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loan`
+  String get everydayLoanTab {
+    return Intl.message('Loan', name: 'everydayLoanTab', desc: '', args: []);
+  }
+
+  /// `Compound`
+  String get everydayCompoundTab {
+    return Intl.message(
+      'Compound',
+      name: 'everydayCompoundTab',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loan amount`
+  String get everydayPrincipal {
+    return Intl.message(
+      'Loan amount',
+      name: 'everydayPrincipal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Annual interest rate (%)`
+  String get everydayAnnualRate {
+    return Intl.message(
+      'Annual interest rate (%)',
+      name: 'everydayAnnualRate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Term (years)`
+  String get everydayTermYears {
+    return Intl.message(
+      'Term (years)',
+      name: 'everydayTermYears',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly payment`
+  String get everydayMonthlyPayment {
+    return Intl.message(
+      'Monthly payment',
+      name: 'everydayMonthlyPayment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total payment`
+  String get everydayTotalPayment {
+    return Intl.message(
+      'Total payment',
+      name: 'everydayTotalPayment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total interest`
+  String get everydayTotalInterest {
+    return Intl.message(
+      'Total interest',
+      name: 'everydayTotalInterest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Starting amount`
+  String get everydayStartingBalance {
+    return Intl.message(
+      'Starting amount',
+      name: 'everydayStartingBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly contribution`
+  String get everydayMonthlyContribution {
+    return Intl.message(
+      'Monthly contribution',
+      name: 'everydayMonthlyContribution',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Compounding`
+  String get everydayCompoundingFrequency {
+    return Intl.message(
+      'Compounding',
+      name: 'everydayCompoundingFrequency',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly`
+  String get everydayCompoundMonthly {
+    return Intl.message(
+      'Monthly',
+      name: 'everydayCompoundMonthly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quarterly`
+  String get everydayCompoundQuarterly {
+    return Intl.message(
+      'Quarterly',
+      name: 'everydayCompoundQuarterly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yearly`
+  String get everydayCompoundYearly {
+    return Intl.message(
+      'Yearly',
+      name: 'everydayCompoundYearly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Final balance`
+  String get everydayFinalBalance {
+    return Intl.message(
+      'Final balance',
+      name: 'everydayFinalBalance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total contributed`
+  String get everydayTotalContributions {
+    return Intl.message(
+      'Total contributed',
+      name: 'everydayTotalContributions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Interest earned`
+  String get everydayInterestEarned {
+    return Intl.message(
+      'Interest earned',
+      name: 'everydayInterestEarned',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Currency converter`
+  String get currencyConverter {
+    return Intl.message(
+      'Currency converter',
+      name: 'currencyConverter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exchange rate`
+  String get currencyRate {
+    return Intl.message(
+      'Exchange rate',
+      name: 'currencyRate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom rate`
+  String get currencyCustomRate {
+    return Intl.message(
+      'Custom rate',
+      name: 'currencyCustomRate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh rates`
+  String get currencyRefreshRates {
+    return Intl.message(
+      'Refresh rates',
+      name: 'currencyRefreshRates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset rate`
+  String get currencyResetRate {
+    return Intl.message(
+      'Reset rate',
+      name: 'currencyResetRate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reference offline rates`
+  String get currencyOfflineRates {
+    return Intl.message(
+      'Reference offline rates',
+      name: 'currencyOfflineRates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rates updated {date}`
+  String currencyUpdatedAt(String date) {
+    return Intl.message(
+      'Rates updated $date',
+      name: 'currencyUpdatedAt',
+      desc: '',
+      args: [date],
+    );
+  }
+
+  /// `Using custom rate`
+  String get currencyCustomRateActive {
+    return Intl.message(
+      'Using custom rate',
+      name: 'currencyCustomRateActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not refresh rates. Using saved rates.`
+  String get currencyRefreshFailed {
+    return Intl.message(
+      'Could not refresh rates. Using saved rates.',
+      name: 'currencyRefreshFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exchange rates updated.`
+  String get currencyRefreshSuccess {
+    return Intl.message(
+      'Exchange rates updated.',
+      name: 'currencyRefreshSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick presets`
+  String get converterPinnedPairs {
+    return Intl.message(
+      'Quick presets',
+      name: 'converterPinnedPairs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pin unit pair`
+  String get converterPinPair {
+    return Intl.message(
+      'Pin unit pair',
+      name: 'converterPinPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unpin unit pair`
+  String get converterUnpinPair {
+    return Intl.message(
+      'Unpin unit pair',
+      name: 'converterUnpinPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup and restore`
+  String get backupAndRestore {
+    return Intl.message(
+      'Backup and restore',
+      name: 'backupAndRestore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export backup`
+  String get backupExport {
+    return Intl.message(
+      'Export backup',
+      name: 'backupExport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy your history, formulas, themes, and settings as JSON`
+  String get backupExportDescription {
+    return Intl.message(
+      'Copy your history, formulas, themes, and settings as JSON',
+      name: 'backupExportDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import backup`
+  String get backupImport {
+    return Intl.message(
+      'Import backup',
+      name: 'backupImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore saved data from a JSON backup`
+  String get backupImportDescription {
+    return Intl.message(
+      'Restore saved data from a JSON backup',
+      name: 'backupImportDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup JSON copied to clipboard.`
+  String get backupCopied {
+    return Intl.message(
+      'Backup JSON copied to clipboard.',
+      name: 'backupCopied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste SwiftSum JSON backup`
+  String get backupPasteHint {
+    return Intl.message(
+      'Paste SwiftSum JSON backup',
+      name: 'backupPasteHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore`
+  String get backupImportAction {
+    return Intl.message(
+      'Restore',
+      name: 'backupImportAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup restored.`
+  String get backupImportSuccess {
+    return Intl.message(
+      'Backup restored.',
+      name: 'backupImportSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid backup JSON. Nothing was changed.`
+  String get backupImportFailed {
+    return Intl.message(
+      'Invalid backup JSON. Nothing was changed.',
+      name: 'backupImportFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep window on top`
+  String get alwaysOnTop {
+    return Intl.message(
+      'Keep window on top',
+      name: 'alwaysOnTop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Float SwiftSum above other windows on macOS`
+  String get alwaysOnTopDescription {
+    return Intl.message(
+      'Float SwiftSum above other windows on macOS',
+      name: 'alwaysOnTopDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -2078,6 +4052,12 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'de'),
+      Locale.fromSubtags(languageCode: 'es'),
+      Locale.fromSubtags(languageCode: 'fr'),
+      Locale.fromSubtags(languageCode: 'ja'),
+      Locale.fromSubtags(languageCode: 'ko'),
+      Locale.fromSubtags(languageCode: 'pt'),
       Locale.fromSubtags(languageCode: 'zh'),
       Locale.fromSubtags(languageCode: 'zh', countryCode: 'HK'),
     ];

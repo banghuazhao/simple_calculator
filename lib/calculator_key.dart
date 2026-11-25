@@ -39,10 +39,18 @@ class CalculatorKey extends StatefulWidget {
     super.key,
     required this.symbol,
     this.isActive = false,
+    this.labelOverride,
+    this.semanticsLabelOverride,
+    this.onTapOverride,
+    this.onLongPress,
   });
 
   final KeySymbol symbol;
   final bool isActive;
+  final String? labelOverride;
+  final String? semanticsLabelOverride;
+  final VoidCallback? onTapOverride;
+  final VoidCallback? onLongPress;
 
   @override
   State<CalculatorKey> createState() => _CalculatorKeyState();
@@ -110,6 +118,10 @@ class _CalculatorKeyState extends State<CalculatorKey>
   }
 
   void _fireKey() {
+    if (widget.onTapOverride != null) {
+      widget.onTapOverride!();
+      return;
+    }
     keycontroller.KeyController.fire(keycontroller.KeyEvent(widget));
   }
 
@@ -125,7 +137,18 @@ class _CalculatorKeyState extends State<CalculatorKey>
     _controller.reverse();
   }
 
+  void _onLongPress() {
+    _cancelRepeat();
+    _repeated = false;
+    _controller.reverse();
+    unawaited(InputFeedback.mediumImpact());
+    widget.onLongPress?.call();
+  }
+
   String _accessibilityLabel(S strings) {
+    if (widget.semanticsLabelOverride != null) {
+      return widget.semanticsLabelOverride!;
+    }
     switch (widget.symbol) {
       case Keys.clear:
         return strings.clearInput;
@@ -201,9 +224,11 @@ class _CalculatorKeyState extends State<CalculatorKey>
     return ListenableBuilder(
       listenable: InputSettings.instance,
       builder: (context, _) {
-        final displayLabel = widget.symbol == Keys.decimal
-            ? InputSettings.instance.decimalSeparator
-            : widget.symbol.value;
+        final displayLabel =
+            widget.labelOverride ??
+            (widget.symbol == Keys.decimal
+                ? InputSettings.instance.decimalSeparator
+                : widget.symbol.value);
         final keyFace = Padding(
           padding: const EdgeInsets.all(4),
           child: SizedBox(
@@ -249,6 +274,7 @@ class _CalculatorKeyState extends State<CalculatorKey>
             onTapDown: _onTapDown,
             onTapUp: _onTapUp,
             onTapCancel: _onTapCancel,
+            onLongPress: widget.onLongPress == null ? null : _onLongPress,
             child: reduceMotion
                 ? keyFace
                 : ScaleTransition(scale: _scale, child: keyFace),

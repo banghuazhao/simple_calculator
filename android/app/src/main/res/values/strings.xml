@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Calculator</string>
+    <string name="shortcut_unit_converter">Unit Converter</string>
+    <string name="shortcut_everyday_tools">Everyday Tools</string>
+    <string name="shortcut_history">History</string>
+    <string name="shortcut_scientific">Scientific</string>
 </resources>

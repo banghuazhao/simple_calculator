@@ -42,6 +42,8 @@ class CalcState {
   final OperandEdit? rightOperand;
   final String? binaryOperator;
   final bool rightOperandIsPercent;
+  final bool clearShowsAllClear;
+  final bool canClearEntry;
 
   const CalcState({
     required this.current,
@@ -55,6 +57,8 @@ class CalcState {
     this.rightOperand,
     this.binaryOperator,
     this.rightOperandIsPercent = false,
+    this.clearShowsAllClear = false,
+    this.canClearEntry = false,
   });
 }
 
@@ -207,6 +211,15 @@ abstract class Processor {
           : _editFor(OperandPosition.right, right),
       binaryOperator: operator?.value,
       rightOperandIsPercent: _percentB,
+      clearShowsAllClear:
+          result == null &&
+          operator != null &&
+          (right == null || right == _zero),
+      canClearEntry:
+          result == null &&
+          operator != null &&
+          right != null &&
+          right != _zero,
     );
   }
 
@@ -627,6 +640,26 @@ abstract class Processor {
       case KeyType.integer:
         _handleInteger(symbol.value);
         break;
+    }
+    _finishAction(before);
+  }
+
+  static void clearAll() {
+    final before = _snapshot;
+    _clear();
+    _finishAction(before);
+  }
+
+  static void clearEntry() {
+    final before = _snapshot;
+    if (_result == null &&
+        _operator != null &&
+        _valB != null &&
+        _valB != _zero) {
+      _valB = _zero;
+      _percentB = false;
+    } else {
+      _clear();
     }
     _finishAction(before);
   }

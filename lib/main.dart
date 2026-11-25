@@ -13,6 +13,7 @@ import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
+import 'package:simple_calculator/util/desktop_window_helper.dart';
 import 'package:simple_calculator/util/in_app_reviewer_helper.dart';
 import 'package:simple_calculator/util/local_storage.dart';
 
@@ -67,6 +68,7 @@ Future<void> main() async {
       unawaited(_runOptionalService('desktop window', () async {
         await DesktopWindow.setMinWindowSize(const Size(320, 540));
         await DesktopWindow.setWindowSize(_savedMacWindowSize());
+        await DesktopWindowHelper.instance.loadAndApply();
       }));
     }
     if (Platform.isAndroid || Platform.isIOS) {
@@ -207,6 +209,11 @@ class _CalculatorAppState extends State<CalculatorApp>
                 } else {
                   return const Locale('zh', ''); //简体
                 }
+              }
+              const supportedCodes = {'en', 'es', 'de', 'fr', 'ja', 'ko', 'pt'};
+              final code = locale?.languageCode;
+              if (code != null && supportedCodes.contains(code)) {
+                return Locale(code, '');
               }
               return const Locale('en', '');
             },

@@ -12,7 +12,11 @@ class ClipboardHelper {
     await copy(context, number);
   }
 
-  static Future<void> copy(BuildContext context, String text) async {
+  static Future<void> copy(
+    BuildContext context,
+    String text, {
+    String? confirmation,
+  }) async {
     try {
       await Clipboard.setData(ClipboardData(text: text));
     } catch (error) {
@@ -22,7 +26,7 @@ class ClipboardHelper {
     if (!context.mounted) return;
     // Feedback is optional; it must not delay successful copy confirmation.
     unawaited(InputFeedback.mediumImpact());
-    showMessage(context, S.of(context).copied);
+    showMessage(context, confirmation ?? S.of(context).copied);
   }
 
   /// Reads the clipboard and enters it as the current number when it is a

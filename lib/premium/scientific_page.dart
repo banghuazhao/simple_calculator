@@ -425,13 +425,6 @@ class _ScientificPageState extends State<ScientificPage> {
           decoration: InputDecoration(
             labelText: strings.scientificExpression,
             labelStyle: textStyle,
-            helperText: error == null
-                ? (livePreview != null
-                      ? '= ${_formatResult(livePreview)}'
-                      : strings.scientificExpressionHelp)
-                : null,
-            helperStyle: textStyle,
-            helperMaxLines: 3,
             errorText: error,
             errorStyle: textStyle,
             errorMaxLines: 4,
@@ -447,7 +440,38 @@ class _ScientificPageState extends State<ScientificPage> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
+        SizedBox(
+          key: const ValueKey('scientific-live-preview-slot'),
+          height: 24,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                livePreview != null
+                    ? '= ${_formatResult(livePreview)}'
+                    : strings.scientificExpressionHelp,
+                key: livePreview != null
+                    ? const ValueKey('scientific-live-preview')
+                    : const ValueKey('scientific-expression-help'),
+                maxLines: 1,
+                softWrap: false,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: livePreview != null
+                      ? ink
+                      : (model.highContrastEnabled
+                            ? ink
+                            : ink.withValues(alpha: 0.7)),
+                  fontWeight: livePreview != null ? FontWeight.w600 : null,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
         Wrap(
           spacing: 8,
           runSpacing: 6,

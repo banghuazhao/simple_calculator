@@ -8,7 +8,7 @@
 // ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
 // ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
 // ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
-// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes, strict_top_level_inference
+// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
@@ -20,29 +20,32 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh_HK';
 
-  static String m0(item) => "${item} 最划算。";
+  static String m0(date) => "匯率更新時間：${date}";
 
-  static String m1(letter) => "商品 ${letter}";
+  static String m1(item) => "${item} 最划算。";
 
-  static String m2(amount) => "1 人支付 ${amount}";
+  static String m2(letter) => "商品 ${letter}";
 
-  static String m3(people, amount) => "${people} 人各支付 ${amount}";
+  static String m3(amount) => "1 人支付 ${amount}";
 
-  static String m4(percent, savings, unit) => "節省 ${percent}%（每 ${unit} 省 ${savings}）";
+  static String m4(people, amount) => "${people} 人各支付 ${amount}";
 
-  static String m5(price, unit) => "每 ${unit} ${price}";
+  static String m5(percent, savings, unit) =>
+      "節省 ${percent}%（每 ${unit} 省 ${savings}）";
 
-  static String m6(alternate, baseline) => "差值（${alternate} − ${baseline}）";
+  static String m6(price, unit) => "每 ${unit} ${price}";
 
-  static String m7(count, total) => "總計（${count} 項）：${total}";
+  static String m7(alternate, baseline) => "差值（${alternate} − ${baseline}）";
 
-  static String m8(message, position) => "${message}（第 ${position} 個字元）";
+  static String m8(count, total) => "總計（${count} 項）：${total}";
 
-  static String m9(name) => "未知函數 ${name}。";
+  static String m9(message, position) => "${message}（第 ${position} 個字元）";
 
-  static String m10(name) => "請以數字或 Ans 取代 ${name}。";
+  static String m10(name) => "未知函數 ${name}。";
 
-  static String m11(value) => "使用目前數值（${value}）";
+  static String m11(name) => "請以數字或 Ans 取代 ${name}。";
+
+  static String m12(value) => "使用目前數值（${value}）";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -75,18 +78,48 @@ class MessageLookup extends MessageLookupByLibrary {
     "World_Weather_Live": MessageLookupByLibrary.simpleMessage("極簡天氣"),
     "Yes_Habit": MessageLookupByLibrary.simpleMessage("簽簽習慣"),
     "add": MessageLookupByLibrary.simpleMessage("加上"),
+    "allClear": MessageLookupByLibrary.simpleMessage("全部清除"),
+    "alwaysOnTop": MessageLookupByLibrary.simpleMessage("視窗置頂"),
+    "alwaysOnTopDescription": MessageLookupByLibrary.simpleMessage(
+      "在 macOS 上讓 SwiftSum 保持在其他視窗上方",
+    ),
     "backspace": MessageLookupByLibrary.simpleMessage("退格"),
+    "backupAndRestore": MessageLookupByLibrary.simpleMessage("備份與還原"),
+    "backupCopied": MessageLookupByLibrary.simpleMessage("已將備份 JSON 複製到剪貼簿。"),
+    "backupExport": MessageLookupByLibrary.simpleMessage("匯出備份"),
+    "backupExportDescription": MessageLookupByLibrary.simpleMessage(
+      "將歷史記錄、公式、主題和設定複製為 JSON",
+    ),
+    "backupImport": MessageLookupByLibrary.simpleMessage("匯入備份"),
+    "backupImportAction": MessageLookupByLibrary.simpleMessage("還原"),
+    "backupImportDescription": MessageLookupByLibrary.simpleMessage(
+      "從 JSON 備份還原已儲存的資料",
+    ),
+    "backupImportFailed": MessageLookupByLibrary.simpleMessage(
+      "無效的備份 JSON，未作任何變更。",
+    ),
+    "backupImportSuccess": MessageLookupByLibrary.simpleMessage("備份已還原。"),
+    "backupPasteHint": MessageLookupByLibrary.simpleMessage(
+      "貼上 SwiftSum JSON 備份",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("取消"),
     "changeSign": MessageLookupByLibrary.simpleMessage("切換正負號"),
     "clear": MessageLookupByLibrary.simpleMessage("清空"),
     "clearAllHistory": MessageLookupByLibrary.simpleMessage("全部清空"),
-    "clearHistoryMessage": MessageLookupByLibrary.simpleMessage("這將刪除所有已儲存的計算記錄。"),
+    "clearEntry": MessageLookupByLibrary.simpleMessage("清除目前輸入"),
+    "clearHistoryMessage": MessageLookupByLibrary.simpleMessage(
+      "這將刪除所有已儲存的計算記錄。",
+    ),
     "clearHistoryTitle": MessageLookupByLibrary.simpleMessage("清空歷史記錄？"),
     "clearInput": MessageLookupByLibrary.simpleMessage("清除輸入"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("清除搜尋"),
-    "clipboardUnavailable": MessageLookupByLibrary.simpleMessage("剪貼簿暫時無法使用，請重試。"),
+    "clipboardUnavailable": MessageLookupByLibrary.simpleMessage(
+      "剪貼簿暫時無法使用，請重試。",
+    ),
     "commaDecimal": MessageLookupByLibrary.simpleMessage("逗號小數點"),
-    "commaDecimalDescription": MessageLookupByLibrary.simpleMessage("使用逗號作為小數點，例如 1.234,56"),
+    "commaDecimalDescription": MessageLookupByLibrary.simpleMessage(
+      "使用逗號作為小數點，例如 1.234,56",
+    ),
     "converterAcre": MessageLookupByLibrary.simpleMessage("英畝"),
     "converterAllUnits": MessageLookupByLibrary.simpleMessage("全部單位換算"),
     "converterAmount": MessageLookupByLibrary.simpleMessage("數值"),
@@ -123,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "converterMillimeter": MessageLookupByLibrary.simpleMessage("毫米"),
     "converterMinute": MessageLookupByLibrary.simpleMessage("分鐘"),
     "converterOunce": MessageLookupByLibrary.simpleMessage("安士"),
+    "converterPinPair": MessageLookupByLibrary.simpleMessage("釘選單位組合"),
+    "converterPinnedPairs": MessageLookupByLibrary.simpleMessage("常用預設"),
     "converterPound": MessageLookupByLibrary.simpleMessage("磅"),
     "converterSecond": MessageLookupByLibrary.simpleMessage("秒"),
     "converterSpeed": MessageLookupByLibrary.simpleMessage("速度"),
@@ -142,6 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "converterTonne": MessageLookupByLibrary.simpleMessage("公噸"),
     "converterUkFluidOunce": MessageLookupByLibrary.simpleMessage("英制液盎司"),
     "converterUkGallon": MessageLookupByLibrary.simpleMessage("英制加侖"),
+    "converterUnpinPair": MessageLookupByLibrary.simpleMessage("取消釘選單位組合"),
     "converterUsCup": MessageLookupByLibrary.simpleMessage("美制杯"),
     "converterUsFluidOunce": MessageLookupByLibrary.simpleMessage("美制液體安士"),
     "converterUsGallon": MessageLookupByLibrary.simpleMessage("美制加侖"),
@@ -154,11 +190,29 @@ class MessageLookup extends MessageLookupByLibrary {
     "copyMatchingHistory": MessageLookupByLibrary.simpleMessage("複製相符的計算記錄"),
     "copyResult": MessageLookupByLibrary.simpleMessage("複製結果"),
     "copySummary": MessageLookupByLibrary.simpleMessage("複製摘要"),
+    "currencyConverter": MessageLookupByLibrary.simpleMessage("匯率換算"),
+    "currencyCustomRate": MessageLookupByLibrary.simpleMessage("自訂匯率"),
+    "currencyCustomRateActive": MessageLookupByLibrary.simpleMessage(
+      "正在使用自訂匯率",
+    ),
+    "currencyOfflineRates": MessageLookupByLibrary.simpleMessage("內置離線參考匯率"),
+    "currencyRate": MessageLookupByLibrary.simpleMessage("匯率"),
+    "currencyRefreshFailed": MessageLookupByLibrary.simpleMessage(
+      "無法更新匯率，將繼續使用已儲存的匯率。",
+    ),
+    "currencyRefreshRates": MessageLookupByLibrary.simpleMessage("更新匯率"),
+    "currencyRefreshSuccess": MessageLookupByLibrary.simpleMessage("匯率已更新。"),
+    "currencyResetRate": MessageLookupByLibrary.simpleMessage("重設匯率"),
+    "currencyUpdatedAt": m0,
     "customTheme": MessageLookupByLibrary.simpleMessage("自訂主題"),
     "customThemeApply": MessageLookupByLibrary.simpleMessage("套用自訂主題"),
     "customThemeBackground": MessageLookupByLibrary.simpleMessage("背景色"),
-    "customThemeContrastGood": MessageLookupByLibrary.simpleMessage("對比度檢測：通過 WCAG AA"),
-    "customThemeDescription": MessageLookupByLibrary.simpleMessage("自訂配色並即時檢測對比度"),
+    "customThemeContrastGood": MessageLookupByLibrary.simpleMessage(
+      "對比度檢測：通過 WCAG AA",
+    ),
+    "customThemeDescription": MessageLookupByLibrary.simpleMessage(
+      "自訂配色並即時檢測對比度",
+    ),
     "customThemeFunctionKeys": MessageLookupByLibrary.simpleMessage("功能鍵"),
     "customThemeNumberKeys": MessageLookupByLibrary.simpleMessage("數字鍵"),
     "customThemeOperatorKeys": MessageLookupByLibrary.simpleMessage("運算子鍵"),
@@ -173,10 +227,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "error": MessageLookupByLibrary.simpleMessage("錯誤"),
     "everydayAbsoluteChange": MessageLookupByLibrary.simpleMessage("變化量"),
     "everydayAddItem": MessageLookupByLibrary.simpleMessage("新增商品"),
-    "everydayBestValue": m0,
+    "everydayAnnualRate": MessageLookupByLibrary.simpleMessage("年利率（%）"),
+    "everydayBestValue": m1,
     "everydayBill": MessageLookupByLibrary.simpleMessage("帳單金額"),
     "everydayBillTotal": MessageLookupByLibrary.simpleMessage("含小費總額"),
     "everydayBusinessDays": MessageLookupByLibrary.simpleMessage("工作日（週一至週五）"),
+    "everydayCompoundMonthly": MessageLookupByLibrary.simpleMessage("按月"),
+    "everydayCompoundQuarterly": MessageLookupByLibrary.simpleMessage("按季"),
+    "everydayCompoundTab": MessageLookupByLibrary.simpleMessage("複利"),
+    "everydayCompoundYearly": MessageLookupByLibrary.simpleMessage("按年"),
+    "everydayCompoundingFrequency": MessageLookupByLibrary.simpleMessage(
+      "複利頻率",
+    ),
     "everydayCost": MessageLookupByLibrary.simpleMessage("成本"),
     "everydayCount": MessageLookupByLibrary.simpleMessage("件數"),
     "everydayCountError": MessageLookupByLibrary.simpleMessage("請輸入正整數。"),
@@ -189,51 +251,71 @@ class MessageLookup extends MessageLookupByLibrary {
     "everydayEach": MessageLookupByLibrary.simpleMessage("件"),
     "everydayEndDate": MessageLookupByLibrary.simpleMessage("結束日期"),
     "everydayEqualPrice": MessageLookupByLibrary.simpleMessage("兩件商品的單價相同。"),
-    "everydayExtraDiscountPercent": MessageLookupByLibrary.simpleMessage("折上折（%）"),
+    "everydayExtraDiscountPercent": MessageLookupByLibrary.simpleMessage(
+      "折上折（%）",
+    ),
+    "everydayFinalBalance": MessageLookupByLibrary.simpleMessage("最終結餘"),
     "everydayFinalPrice": MessageLookupByLibrary.simpleMessage("最終價格"),
     "everydayFromValue": MessageLookupByLibrary.simpleMessage("起始值"),
+    "everydayInterestEarned": MessageLookupByLibrary.simpleMessage("複利收益"),
     "everydayItemA": MessageLookupByLibrary.simpleMessage("商品 A"),
     "everydayItemACheaper": MessageLookupByLibrary.simpleMessage("商品 A 的單價較低。"),
     "everydayItemB": MessageLookupByLibrary.simpleMessage("商品 B"),
     "everydayItemBCheaper": MessageLookupByLibrary.simpleMessage("商品 B 的單價較低。"),
-    "everydayItemLabel": m1,
+    "everydayItemLabel": m2,
+    "everydayLoanCompound": MessageLookupByLibrary.simpleMessage("貸款與複利"),
+    "everydayLoanTab": MessageLookupByLibrary.simpleMessage("貸款"),
     "everydayMargin": MessageLookupByLibrary.simpleMessage("利潤率"),
     "everydayMarginTab": MessageLookupByLibrary.simpleMessage("利潤率"),
     "everydayMarkup": MessageLookupByLibrary.simpleMessage("加價率"),
-    "everydayMoneyError": MessageLookupByLibrary.simpleMessage("請輸入非負金額，最多保留兩位小數。"),
-    "everydayNonnegativeError": MessageLookupByLibrary.simpleMessage("請輸入非負數字。"),
-    "everydayOnePersonPays": m2,
+    "everydayMoneyError": MessageLookupByLibrary.simpleMessage(
+      "請輸入非負金額，最多保留兩位小數。",
+    ),
+    "everydayMonthlyContribution": MessageLookupByLibrary.simpleMessage("每月供款"),
+    "everydayMonthlyPayment": MessageLookupByLibrary.simpleMessage("每月還款"),
+    "everydayNonnegativeError": MessageLookupByLibrary.simpleMessage(
+      "請輸入非負數字。",
+    ),
+    "everydayOnePersonPays": m3,
     "everydayOriginalPrice": MessageLookupByLibrary.simpleMessage("原價"),
     "everydayPackCount": MessageLookupByLibrary.simpleMessage("每組數量"),
     "everydayPackageSize": MessageLookupByLibrary.simpleMessage("包裝規格"),
     "everydayPeople": MessageLookupByLibrary.simpleMessage("人數"),
-    "everydayPeoplePay": m3,
+    "everydayPeoplePay": m4,
     "everydayPerPerson": MessageLookupByLibrary.simpleMessage("每人應付"),
     "everydayPercentChange": MessageLookupByLibrary.simpleMessage("變化百分比"),
     "everydayPercentChangeTab": MessageLookupByLibrary.simpleMessage("變化率"),
     "everydayPercentTools": MessageLookupByLibrary.simpleMessage("百分比變化與利潤率"),
     "everydayPrice": MessageLookupByLibrary.simpleMessage("價格"),
+    "everydayPrincipal": MessageLookupByLibrary.simpleMessage("貸款金額"),
     "everydayProfit": MessageLookupByLibrary.simpleMessage("利潤"),
     "everydayRemoveItem": MessageLookupByLibrary.simpleMessage("移除商品"),
     "everydayResultDate": MessageLookupByLibrary.simpleMessage("目標日期"),
-    "everydaySavesPercent": m4,
+    "everydaySavesPercent": m5,
     "everydaySellingPrice": MessageLookupByLibrary.simpleMessage("售價"),
     "everydaySizeError": MessageLookupByLibrary.simpleMessage("請輸入大於零的規格。"),
     "everydayStartDate": MessageLookupByLibrary.simpleMessage("開始日期"),
+    "everydayStartingBalance": MessageLookupByLibrary.simpleMessage("初始本金"),
     "everydayTaxAmount": MessageLookupByLibrary.simpleMessage("稅費"),
     "everydayTaxPercent": MessageLookupByLibrary.simpleMessage("稅率（%）"),
+    "everydayTermYears": MessageLookupByLibrary.simpleMessage("年期（年）"),
     "everydayTipAmount": MessageLookupByLibrary.simpleMessage("小費金額"),
     "everydayTipPercent": MessageLookupByLibrary.simpleMessage("小費 (%)"),
     "everydayTipSplitter": MessageLookupByLibrary.simpleMessage("小費和帳單分攤"),
     "everydayToValue": MessageLookupByLibrary.simpleMessage("目標值"),
     "everydayTools": MessageLookupByLibrary.simpleMessage("日常工具"),
+    "everydayTotalContributions": MessageLookupByLibrary.simpleMessage("累計投入"),
     "everydayTotalDays": MessageLookupByLibrary.simpleMessage("總天數"),
-    "everydayUnitCost": m5,
+    "everydayTotalInterest": MessageLookupByLibrary.simpleMessage("總利息"),
+    "everydayTotalPayment": MessageLookupByLibrary.simpleMessage("還款總額"),
+    "everydayUnitCost": m6,
     "everydayUnitPrice": MessageLookupByLibrary.simpleMessage("單價比較"),
     "everydayWeeksAndDays": MessageLookupByLibrary.simpleMessage("週與天"),
     "everydayYouSave": MessageLookupByLibrary.simpleMessage("節省金額"),
     "followSystemTheme": MessageLookupByLibrary.simpleMessage("跟隨系統外觀"),
-    "followSystemThemeDescription": MessageLookupByLibrary.simpleMessage("根據系統淺色或深色模式自動切換主題"),
+    "followSystemThemeDescription": MessageLookupByLibrary.simpleMessage(
+      "根據系統淺色或深色模式自動切換主題",
+    ),
     "formulaAlternate": MessageLookupByLibrary.simpleMessage("替代方案"),
     "formulaAlternateName": MessageLookupByLibrary.simpleMessage("替代情境名稱"),
     "formulaBaseline": MessageLookupByLibrary.simpleMessage("基準方案"),
@@ -256,30 +338,46 @@ class MessageLookup extends MessageLookupByLibrary {
     "formulaExampleTax": MessageLookupByLibrary.simpleMessage("含稅價格"),
     "formulaExamples": MessageLookupByLibrary.simpleMessage("公式範例"),
     "formulaExpression": MessageLookupByLibrary.simpleMessage("算式"),
-    "formulaExpressionHint": MessageLookupByLibrary.simpleMessage("例如 price * quantity"),
+    "formulaExpressionHint": MessageLookupByLibrary.simpleMessage(
+      "例如 price * quantity",
+    ),
     "formulaInputLabel": MessageLookupByLibrary.simpleMessage("輸入項目標籤"),
     "formulaInputUnit": MessageLookupByLibrary.simpleMessage("單位"),
-    "formulaInvalidExpression": MessageLookupByLibrary.simpleMessage("請輸入有效的算式。"),
+    "formulaInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "請輸入有效的算式。",
+    ),
     "formulaInvalidInput": MessageLookupByLibrary.simpleMessage("請輸入有效的數字。"),
     "formulaInvalidName": MessageLookupByLibrary.simpleMessage("請輸入公式名稱。"),
-    "formulaLimitReached": MessageLookupByLibrary.simpleMessage("最多可儲存 30 個公式。"),
+    "formulaLimitReached": MessageLookupByLibrary.simpleMessage(
+      "最多可儲存 30 個公式。",
+    ),
     "formulaMoveDown": MessageLookupByLibrary.simpleMessage("下移"),
     "formulaMoveUp": MessageLookupByLibrary.simpleMessage("上移"),
     "formulaName": MessageLookupByLibrary.simpleMessage("公式名稱"),
-    "formulaNamedDifference": m6,
+    "formulaNamedDifference": m7,
     "formulaNew": MessageLookupByLibrary.simpleMessage("新增公式"),
     "formulaNoResult": MessageLookupByLibrary.simpleMessage("沒有結果"),
     "formulaSave": MessageLookupByLibrary.simpleMessage("儲存"),
     "formulaSaveFailed": MessageLookupByLibrary.simpleMessage("無法儲存公式。"),
     "formulaSearch": MessageLookupByLibrary.simpleMessage("搜尋公式"),
-    "formulaTooManyInputs": MessageLookupByLibrary.simpleMessage("最多可使用 12 個命名變數。"),
-    "graphExpressionHelp": MessageLookupByLibrary.simpleMessage("請輸入 x 的函數，例如 x^2 − 4。"),
+    "formulaTooManyInputs": MessageLookupByLibrary.simpleMessage(
+      "最多可使用 12 個命名變數。",
+    ),
+    "graphExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "請輸入 x 的函數，例如 x^2 − 4。",
+    ),
     "graphFindIntersection": MessageLookupByLibrary.simpleMessage("求交點"),
     "graphFindRoot": MessageLookupByLibrary.simpleMessage("求根"),
-    "graphIntersectionNotFound": MessageLookupByLibrary.simpleMessage("此區間內未找到交點。"),
+    "graphIntersectionNotFound": MessageLookupByLibrary.simpleMessage(
+      "此區間內未找到交點。",
+    ),
     "graphIntersectionResult": MessageLookupByLibrary.simpleMessage("近似交點"),
-    "graphInvalidRange": MessageLookupByLibrary.simpleMessage("請輸入有限區間，且最小值小於最大值。"),
-    "graphInvalidVariables": MessageLookupByLibrary.simpleMessage("請使用 x 和上次結果（Ans）作為變數。"),
+    "graphInvalidRange": MessageLookupByLibrary.simpleMessage(
+      "請輸入有限區間，且最小值小於最大值。",
+    ),
+    "graphInvalidVariables": MessageLookupByLibrary.simpleMessage(
+      "請使用 x 和上次結果（Ans）作為變數。",
+    ),
     "graphKeyPoints": MessageLookupByLibrary.simpleMessage("關鍵點"),
     "graphMaximum": MessageLookupByLibrary.simpleMessage("最大值"),
     "graphMinimum": MessageLookupByLibrary.simpleMessage("最小值"),
@@ -287,10 +385,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "graphPlot": MessageLookupByLibrary.simpleMessage("繪製"),
     "graphPlotHint": MessageLookupByLibrary.simpleMessage("點按或拖曳曲線以查看數值。"),
     "graphResetView": MessageLookupByLibrary.simpleMessage("重設檢視"),
-    "graphRootNeedsBracket": MessageLookupByLibrary.simpleMessage("請選擇兩端函數值異號或端點為根的區間。"),
-    "graphRootNotFound": MessageLookupByLibrary.simpleMessage("無法驗證根。請嘗試函數連續的較小區間。"),
+    "graphRootNeedsBracket": MessageLookupByLibrary.simpleMessage(
+      "請選擇兩端函數值異號或端點為根的區間。",
+    ),
+    "graphRootNotFound": MessageLookupByLibrary.simpleMessage(
+      "無法驗證根。請嘗試函數連續的較小區間。",
+    ),
     "graphRootResult": MessageLookupByLibrary.simpleMessage("近似根"),
-    "graphSecondFunction": MessageLookupByLibrary.simpleMessage("第二個函數 g(x)（選填）"),
+    "graphSecondFunction": MessageLookupByLibrary.simpleMessage(
+      "第二個函數 g(x)（選填）",
+    ),
     "graphUndefined": MessageLookupByLibrary.simpleMessage("未定義"),
     "graphValueTable": MessageLookupByLibrary.simpleMessage("數值表"),
     "graphXMax": MessageLookupByLibrary.simpleMessage("x 最大值"),
@@ -299,25 +403,55 @@ class MessageLookup extends MessageLookupByLibrary {
     "graphZoomIn": MessageLookupByLibrary.simpleMessage("放大"),
     "graphZoomOut": MessageLookupByLibrary.simpleMessage("縮小"),
     "hapticFeedback": MessageLookupByLibrary.simpleMessage("觸覺回饋"),
-    "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage("操作計算器時震動"),
+    "hapticFeedbackDescription": MessageLookupByLibrary.simpleMessage(
+      "操作計算器時震動",
+    ),
     "helpAndShortcuts": MessageLookupByLibrary.simpleMessage("使用提示與快捷鍵"),
     "helpBasics": MessageLookupByLibrary.simpleMessage("計算器使用方法"),
-    "helpConverter": MessageLookupByLibrary.simpleMessage("在日常工具中選擇單位換算，輸入數值後可將結果傳回計算機。"),
-    "helpCopy": MessageLookupByLibrary.simpleMessage("點按結果可複製數字。按下 = 後，使用算式旁的複製按鈕可複製完整計算。"),
-    "helpCopyHistory": MessageLookupByLibrary.simpleMessage("使用複製全部記錄或複製符合的計算來複製純文字。選擇複製為 TSV 可將相同記錄貼到試算表的各欄中。"),
-    "helpEditOperands": MessageLookupByLibrary.simpleMessage("點按主顯示區域上方的任一數字即可更正。使用已完成算式旁的複製按鈕可複製計算。"),
-    "helpEverydayTools": MessageLookupByLibrary.simpleMessage("從工具列開啟日常工具，即可分攤帳單、比較單價或換算單位。"),
-    "helpHistory": MessageLookupByLibrary.simpleMessage("記錄最多儲存 100 條計算。點按項目可使用其結果，也可在動作選單中選擇編輯計算來重新計算。滑動可刪除，點按復原可還原。"),
+    "helpConverter": MessageLookupByLibrary.simpleMessage(
+      "在日常工具中選擇單位換算，輸入數值後可將結果傳回計算機。",
+    ),
+    "helpCopy": MessageLookupByLibrary.simpleMessage(
+      "點按結果可複製數字。按下 = 後，使用算式旁的複製按鈕可複製完整計算。",
+    ),
+    "helpCopyHistory": MessageLookupByLibrary.simpleMessage(
+      "使用複製全部記錄或複製符合的計算來複製純文字。選擇複製為 TSV 可將相同記錄貼到試算表的各欄中。",
+    ),
+    "helpEditOperands": MessageLookupByLibrary.simpleMessage(
+      "點按主顯示區域上方的任一數字即可更正。使用已完成算式旁的複製按鈕可複製計算。",
+    ),
+    "helpEverydayTools": MessageLookupByLibrary.simpleMessage(
+      "從工具列開啟日常工具，即可分攤帳單、比較單價或換算單位。",
+    ),
+    "helpHistory": MessageLookupByLibrary.simpleMessage(
+      "記錄最多儲存 100 條計算。點按項目可使用其結果，也可在動作選單中選擇編輯計算來重新計算。滑動可刪除，點按復原可還原。",
+    ),
     "helpKeyboard": MessageLookupByLibrary.simpleMessage("鍵盤快捷鍵"),
-    "helpPaste": MessageLookupByLibrary.simpleMessage("貼上僅接受單一有限數值，包括分組正確的千位分隔數字或科學記數法。計算運算式和其他文字將被拒絕。"),
-    "helpPercent": MessageLookupByLibrary.simpleMessage("用 + 或 − 和 % 按百分比調整數值。例如，200 + 10% = 220。"),
-    "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage("開啟已儲存的公式來比較輸入。選擇編輯公式可更改算式、輸入項目標籤或單位以及情境名稱。"),
-    "helpPremiumScientific": MessageLookupByLibrary.simpleMessage("使用三角函數前，請在科學計算器中選擇「角度」或「弧度」。"),
-    "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage("點按計算器工具列中的「進階版工具」，即可開啟科學計算器或可重用公式。"),
-    "helpScientificAdvanced": MessageLookupByLibrary.simpleMessage("用 Ans 使用上次科學計算結果，用 EXP 輸入指數，用 ENG 切換結果格式。開啟函數圖形可繪製函數、查看數值或在區間內求根。"),
-    "helpUndo": MessageLookupByLibrary.simpleMessage("使用「復原」恢復最近的輸入。您可以在輸入設定中調整搖動復原和觸覺回饋。"),
+    "helpPaste": MessageLookupByLibrary.simpleMessage(
+      "貼上僅接受單一有限數值，包括分組正確的千位分隔數字或科學記數法。計算運算式和其他文字將被拒絕。",
+    ),
+    "helpPercent": MessageLookupByLibrary.simpleMessage(
+      "用 + 或 − 和 % 按百分比調整數值。例如，200 + 10% = 220。",
+    ),
+    "helpPremiumFormulas": MessageLookupByLibrary.simpleMessage(
+      "開啟已儲存的公式來比較輸入。選擇編輯公式可更改算式、輸入項目標籤或單位以及情境名稱。",
+    ),
+    "helpPremiumScientific": MessageLookupByLibrary.simpleMessage(
+      "使用三角函數前，請在科學計算器中選擇「角度」或「弧度」。",
+    ),
+    "helpPremiumShortcut": MessageLookupByLibrary.simpleMessage(
+      "點按計算器工具列中的「進階版工具」，即可開啟科學計算器或可重用公式。",
+    ),
+    "helpScientificAdvanced": MessageLookupByLibrary.simpleMessage(
+      "用 Ans 使用上次科學計算結果，用 EXP 輸入指數，用 ENG 切換結果格式。開啟函數圖形可繪製函數、查看數值或在區間內求根。",
+    ),
+    "helpUndo": MessageLookupByLibrary.simpleMessage(
+      "使用「復原」恢復最近的輸入。您可以在輸入設定中調整搖動復原和觸覺回饋。",
+    ),
     "highContrast": MessageLookupByLibrary.simpleMessage("高對比度"),
-    "highContrastDescription": MessageLookupByLibrary.simpleMessage("增強數字和控制項的對比度。您選擇的主題將被保留。"),
+    "highContrastDescription": MessageLookupByLibrary.simpleMessage(
+      "增強數字和控制項的對比度。您選擇的主題將被保留。",
+    ),
     "history": MessageLookupByLibrary.simpleMessage("歷史記錄"),
     "historyCalculationName": MessageLookupByLibrary.simpleMessage("計算名稱"),
     "historyCopyAsTsv": MessageLookupByLibrary.simpleMessage("複製為 TSV"),
@@ -325,8 +459,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "historyEarlier": MessageLookupByLibrary.simpleMessage("更早"),
     "historyEditCalculation": MessageLookupByLibrary.simpleMessage("編輯計算"),
     "historyEntryActions": MessageLookupByLibrary.simpleMessage("計算記錄操作"),
-    "historyExpressionHelp": MessageLookupByLibrary.simpleMessage("試試 (2 + 3) × 4 或 200 + 10%。"),
-    "historyInvalidExpression": MessageLookupByLibrary.simpleMessage("請輸入有效的算術算式。"),
+    "historyExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "試試 (2 + 3) × 4 或 200 + 10%。",
+    ),
+    "historyInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "請輸入有效的算術算式。",
+    ),
     "historyNameCalculation": MessageLookupByLibrary.simpleMessage("為計算命名"),
     "historyNameTooLong": MessageLookupByLibrary.simpleMessage("請使用較短的名稱。"),
     "historyPinCalculation": MessageLookupByLibrary.simpleMessage("釘選計算"),
@@ -337,7 +475,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "historyToday": MessageLookupByLibrary.simpleMessage("今天"),
     "historyUnpinCalculation": MessageLookupByLibrary.simpleMessage("取消釘選計算"),
     "historyUseSum": MessageLookupByLibrary.simpleMessage("使用總計"),
-    "historyVisibleSum": m7,
+    "historyVisibleSum": m8,
     "historyYesterday": MessageLookupByLibrary.simpleMessage("昨天"),
     "increasePeople": MessageLookupByLibrary.simpleMessage("增加人數"),
     "inputSettings": MessageLookupByLibrary.simpleMessage("輸入設定"),
@@ -345,14 +483,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "lightTheme": MessageLookupByLibrary.simpleMessage("淺色主題"),
     "memoryAdd": MessageLookupByLibrary.simpleMessage("加入記憶"),
     "memoryBar": MessageLookupByLibrary.simpleMessage("記憶按鍵"),
-    "memoryBarDescription": MessageLookupByLibrary.simpleMessage("在鍵盤上方顯示 MC、MR、M+ 和 M−"),
+    "memoryBarDescription": MessageLookupByLibrary.simpleMessage(
+      "在鍵盤上方顯示 MC、MR、M+ 和 M−",
+    ),
     "memoryClear": MessageLookupByLibrary.simpleMessage("清除記憶"),
     "memoryRecall": MessageLookupByLibrary.simpleMessage("讀取記憶"),
     "memorySubtract": MessageLookupByLibrary.simpleMessage("從記憶中減去"),
     "multiply": MessageLookupByLibrary.simpleMessage("乘以"),
     "noCalculationsYet": MessageLookupByLibrary.simpleMessage("暫無計算記錄"),
     "noHistoryMatches": MessageLookupByLibrary.simpleMessage("沒有相符的計算記錄"),
-    "operandChanged": MessageLookupByLibrary.simpleMessage("計算已更改。請關閉此視窗，再次點按要編輯的數字。"),
+    "operandChanged": MessageLookupByLibrary.simpleMessage(
+      "計算已更改。請關閉此視窗，再次點按要編輯的數字。",
+    ),
     "pasteNumber": MessageLookupByLibrary.simpleMessage("貼上數字"),
     "pasted": MessageLookupByLibrary.simpleMessage("已貼上數字"),
     "percent": MessageLookupByLibrary.simpleMessage("百分比"),
@@ -360,21 +502,39 @@ class MessageLookup extends MessageLookupByLibrary {
     "premiumActive": MessageLookupByLibrary.simpleMessage("進階版已啟用。"),
     "premiumAdFree": MessageLookupByLibrary.simpleMessage("無廣告計算器"),
     "premiumBuy": MessageLookupByLibrary.simpleMessage("購買進階版"),
-    "premiumCheckPrice": MessageLookupByLibrary.simpleMessage("查看 App Store 價格"),
-    "premiumCheckPriceGooglePlay": MessageLookupByLibrary.simpleMessage("查看 Google Play 價格"),
-    "premiumFailed": MessageLookupByLibrary.simpleMessage("App Store 無法完成要求，請重試。"),
-    "premiumFailedGooglePlay": MessageLookupByLibrary.simpleMessage("Google Play 無法完成要求，請重試。"),
-    "premiumNotPurchased": MessageLookupByLibrary.simpleMessage("找不到此 Apple 帳戶的進階版購買記錄。"),
-    "premiumNotPurchasedGooglePlay": MessageLookupByLibrary.simpleMessage("找不到此 Google 帳戶的進階版購買記錄。"),
+    "premiumCheckPrice": MessageLookupByLibrary.simpleMessage(
+      "查看 App Store 價格",
+    ),
+    "premiumCheckPriceGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "查看 Google Play 價格",
+    ),
+    "premiumFailed": MessageLookupByLibrary.simpleMessage(
+      "App Store 無法完成要求，請重試。",
+    ),
+    "premiumFailedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "Google Play 無法完成要求，請重試。",
+    ),
+    "premiumNotPurchased": MessageLookupByLibrary.simpleMessage(
+      "找不到此 Apple 帳戶的進階版購買記錄。",
+    ),
+    "premiumNotPurchasedGooglePlay": MessageLookupByLibrary.simpleMessage(
+      "找不到此 Google 帳戶的進階版購買記錄。",
+    ),
     "premiumOffer": MessageLookupByLibrary.simpleMessage("一次性購買即可解鎖兩款工具並移除廣告。"),
-    "premiumOfferToolsOnly": MessageLookupByLibrary.simpleMessage("一次性購買即可解鎖科學計算器和可重用公式。"),
+    "premiumOfferToolsOnly": MessageLookupByLibrary.simpleMessage(
+      "一次性購買即可解鎖科學計算器和可重用公式。",
+    ),
     "premiumPending": MessageLookupByLibrary.simpleMessage("購買正在等候批准。"),
     "premiumRestore": MessageLookupByLibrary.simpleMessage("恢復購買"),
     "premiumRestored": MessageLookupByLibrary.simpleMessage("已恢復進階版購買。"),
     "premiumTools": MessageLookupByLibrary.simpleMessage("進階版工具"),
     "premiumUnavailable": MessageLookupByLibrary.simpleMessage("進階版暫時無法使用。"),
-    "premiumWhatIfAlternate": MessageLookupByLibrary.simpleMessage("減價 25% 後，實付 \$75。"),
-    "premiumWhatIfBaseline": MessageLookupByLibrary.simpleMessage("減價 10% 後，實付 \$90。"),
+    "premiumWhatIfAlternate": MessageLookupByLibrary.simpleMessage(
+      "減價 25% 後，實付 \$75。",
+    ),
+    "premiumWhatIfBaseline": MessageLookupByLibrary.simpleMessage(
+      "減價 10% 後，實付 \$90。",
+    ),
     "premiumWhatIfPreview": MessageLookupByLibrary.simpleMessage("方案比較預覽"),
     "premiumWhatIfPrice": MessageLookupByLibrary.simpleMessage("以原價 \$100 為例。"),
     "programmerBitwise": MessageLookupByLibrary.simpleMessage("位元運算"),
@@ -384,30 +544,46 @@ class MessageLookup extends MessageLookupByLibrary {
     "programmerValue": MessageLookupByLibrary.simpleMessage("整數值"),
     "redo": MessageLookupByLibrary.simpleMessage("重做"),
     "repeatEquals": MessageLookupByLibrary.simpleMessage("連續按等號重複運算"),
-    "repeatEqualsDescription": MessageLookupByLibrary.simpleMessage("再次按 = 重複上一次運算"),
+    "repeatEqualsDescription": MessageLookupByLibrary.simpleMessage(
+      "再次按 = 重複上一次運算",
+    ),
     "reusableFormulas": MessageLookupByLibrary.simpleMessage("可重用公式"),
     "reuseResult": MessageLookupByLibrary.simpleMessage("使用此結果"),
     "roundUpPerPerson": MessageLookupByLibrary.simpleMessage("人均向上取整"),
-    "scientificArgumentSeparator": MessageLookupByLibrary.simpleMessage("參數分隔符"),
+    "scientificArgumentSeparator": MessageLookupByLibrary.simpleMessage(
+      "參數分隔符",
+    ),
     "scientificCalculator": MessageLookupByLibrary.simpleMessage("科學計算器"),
     "scientificCloseParenthesis": MessageLookupByLibrary.simpleMessage("右括號"),
     "scientificDegrees": MessageLookupByLibrary.simpleMessage("角度"),
-    "scientificDivideByZero": MessageLookupByLibrary.simpleMessage("請將除數改為非零值。"),
-    "scientificDomainError": MessageLookupByLibrary.simpleMessage("請檢查此運算允許的數值範圍。"),
-    "scientificEngineeringNotation": MessageLookupByLibrary.simpleMessage("工程記數法"),
-    "scientificErrorPosition": m8,
+    "scientificDivideByZero": MessageLookupByLibrary.simpleMessage(
+      "請將除數改為非零值。",
+    ),
+    "scientificDomainError": MessageLookupByLibrary.simpleMessage(
+      "請檢查此運算允許的數值範圍。",
+    ),
+    "scientificEngineeringNotation": MessageLookupByLibrary.simpleMessage(
+      "工程記數法",
+    ),
+    "scientificErrorPosition": m9,
     "scientificEvaluate": MessageLookupByLibrary.simpleMessage("計算"),
     "scientificExponentEntry": MessageLookupByLibrary.simpleMessage("科學記數法指數"),
     "scientificExpression": MessageLookupByLibrary.simpleMessage("算式"),
-    "scientificExpressionHelp": MessageLookupByLibrary.simpleMessage("使用 * 表示乘法，例如 2 * sin(30) + sqrt(9)。"),
+    "scientificExpressionHelp": MessageLookupByLibrary.simpleMessage(
+      "使用 * 表示乘法，例如 2 * sin(30) + sqrt(9)。",
+    ),
     "scientificFactorial": MessageLookupByLibrary.simpleMessage("階乘"),
     "scientificFraction": MessageLookupByLibrary.simpleMessage("分數"),
     "scientificGraph": MessageLookupByLibrary.simpleMessage("函數圖形"),
     "scientificHideKeyboard": MessageLookupByLibrary.simpleMessage("隱藏系統鍵盤"),
     "scientificHistory": MessageLookupByLibrary.simpleMessage("科學計算記錄"),
-    "scientificInvalidExpression": MessageLookupByLibrary.simpleMessage("請輸入有效且結果為有限數值的算式。"),
+    "scientificInvalidExpression": MessageLookupByLibrary.simpleMessage(
+      "請輸入有效且結果為有限數值的算式。",
+    ),
     "scientificMissingParen": MessageLookupByLibrary.simpleMessage("請加入右括號。"),
-    "scientificNoAnswer": MessageLookupByLibrary.simpleMessage("請先計算結果，再使用 Ans。"),
+    "scientificNoAnswer": MessageLookupByLibrary.simpleMessage(
+      "請先計算結果，再使用 Ans。",
+    ),
     "scientificOpenParenthesis": MessageLookupByLibrary.simpleMessage("左括號"),
     "scientificOverflow": MessageLookupByLibrary.simpleMessage("結果超出支援範圍。"),
     "scientificPower": MessageLookupByLibrary.simpleMessage("次方"),
@@ -416,33 +592,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "scientificRadians": MessageLookupByLibrary.simpleMessage("弧度"),
     "scientificResult": MessageLookupByLibrary.simpleMessage("結果"),
     "scientificShowKeyboard": MessageLookupByLibrary.simpleMessage("顯示系統鍵盤"),
-    "scientificSyntaxError": MessageLookupByLibrary.simpleMessage("請檢查游標附近的算式。"),
+    "scientificSyntaxError": MessageLookupByLibrary.simpleMessage(
+      "請檢查游標附近的算式。",
+    ),
     "scientificTooDeep": MessageLookupByLibrary.simpleMessage("請減少巢狀運算層數。"),
     "scientificTooLong": MessageLookupByLibrary.simpleMessage("請縮短算式。"),
-    "scientificUnknownFunction": m9,
-    "scientificUnknownVariable": m10,
+    "scientificUnknownFunction": m10,
+    "scientificUnknownVariable": m11,
     "searchHistory": MessageLookupByLibrary.simpleMessage("搜尋歷史記錄"),
     "settings": MessageLookupByLibrary.simpleMessage("設定"),
     "shakeToUndo": MessageLookupByLibrary.simpleMessage("搖動復原"),
-    "shakeToUndoDescription": MessageLookupByLibrary.simpleMessage("搖動手機以復原上一步輸入"),
+    "shakeToUndoDescription": MessageLookupByLibrary.simpleMessage(
+      "搖動手機以復原上一步輸入",
+    ),
     "shortcutBackspace": MessageLookupByLibrary.simpleMessage("刪除最後一位數字"),
     "shortcutClear": MessageLookupByLibrary.simpleMessage("清除輸入"),
     "shortcutEquals": MessageLookupByLibrary.simpleMessage("計算結果"),
     "shortcutHistory": MessageLookupByLibrary.simpleMessage("開啟或隱藏歷史記錄"),
     "shortcutNumbers": MessageLookupByLibrary.simpleMessage("數字鍵與數字鍵盤"),
-    "shortcutOperators": MessageLookupByLibrary.simpleMessage("加、減、乘、除、百分比和小數點"),
+    "shortcutOperators": MessageLookupByLibrary.simpleMessage(
+      "加、減、乘、除、百分比和小數點",
+    ),
     "shortcutPaste": MessageLookupByLibrary.simpleMessage("貼上數字"),
     "shortcutRedo": MessageLookupByLibrary.simpleMessage("重做輸入"),
     "shortcutTools": MessageLookupByLibrary.simpleMessage("開啟日常工具"),
     "shortcutUndo": MessageLookupByLibrary.simpleMessage("復原輸入"),
     "soundEffects": MessageLookupByLibrary.simpleMessage("按鍵音"),
-    "soundEffectsDescription": MessageLookupByLibrary.simpleMessage("按下計算機按鍵時播放輕柔按鍵音"),
+    "soundEffectsDescription": MessageLookupByLibrary.simpleMessage(
+      "按下計算機按鍵時播放輕柔按鍵音",
+    ),
     "subtract": MessageLookupByLibrary.simpleMessage("減去"),
     "theme": MessageLookupByLibrary.simpleMessage("主題"),
     "thousandsSeparator": MessageLookupByLibrary.simpleMessage("千位分隔符"),
-    "thousandsSeparatorDescription": MessageLookupByLibrary.simpleMessage("在大數字中按千位分組，例如 1,234.56"),
+    "thousandsSeparatorDescription": MessageLookupByLibrary.simpleMessage(
+      "在大數字中按千位分組，例如 1,234.56",
+    ),
     "undo": MessageLookupByLibrary.simpleMessage("復原"),
     "unitConverter": MessageLookupByLibrary.simpleMessage("單位換算"),
-    "useCurrentDisplay": m11,
+    "useCurrentDisplay": m12,
   };
 }

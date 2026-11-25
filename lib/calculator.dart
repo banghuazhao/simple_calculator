@@ -17,6 +17,9 @@ import 'package:simple_calculator/more_page.dart';
 import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/premium/premium_page.dart';
 import 'package:simple_calculator/processor.dart';
+import 'package:simple_calculator/unit_converter_page.dart';
+import 'package:simple_calculator/util/desktop_window_helper.dart';
+import 'package:simple_calculator/util/quick_actions_service.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/shake_listener.dart';
@@ -49,6 +52,7 @@ class _CalculatorState extends State<Calculator> {
   ShakeListener? _shakeListener;
   StreamSubscription<input.KeyEvent>? _keySubscription;
   StreamSubscription<CalcState>? _processorSubscription;
+  StreamSubscription<String>? _quickActionSubscription;
 
   @override
   void initState() {
@@ -56,6 +60,12 @@ class _CalculatorState extends State<Calculator> {
     _keySubscription = input.KeyController.listen(Processor.process);
     _processorSubscription = Processor.listen((state) {
       if (mounted) _calcState.value = state;
+    });
+    _quickActionSubscription = QuickActionsService.instance.listen(
+      _handleQuickAction,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(QuickActionsService.instance.checkInitialAction());
     });
     Processor.refresh();
 
@@ -149,6 +159,7 @@ class _CalculatorState extends State<Calculator> {
     _premium?.removeListener(_syncBanner);
     unawaited(_keySubscription?.cancel());
     unawaited(_processorSubscription?.cancel());
+    unawaited(_quickActionSubscription?.cancel());
     _calcState.dispose();
     final ad = _ad;
     _ad = null;
@@ -184,6 +195,26 @@ class _CalculatorState extends State<Calculator> {
     Navigator.of(context).push<void>(
       MaterialPageRoute(builder: (_) => const EverydayToolsPage()),
     );
+  }
+
+  void _handleQuickAction(String action) {
+    if (!mounted) return;
+    final navigator = Navigator.of(context);
+    navigator.popUntil((route) => route.isFirst);
+    switch (action) {
+      case QuickActionsService.actionUnitConverter:
+        navigator.push<void>(
+          MaterialPageRoute(builder: (_) => const UnitConverterPage()),
+        );
+      case QuickActionsService.actionEverydayTools:
+        _openEverydayTools();
+      case QuickActionsService.actionHistory:
+        _handleHistoryAction();
+      case QuickActionsService.actionScientific:
+        navigator.push<void>(
+          MaterialPageRoute(builder: (_) => const PremiumPage()),
+        );
+    }
   }
 
   void _correctOperand(OperandEdit operand) {
@@ -296,6 +327,14 @@ class _CalculatorState extends State<Calculator> {
     final strings = S.of(context);
     final toolbarColor = model.readableTextColor;
 
+    final compactToolbar = screenSize.width < 380;
+    final toolbarButtonConstraints = compactToolbar
+        ? const BoxConstraints(minWidth: 38, minHeight: 44)
+        : const BoxConstraints(minWidth: 44, minHeight: 48);
+    final toolbarPadding = compactToolbar
+        ? const EdgeInsets.all(6)
+        : const EdgeInsets.all(8);
+
     final calculatorColumn = Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 640),
@@ -307,6 +346,8 @@ class _CalculatorState extends State<Calculator> {
                 children: [
                   IconButton(
                     tooltip: strings.settings,
+                    constraints: toolbarButtonConstraints,
+                    padding: toolbarPadding,
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const MorePage()),
@@ -332,9 +373,31 @@ class _CalculatorState extends State<Calculator> {
                       ),
                     ),
                   ),
+                  if (defaultTargetPlatform == TargetPlatform.macOS)
+                    ListenableBuilder(
+                      listenable: DesktopWindowHelper.instance,
+                      builder: (_, _) {
+                        final pinned = DesktopWindowHelper.instance.alwaysOnTop;
+                        return IconButton(
+                          key: const ValueKey('toolbar-pin-window-button'),
+                          tooltip: strings.alwaysOnTop,
+                          constraints: toolbarButtonConstraints,
+                          padding: toolbarPadding,
+                          onPressed: () => unawaited(
+                            DesktopWindowHelper.instance.toggleAlwaysOnTop(),
+                          ),
+                          icon: Icon(
+                            pinned ? Icons.push_pin : Icons.push_pin_outlined,
+                            color: toolbarColor,
+                          ),
+                        );
+                      },
+                    ),
                   if (showPremiumTools)
                     IconButton(
                       tooltip: strings.premiumTools,
+                      constraints: toolbarButtonConstraints,
+                      padding: toolbarPadding,
                       onPressed: () => Navigator.of(context).push<void>(
                         MaterialPageRoute(
                           builder: (_) => const PremiumPage(),
@@ -347,6 +410,8 @@ class _CalculatorState extends State<Calculator> {
                     ),
                   IconButton(
                     tooltip: strings.everydayTools,
+                    constraints: toolbarButtonConstraints,
+                    padding: toolbarPadding,
                     onPressed: _openEverydayTools,
                     icon: Icon(
                       Icons.grid_view_rounded,
@@ -355,16 +420,35 @@ class _CalculatorState extends State<Calculator> {
                   ),
                   ValueListenableBuilder<CalcState>(
                     valueListenable: _calcState,
-                    builder: (_, state, _) => IconButton(
-                      tooltip: strings.undo,
-                      onPressed: state.canUndo ? Processor.undo : null,
-                      color: toolbarColor,
-                      disabledColor: toolbarColor.withValues(alpha: 0.35),
-                      icon: const Icon(Icons.undo),
+                    builder: (_, state, _) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: strings.undo,
+                          constraints: toolbarButtonConstraints,
+                          padding: toolbarPadding,
+                          onPressed: state.canUndo ? Processor.undo : null,
+                          color: toolbarColor,
+                          disabledColor: toolbarColor.withValues(alpha: 0.35),
+                          icon: const Icon(Icons.undo),
+                        ),
+                        IconButton(
+                          key: const ValueKey('toolbar-redo-button'),
+                          tooltip: strings.redo,
+                          constraints: toolbarButtonConstraints,
+                          padding: toolbarPadding,
+                          onPressed: state.canRedo ? Processor.redo : null,
+                          color: toolbarColor,
+                          disabledColor: toolbarColor.withValues(alpha: 0.35),
+                          icon: const Icon(Icons.redo),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
                     tooltip: strings.history,
+                    constraints: toolbarButtonConstraints,
+                    padding: toolbarPadding,
                     onPressed: _handleHistoryAction,
                     icon: Icon(Icons.history, color: toolbarColor),
                   ),
@@ -409,6 +493,8 @@ class _CalculatorState extends State<Calculator> {
               valueListenable: _calcState,
               builder: (_, state, _) => KeyPad(
                 activeOperator: state.isResult ? null : state.binaryOperator,
+                clearShowsAllClear: state.clearShowsAllClear,
+                canClearEntry: state.canClearEntry,
               ),
             ),
             SizedBox(height: screenHeight <= 740 ? 8 : 24),
@@ -440,6 +526,7 @@ class _CalculatorState extends State<Calculator> {
       onHistory: _handleHistoryAction,
       onTools: _openEverydayTools,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: model.backgroundColor,
         body: SafeArea(
           child: showSidebar
@@ -508,42 +595,77 @@ class _CorrectOperandDialogState extends State<_CorrectOperandDialog> {
     final model = context.watch<ThemeModel>();
     final ink = model.readableTextColor;
     final stale = _failure == OperandCorrection.stale;
+    final outline = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: ink),
+    );
     return AlertDialog(
+      key: const ValueKey('correct-operand-dialog'),
       scrollable: true,
       backgroundColor: model.backgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: model.panelBorderColor),
+      ),
       title: Text(
         widget.operand.position == OperandPosition.left
             ? strings.editFirstOperand
             : strings.editSecondOperand,
         style: TextStyle(color: ink),
       ),
-      content: TextField(
-        controller: _input,
-        autofocus: true,
-        enabled: !stale,
-        style: TextStyle(color: ink),
-        keyboardType: const TextInputType.numberWithOptions(
-          signed: true,
-          decimal: true,
-        ),
-        textInputAction: TextInputAction.done,
-        onChanged: (_) {
-          if (_failure != null) setState(() => _failure = null);
-        },
-        onSubmitted: (_) => _save(),
-        decoration: InputDecoration(
-          labelText: strings.converterAmount,
-          labelStyle: TextStyle(color: ink),
-          suffixText: widget.percent ? '%' : null,
-          suffixStyle: TextStyle(color: ink),
-          errorText: switch (_failure) {
-            OperandCorrection.invalid => strings.formulaInvalidInput,
-            OperandCorrection.stale => strings.operandChanged,
-            _ => null,
+      content: ValueListenableBuilder<TextEditingValue>(
+        valueListenable: _input,
+        builder: (_, value, _) => TextField(
+          controller: _input,
+          autofocus: true,
+          enabled: !stale,
+          style: TextStyle(
+            color: ink,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+          cursorColor: ink,
+          keyboardType: const TextInputType.numberWithOptions(
+            signed: true,
+            decimal: true,
+          ),
+          textInputAction: TextInputAction.done,
+          onChanged: (_) {
+            if (_failure != null) setState(() => _failure = null);
           },
-          errorStyle: TextStyle(color: ink),
-          errorMaxLines: 3,
-          border: const OutlineInputBorder(),
+          onSubmitted: (_) => _save(),
+          decoration: InputDecoration(
+            labelText: strings.converterAmount,
+            labelStyle: TextStyle(color: ink),
+            suffixText: widget.percent ? '%' : null,
+            suffixStyle: TextStyle(color: ink),
+            suffixIcon: value.text.isEmpty || stale
+                ? null
+                : IconButton(
+                    tooltip: strings.clearInput,
+                    color: ink,
+                    icon: const Icon(Icons.clear, size: 18),
+                    onPressed: () {
+                      _input.clear();
+                      if (_failure != null) setState(() => _failure = null);
+                    },
+                  ),
+            errorText: switch (_failure) {
+              OperandCorrection.invalid => strings.formulaInvalidInput,
+              OperandCorrection.stale => strings.operandChanged,
+              _ => null,
+            },
+            errorStyle: TextStyle(color: ink),
+            errorMaxLines: 3,
+            border: outline,
+            enabledBorder: outline,
+            focusedBorder: outline.copyWith(
+              borderSide: BorderSide(color: ink, width: 2),
+            ),
+            errorBorder: outline,
+            focusedErrorBorder: outline.copyWith(
+              borderSide: BorderSide(color: ink, width: 2),
+            ),
+          ),
         ),
       ),
       actions: [

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,22 +10,98 @@ import 'package:simple_calculator/util/measurement_units.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
+class UnitPairPreset {
+  const UnitPairPreset({
+    required this.quantity,
+    required this.from,
+    required this.to,
+  });
+
+  final MeasurementQuantity quantity;
+  final MeasurementUnit from;
+  final MeasurementUnit to;
+
+  String get label => '${from.symbol} → ${to.symbol}';
+
+  Map<String, String> toJson() => {
+    'q': quantity.name,
+    'from': from.name,
+    'to': to.name,
+  };
+
+  static UnitPairPreset? fromJson(Object? raw) {
+    if (raw is! Map) return null;
+    final qName = raw['q'];
+    final fromName = raw['from'];
+    final toName = raw['to'];
+    if (qName is! String || fromName is! String || toName is! String) {
+      return null;
+    }
+    final quantity = MeasurementQuantity.values
+        .where((q) => q.name == qName)
+        .firstOrNull;
+    if (quantity == null) return null;
+    final units = quantity.units;
+    final from = units.where((u) => u.name == fromName).firstOrNull;
+    final to = units.where((u) => u.name == toName).firstOrNull;
+    if (from == null || to == null || from == to) return null;
+    return UnitPairPreset(quantity: quantity, from: from, to: to);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is UnitPairPreset &&
+      other.quantity == quantity &&
+      other.from == from &&
+      other.to == to;
+
+  @override
+  int get hashCode => Object.hash(quantity, from, to);
+}
+
 class UnitConverterPage extends StatefulWidget {
   const UnitConverterPage({super.key});
 
   static const _quantityKey = 'converter_last_quantity';
   static const _fromKey = 'converter_last_from';
   static const _toKey = 'converter_last_to';
+  static const categoryPairsKey = 'converter_category_pairs_v1';
+  static const pinnedPairsKey = 'converter_pinned_pairs_v1';
+
+  static const List<UnitPairPreset> defaultPinnedPairs = [
+    UnitPairPreset(
+      quantity: MeasurementQuantity.length,
+      from: MeasurementUnit.kilometer,
+      to: MeasurementUnit.mile,
+    ),
+    UnitPairPreset(
+      quantity: MeasurementQuantity.temperature,
+      from: MeasurementUnit.celsius,
+      to: MeasurementUnit.fahrenheit,
+    ),
+    UnitPairPreset(
+      quantity: MeasurementQuantity.mass,
+      from: MeasurementUnit.kilogram,
+      to: MeasurementUnit.pound,
+    ),
+  ];
 
   @override
   State<UnitConverterPage> createState() => _UnitConverterPageState();
 }
 
 class _UnitConverterPageState extends State<UnitConverterPage> {
+  static const _maxPinnedPairs = 12;
+
   final _amount = TextEditingController();
   MeasurementQuantity _quantity = MeasurementQuantity.length;
   MeasurementUnit _from = MeasurementUnit.meter;
   MeasurementUnit _to = MeasurementUnit.foot;
+  final Map<MeasurementQuantity, (MeasurementUnit, MeasurementUnit)>
+  _categoryPairs = {};
+  List<UnitPairPreset> _pinnedPairs = List.of(
+    UnitConverterPage.defaultPinnedPairs,
+  );
 
   @override
   void initState() {
@@ -35,7 +112,47 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
   void _restoreLastSelection() {
     try {
       final prefs = StorageManager.sharedPreferences;
-      final qName = prefs?.getString(UnitConverterPage._quantityKey);
+      if (prefs == null) return;
+
+      final rawCategoryPairs = prefs.getString(
+        UnitConverterPage.categoryPairsKey,
+      );
+      if (rawCategoryPairs != null) {
+        final decoded = jsonDecode(rawCategoryPairs);
+        if (decoded is Map) {
+          for (final entry in decoded.entries) {
+            final q = MeasurementQuantity.values
+                .where((item) => item.name == entry.key)
+                .firstOrNull;
+            if (q == null || entry.value is! List) continue;
+            final list = entry.value as List;
+            if (list.length != 2) continue;
+            final from = q.units.where((u) => u.name == list[0]).firstOrNull;
+            final to = q.units.where((u) => u.name == list[1]).firstOrNull;
+            if (from != null && to != null) {
+              _categoryPairs[q] = (from, to);
+            }
+          }
+        }
+      }
+
+      final rawPinned = prefs.getString(UnitConverterPage.pinnedPairsKey);
+      if (rawPinned != null) {
+        final decoded = jsonDecode(rawPinned);
+        if (decoded is List) {
+          final parsed = <UnitPairPreset>[];
+          for (final entry in decoded) {
+            final preset = UnitPairPreset.fromJson(entry);
+            if (preset != null && !parsed.contains(preset)) {
+              parsed.add(preset);
+            }
+            if (parsed.length == _maxPinnedPairs) break;
+          }
+          _pinnedPairs = parsed;
+        }
+      }
+
+      final qName = prefs.getString(UnitConverterPage._quantityKey);
       if (qName == null) return;
       final quantity = MeasurementQuantity.values
           .where((q) => q.name == qName)
@@ -43,26 +160,59 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
       if (quantity == null) return;
       _quantity = quantity;
       final units = quantity.units;
-      final fromName = prefs?.getString(UnitConverterPage._fromKey);
-      final toName = prefs?.getString(UnitConverterPage._toKey);
+      final fromName = prefs.getString(UnitConverterPage._fromKey);
+      final toName = prefs.getString(UnitConverterPage._toKey);
+      final savedPair = _categoryPairs[quantity];
       _from =
-          units.where((u) => u.name == fromName).firstOrNull ?? units.first;
-      _to = units.where((u) => u.name == toName).firstOrNull ?? units[1];
+          units.where((u) => u.name == fromName).firstOrNull ??
+          savedPair?.$1 ??
+          units.first;
+      _to =
+          units.where((u) => u.name == toName).firstOrNull ??
+          savedPair?.$2 ??
+          units[1];
+      _categoryPairs[_quantity] = (_from, _to);
     } catch (_) {
       // Fall back cleanly to defaults.
     }
   }
 
   void _persistSelection() {
+    _categoryPairs[_quantity] = (_from, _to);
     try {
       final prefs = StorageManager.sharedPreferences;
       if (prefs == null) return;
-      unawaited(prefs.setString(UnitConverterPage._quantityKey, _quantity.name));
+      unawaited(
+        prefs.setString(UnitConverterPage._quantityKey, _quantity.name),
+      );
       unawaited(prefs.setString(UnitConverterPage._fromKey, _from.name));
       unawaited(prefs.setString(UnitConverterPage._toKey, _to.name));
+      final serializedPairs = {
+        for (final entry in _categoryPairs.entries)
+          entry.key.name: [entry.value.$1.name, entry.value.$2.name],
+      };
+      unawaited(
+        prefs.setString(
+          UnitConverterPage.categoryPairsKey,
+          jsonEncode(serializedPairs),
+        ),
+      );
     } catch (_) {
       // Persistence is optional.
     }
+  }
+
+  void _persistPinnedPairs() {
+    try {
+      final prefs = StorageManager.sharedPreferences;
+      if (prefs == null) return;
+      unawaited(
+        prefs.setString(
+          UnitConverterPage.pinnedPairsKey,
+          jsonEncode(_pinnedPairs.map((p) => p.toJson()).toList()),
+        ),
+      );
+    } catch (_) {}
   }
 
   @override
@@ -75,10 +225,40 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
     if (_quantity == quantity) return;
     setState(() {
       _quantity = quantity;
-      _from = quantity.units.first;
-      _to = quantity.units[1];
+      final remembered = _categoryPairs[quantity];
+      _from = remembered?.$1 ?? quantity.units.first;
+      _to = remembered?.$2 ?? quantity.units[1];
     });
     _persistSelection();
+  }
+
+  void _applyPreset(UnitPairPreset preset) {
+    setState(() {
+      _quantity = preset.quantity;
+      _from = preset.from;
+      _to = preset.to;
+    });
+    _persistSelection();
+  }
+
+  bool get _isCurrentPinned => _pinnedPairs.contains(
+    UnitPairPreset(quantity: _quantity, from: _from, to: _to),
+  );
+
+  void _togglePinCurrent() {
+    if (_from == _to) return;
+    final current = UnitPairPreset(quantity: _quantity, from: _from, to: _to);
+    setState(() {
+      if (_pinnedPairs.contains(current)) {
+        _pinnedPairs.remove(current);
+      } else {
+        if (_pinnedPairs.length >= _maxPinnedPairs) {
+          _pinnedPairs.removeLast();
+        }
+        _pinnedPairs.insert(0, current);
+      }
+    });
+    _persistPinnedPairs();
   }
 
   void _swap(double? result) {
@@ -185,6 +365,18 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
           backgroundColor: model.backgroundColor,
           foregroundColor: foreground,
           title: Text(strings.unitConverter),
+          actions: [
+            IconButton(
+              key: const ValueKey('converter-pin-button'),
+              tooltip: _isCurrentPinned
+                  ? strings.converterUnpinPair
+                  : strings.converterPinPair,
+              onPressed: _from == _to ? null : _togglePinCurrent,
+              icon: Icon(
+                _isCurrentPinned ? Icons.push_pin : Icons.push_pin_outlined,
+              ),
+            ),
+          ],
         ),
         body: SafeArea(
           top: false,
@@ -357,6 +549,34 @@ class _UnitConverterPageState extends State<UnitConverterPage> {
                     icon: const Icon(Icons.calculate_outlined),
                     label: Text(strings.reuseResult),
                   ),
+                  if (_pinnedPairs.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      strings.converterPinnedPairs,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: foreground,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      key: const ValueKey('converter-pinned-pairs'),
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: [
+                        for (final preset in _pinnedPairs)
+                          ActionChip(
+                            avatar: Icon(
+                              Icons.push_pin_outlined,
+                              size: 14,
+                              color: model.panelTextColor,
+                            ),
+                            label: Text(preset.label),
+                            onPressed: () => _applyPreset(preset),
+                          ),
+                      ],
+                    ),
+                  ],
                   if (validResult && otherUnits.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     DecoratedBox(

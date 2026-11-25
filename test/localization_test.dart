@@ -75,7 +75,17 @@ Map<String, String> calculatorMessages(S strings) => {
 };
 
 void main() {
-  const expectedHistory = {'en': 'History', 'zh': '历史记录', 'zh_HK': '歷史記錄'};
+  const expectedHistory = {
+    'en': 'History',
+    'zh': '历史记录',
+    'zh_HK': '歷史記錄',
+    'de': 'Verlauf',
+    'es': 'Historial',
+    'fr': 'Historique',
+    'ja': '履歴',
+    'ko': '기록',
+    'pt': 'Histórico',
+  };
 
   for (final locale in S.delegate.supportedLocales) {
     test('calculator messages load completely for $locale', () async {

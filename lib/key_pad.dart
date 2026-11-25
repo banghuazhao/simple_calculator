@@ -1,13 +1,23 @@
 import 'package:flutter/widgets.dart';
 import 'package:simple_calculator/calculator_key.dart';
+import 'package:simple_calculator/generated/l10n.dart';
+import 'package:simple_calculator/processor.dart';
 
 class KeyPad extends StatelessWidget {
-  const KeyPad({super.key, this.activeOperator});
+  const KeyPad({
+    super.key,
+    this.activeOperator,
+    this.clearShowsAllClear = false,
+    this.canClearEntry = false,
+  });
 
   final String? activeOperator;
+  final bool clearShowsAllClear;
+  final bool canClearEntry;
 
   @override
   Widget build(BuildContext context) {
+    final strings = S.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Column(
@@ -15,7 +25,17 @@ class KeyPad extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const CalculatorKey(symbol: Keys.clear),
+              CalculatorKey(
+                symbol: Keys.clear,
+                labelOverride: clearShowsAllClear ? 'AC' : null,
+                semanticsLabelOverride: clearShowsAllClear
+                    ? strings.allClear
+                    : canClearEntry
+                    ? strings.clearEntry
+                    : null,
+                onTapOverride: canClearEntry ? Processor.clearEntry : null,
+                onLongPress: Processor.clearAll,
+              ),
               const CalculatorKey(symbol: Keys.sign),
               const CalculatorKey(symbol: Keys.percent),
               CalculatorKey(

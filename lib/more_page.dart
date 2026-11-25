@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,9 @@ import 'package:simple_calculator/help_page.dart';
 import 'package:simple_calculator/premium/custom_theme_page.dart';
 import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/premium/premium_page.dart';
+import 'package:simple_calculator/util/backup_manager.dart';
+import 'package:simple_calculator/util/clipboard_helper.dart';
+import 'package:simple_calculator/util/desktop_window_helper.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 import 'package:simple_calculator/util/ads_manager.dart';
 import 'package:simple_calculator/util/input_settings.dart';
@@ -584,6 +589,8 @@ class _MorePageState extends State<MorePage> {
                     ),
                     const SizedBox(height: 16),
                     const InputSettingsSection(),
+                    const SizedBox(height: 16),
+                    const _BackupSection(),
                     if (showMoreApps) ...[
                       const SizedBox(height: 24),
                       _SettingsHeading(strings.MoreApps),
@@ -870,11 +877,183 @@ class InputSettingsSection extends StatelessWidget {
                   value: settings.repeatEqualsEnabled,
                   onChanged: settings.setRepeatEqualsEnabled,
                 ),
+                if (defaultTargetPlatform == TargetPlatform.macOS) ...[
+                  divider(),
+                  ListenableBuilder(
+                    listenable: DesktopWindowHelper.instance,
+                    builder: (_, _) => switchRow(
+                      key: const ValueKey('always-on-top-setting'),
+                      title: strings.alwaysOnTop,
+                      subtitle: strings.alwaysOnTopDescription,
+                      value: DesktopWindowHelper.instance.alwaysOnTop,
+                      onChanged: (enabled) => unawaited(
+                        DesktopWindowHelper.instance.setAlwaysOnTop(enabled),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BackupSection extends StatelessWidget {
+  const _BackupSection();
+
+  Future<void> _exportBackup(BuildContext context) async {
+    final model = context.read<ThemeModel>();
+    final strings = S.of(context);
+    final jsonText = BackupManager.exportJson(model);
+    await ClipboardHelper.copy(
+      context,
+      jsonText,
+      confirmation: strings.backupCopied,
+    );
+  }
+
+  Future<void> _importBackup(BuildContext context) async {
+    final model = context.read<ThemeModel>();
+    final strings = S.of(context);
+    final controller = TextEditingController();
+    final restored = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        final ink = model.readableTextColor;
+        final outline = OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: ink),
+        );
+        return AlertDialog(
+          backgroundColor: model.backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: model.panelBorderColor),
+          ),
+          title: Text(strings.backupImport, style: TextStyle(color: ink)),
+          content: SizedBox(
+            width: 420,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  key: const ValueKey('backup-import-field'),
+                  controller: controller,
+                  minLines: 4,
+                  maxLines: 8,
+                  style: TextStyle(color: ink, fontSize: 12),
+                  decoration: InputDecoration(
+                    hintText: strings.backupPasteHint,
+                    hintStyle: TextStyle(color: ink.withValues(alpha: 0.6)),
+                    border: outline,
+                    enabledBorder: outline,
+                    focusedBorder: outline.copyWith(
+                      borderSide: BorderSide(color: ink, width: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      try {
+                        final data = await Clipboard.getData(
+                          Clipboard.kTextPlain,
+                        );
+                        if (data?.text != null) {
+                          controller.text = data!.text!;
+                        }
+                      } catch (_) {}
+                    },
+                    icon: Icon(Icons.content_paste_outlined, color: ink),
+                    label: Text(
+                      strings.pasteNumber,
+                      style: TextStyle(color: ink),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(strings.cancel, style: TextStyle(color: ink)),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: ink,
+                foregroundColor: model.backgroundColor,
+              ),
+              onPressed: () async {
+                final ok = await BackupManager.importJson(
+                  controller.text,
+                  model,
+                );
+                if (!dialogContext.mounted) return;
+                Navigator.of(dialogContext).pop(ok);
+              },
+              child: Text(strings.backupImportAction),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    if (!context.mounted || restored == null) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            restored ? strings.backupImportSuccess : strings.backupImportFailed,
+          ),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final model = context.watch<ThemeModel>();
+    final strings = S.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SettingsHeading(strings.backupAndRestore),
+        _SettingsGroup(
+          child: Column(
+            children: [
+              ListTile(
+                key: const ValueKey('backup-export-tile'),
+                leading: const Icon(Icons.upload_file_outlined),
+                title: Text(strings.backupExport),
+                subtitle: Text(strings.backupExportDescription),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => unawaited(_exportBackup(context)),
+              ),
+              Divider(
+                height: 1,
+                indent: 16,
+                endIndent: 16,
+                color: model.panelBorderColor,
+              ),
+              ListTile(
+                key: const ValueKey('backup-import-tile'),
+                leading: const Icon(Icons.download_outlined),
+                title: Text(strings.backupImport),
+                subtitle: Text(strings.backupImportDescription),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => unawaited(_importBackup(context)),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
