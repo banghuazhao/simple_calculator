@@ -88,6 +88,25 @@ class ScientificGraph {
 
   GraphPoint _pointAt(double x) => (x: x, y: valueAt(x));
 
+  double? yIntercept(GraphInterval interval) {
+    if (interval.minimum > 0 || interval.maximum < 0) return null;
+    return valueAt(0);
+  }
+
+  static ({GraphPoint? min, GraphPoint? max}) extrema(
+    List<GraphPoint> samples,
+  ) {
+    GraphPoint? minPoint;
+    GraphPoint? maxPoint;
+    for (final point in samples) {
+      final y = point.y;
+      if (y == null) continue;
+      if (minPoint == null || y < minPoint.y!) minPoint = point;
+      if (maxPoint == null || y > maxPoint.y!) maxPoint = point;
+    }
+    return (min: minPoint, max: maxPoint);
+  }
+
   List<GraphPoint> curve(GraphInterval interval) {
     const steps = 240;
     final samples = <GraphPoint>[_pointAt(interval.minimum)];
@@ -135,10 +154,61 @@ class ScientificGraph {
   }
 
   GraphRootResult findRoot(GraphInterval interval) {
+    return _bisectZero(valueAt, interval);
+  }
+
+  /// Finds an approximate intersection where `this(x) == other(x)` inside
+  /// [interval] by scanning sub-intervals for a sign change in `f(x) - g(x)`.
+  GraphRootResult findIntersection(
+    ScientificGraph other,
+    GraphInterval interval,
+  ) {
+    double? diffAt(double x) {
+      final a = valueAt(x);
+      final b = other.valueAt(x);
+      if (a == null || b == null) return null;
+      final d = a - b;
+      return d.isFinite ? d : null;
+    }
+
+    const segments = 120;
+    var prevX = interval.minimum;
+    var prevD = diffAt(prevX);
+    if (prevD == 0) {
+      final y = valueAt(prevX);
+      if (y != null) return _root(prevX, y);
+    }
+    for (var i = 1; i <= segments; i++) {
+      final x = interval.position(i / segments);
+      final d = diffAt(x);
+      if (d == 0) {
+        final y = valueAt(x);
+        if (y != null) return _root(x, y);
+      }
+      if (prevD != null && d != null && prevD.isNegative != d.isNegative) {
+        final sub = GraphInterval.tryCreate(prevX, x);
+        if (sub != null) {
+          final found = _bisectZero(diffAt, sub);
+          if (found.status == GraphRootStatus.found && found.root != null) {
+            final y = valueAt(found.root!.x);
+            if (y != null) return _root(found.root!.x, y);
+          }
+        }
+      }
+      prevX = x;
+      prevD = d;
+    }
+    return const (status: GraphRootStatus.unverified, root: null);
+  }
+
+  GraphRootResult _bisectZero(
+    double? Function(double) fn,
+    GraphInterval interval,
+  ) {
     var left = interval.minimum;
     var right = interval.maximum;
-    var low = valueAt(left);
-    var high = valueAt(right);
+    var low = fn(left);
+    var high = fn(right);
     const needsBracket = (status: GraphRootStatus.needsBracket, root: null);
     const unverified = (status: GraphRootStatus.unverified, root: null);
     if (low == 0) return _root(left, low!);
@@ -153,7 +223,7 @@ class ScientificGraph {
     for (var i = 0; i < 2100; i++) {
       final middle = left + (right - left) / 2;
       if (middle == left || middle == right) break;
-      final value = valueAt(middle);
+      final value = fn(middle);
       if (value == null) return unverified;
       if (value == 0) return _root(middle, value);
       if (value.isNegative == low!.isNegative) {

@@ -32,7 +32,10 @@ class Calculator extends StatefulWidget {
 }
 
 class _CalculatorState extends State<Calculator> {
+  static const double _sidebarBreakpoint = 960;
+
   final _calcState = ValueNotifier(Processor.state);
+  bool _showHistorySidebar = true;
 
   BannerAd? _ad;
   bool _isAdLoaded = false;
@@ -154,7 +157,16 @@ class _CalculatorState extends State<Calculator> {
     super.dispose();
   }
 
-  void _showHistory() {
+  void _handleHistoryAction() {
+    final wide = MediaQuery.sizeOf(context).width >= _sidebarBreakpoint;
+    if (wide) {
+      setState(() => _showHistorySidebar = !_showHistorySidebar);
+      return;
+    }
+    _showHistoryModal();
+  }
+
+  void _showHistoryModal() {
     final model = Provider.of<ThemeModel>(context, listen: false);
     showModalBottomSheet<void>(
       context: context,
@@ -165,6 +177,12 @@ class _CalculatorState extends State<Calculator> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => const HistorySheet(),
+    );
+  }
+
+  void _openEverydayTools() {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const EverydayToolsPage()),
     );
   }
 
@@ -180,6 +198,86 @@ class _CalculatorState extends State<Calculator> {
     );
   }
 
+  Widget _memoryBar(
+    BuildContext context,
+    CalcState state,
+    ThemeModel model,
+    S strings,
+  ) {
+    final ink = model.panelTextColor;
+    final hasMemory = state.memory != null;
+    Widget button(String label, String tooltip, VoidCallback? onPressed) =>
+        Expanded(
+          child: Tooltip(
+            message: tooltip,
+            child: TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: ink,
+                disabledForegroundColor: ink.withValues(alpha: 0.35),
+                minimumSize: const Size(0, 36),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                visualDensity: VisualDensity.compact,
+                textStyle: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onPressed: onPressed == null
+                  ? null
+                  : () {
+                      unawaited(InputFeedback.keyClick());
+                      onPressed();
+                    },
+              child: Text(label),
+            ),
+          ),
+        );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
+      child: DecoratedBox(
+        key: const ValueKey('calculator-memory-bar'),
+        decoration: BoxDecoration(
+          color: model.panelColor,
+          border: Border.all(color: model.panelBorderColor),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            button(
+              'MC',
+              strings.memoryClear,
+              hasMemory ? Processor.memoryClear : null,
+            ),
+            button(
+              'MR',
+              strings.memoryRecall,
+              hasMemory ? Processor.memoryRecall : null,
+            ),
+            button('M+', strings.memoryAdd, Processor.memoryAdd),
+            button('M−', strings.memorySubtract, Processor.memorySubtract),
+            if (hasMemory)
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Text(
+                  'M: ${InputSettings.instance.formatDisplayNumber(state.memory!)}',
+                  key: const ValueKey('calculator-memory-value'),
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final model = Provider.of<ThemeModel>(context);
@@ -189,141 +287,175 @@ class _CalculatorState extends State<Calculator> {
     final showPremiumTools = context.select<PremiumController?, bool>(
       (premium) => premium?.isPremium ?? false,
     );
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenSize = MediaQuery.sizeOf(context);
+    final screenHeight = screenSize.height;
+    final showSidebar =
+        screenSize.width >= _sidebarBreakpoint && _showHistorySidebar;
     final strings = S.of(context);
     final toolbarColor = model.readableTextColor;
+
+    final calculatorColumn = Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: strings.settings,
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MorePage()),
+                    ),
+                    icon: Icon(
+                      Icons.settings_outlined,
+                      color: toolbarColor,
+                    ),
+                  ),
+                  Expanded(
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'SwiftSum',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: toolbarColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (showPremiumTools)
+                    IconButton(
+                      tooltip: strings.premiumTools,
+                      onPressed: () => Navigator.of(context).push<void>(
+                        MaterialPageRoute(
+                          builder: (_) => const PremiumPage(),
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.workspace_premium_outlined,
+                        color: toolbarColor,
+                      ),
+                    ),
+                  IconButton(
+                    tooltip: strings.everydayTools,
+                    onPressed: _openEverydayTools,
+                    icon: Icon(
+                      Icons.grid_view_rounded,
+                      color: toolbarColor,
+                    ),
+                  ),
+                  ValueListenableBuilder<CalcState>(
+                    valueListenable: _calcState,
+                    builder: (_, state, _) => IconButton(
+                      tooltip: strings.undo,
+                      onPressed: state.canUndo ? Processor.undo : null,
+                      color: toolbarColor,
+                      disabledColor: toolbarColor.withValues(alpha: 0.35),
+                      icon: const Icon(Icons.undo),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: strings.history,
+                    onPressed: _handleHistoryAction,
+                    icon: Icon(Icons.history, color: toolbarColor),
+                  ),
+                ],
+              ),
+            ),
+            // Display fills all available space above keypad
+            Expanded(
+              child: ValueListenableBuilder<CalcState>(
+                valueListenable: _calcState,
+                builder: (_, state, _) => Display(
+                  current: state.current,
+                  history: state.history,
+                  isResult: state.isResult,
+                  preview: state.preview,
+                  leftOperand: state.leftOperand,
+                  rightOperand: state.rightOperand,
+                  binaryOperator: state.binaryOperator,
+                  rightOperandIsPercent: state.rightOperandIsPercent,
+                  onCorrectOperand: _correctOperand,
+                  onBackspace: () => input.KeyController.fire(
+                    input.KeyEvent(const CalculatorKey(symbol: Keys.back)),
+                  ),
+                  onPaste: () => ClipboardHelper.paste(context),
+                ),
+              ),
+            ),
+            ListenableBuilder(
+              listenable: InputSettings.instance,
+              builder: (context, _) {
+                if (!InputSettings.instance.memoryBarEnabled) {
+                  return const SizedBox.shrink();
+                }
+                return ValueListenableBuilder<CalcState>(
+                  valueListenable: _calcState,
+                  builder: (_, state, _) =>
+                      _memoryBar(context, state, model, strings),
+                );
+              },
+            ),
+            ValueListenableBuilder<CalcState>(
+              valueListenable: _calcState,
+              builder: (_, state, _) => KeyPad(
+                activeOperator: state.isResult ? null : state.binaryOperator,
+              ),
+            ),
+            SizedBox(height: screenHeight <= 740 ? 8 : 24),
+            // Banner ad
+            if (!Platform.isMacOS && allowsAds)
+              SizedBox(
+                height: 50,
+                child: _isAdLoaded && _ad != null
+                    ? AdWidget(ad: _ad!)
+                    : const SizedBox.shrink(),
+              )
+            else if (Platform.isMacOS)
+              const SizedBox(height: 20),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
 
     return CalculatorShortcuts(
       onKey: (symbol) => input.KeyController.fire(
         input.KeyEvent(CalculatorKey(symbol: symbol)),
       ),
       onUndo: Processor.undo,
+      onRedo: Processor.redo,
       onCopy: () =>
           ClipboardHelper.copyNumber(context, _calcState.value.current),
       onPaste: () => ClipboardHelper.paste(context),
+      onHistory: _handleHistoryAction,
+      onTools: _openEverydayTools,
       child: Scaffold(
         backgroundColor: model.backgroundColor,
         body: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          tooltip: strings.settings,
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const MorePage()),
-                          ),
-                          icon: Icon(
-                            Icons.settings_outlined,
-                            color: toolbarColor,
-                          ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                'SwiftSum',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      color: toolbarColor,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (showPremiumTools)
-                          IconButton(
-                            tooltip: strings.premiumTools,
-                            onPressed: () => Navigator.of(context).push<void>(
-                              MaterialPageRoute(
-                                builder: (_) => const PremiumPage(),
-                              ),
-                            ),
-                            icon: Icon(
-                              Icons.workspace_premium_outlined,
-                              color: toolbarColor,
-                            ),
-                          ),
-                        IconButton(
-                          tooltip: strings.everydayTools,
-                          onPressed: () => Navigator.of(context).push<void>(
-                            MaterialPageRoute(
-                              builder: (_) => const EverydayToolsPage(),
-                            ),
-                          ),
-                          icon: Icon(
-                            Icons.grid_view_rounded,
-                            color: toolbarColor,
-                          ),
-                        ),
-                        ValueListenableBuilder<CalcState>(
-                          valueListenable: _calcState,
-                          builder: (_, state, _) => IconButton(
-                            tooltip: strings.undo,
-                            onPressed: state.canUndo ? Processor.undo : null,
-                            color: toolbarColor,
-                            disabledColor: toolbarColor.withValues(alpha: 0.35),
-                            icon: const Icon(Icons.undo),
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: strings.pasteNumber,
-                          onPressed: () => ClipboardHelper.paste(context),
-                          icon: Icon(
-                            Icons.content_paste_outlined,
-                            color: toolbarColor,
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: strings.history,
-                          onPressed: _showHistory,
-                          icon: Icon(Icons.history, color: toolbarColor),
-                        ),
-                      ],
+          child: showSidebar
+              ? Row(
+                  children: [
+                    Expanded(child: calculatorColumn),
+                    VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: model.panelBorderColor,
                     ),
-                  ),
-                  // Display fills all available space above keypad
-                  Expanded(
-                    child: ValueListenableBuilder<CalcState>(
-                      valueListenable: _calcState,
-                      builder: (_, state, _) => Display(
-                        current: state.current,
-                        history: state.history,
-                        isResult: state.isResult,
-                        leftOperand: state.leftOperand,
-                        rightOperand: state.rightOperand,
-                        binaryOperator: state.binaryOperator,
-                        rightOperandIsPercent: state.rightOperandIsPercent,
-                        onCorrectOperand: _correctOperand,
-                      ),
+                    const SizedBox(
+                      width: 340,
+                      child: HistorySheet(embedded: true),
                     ),
-                  ),
-                  const KeyPad(),
-                  SizedBox(height: screenHeight <= 740 ? 8 : 24),
-                  // Banner ad
-                  if (!Platform.isMacOS && allowsAds)
-                    SizedBox(
-                      height: 50,
-                      child: _isAdLoaded && _ad != null
-                          ? AdWidget(ad: _ad!)
-                          : const SizedBox.shrink(),
-                    )
-                  else if (Platform.isMacOS)
-                    const SizedBox(height: 20),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
-          ),
+                  ],
+                )
+              : calculatorColumn,
         ),
       ),
     );
@@ -371,18 +503,23 @@ class _CorrectOperandDialogState extends State<_CorrectOperandDialog> {
   @override
   Widget build(BuildContext context) {
     final strings = S.of(context);
+    final model = context.watch<ThemeModel>();
+    final ink = model.readableTextColor;
     final stale = _failure == OperandCorrection.stale;
     return AlertDialog(
       scrollable: true,
+      backgroundColor: model.backgroundColor,
       title: Text(
         widget.operand.position == OperandPosition.left
             ? strings.editFirstOperand
             : strings.editSecondOperand,
+        style: TextStyle(color: ink),
       ),
       content: TextField(
         controller: _input,
         autofocus: true,
         enabled: !stale,
+        style: TextStyle(color: ink),
         keyboardType: const TextInputType.numberWithOptions(
           signed: true,
           decimal: true,
@@ -394,21 +531,29 @@ class _CorrectOperandDialogState extends State<_CorrectOperandDialog> {
         onSubmitted: (_) => _save(),
         decoration: InputDecoration(
           labelText: strings.converterAmount,
+          labelStyle: TextStyle(color: ink),
           suffixText: widget.percent ? '%' : null,
+          suffixStyle: TextStyle(color: ink),
           errorText: switch (_failure) {
             OperandCorrection.invalid => strings.formulaInvalidInput,
             OperandCorrection.stale => strings.operandChanged,
             _ => null,
           },
+          errorStyle: TextStyle(color: ink),
           errorMaxLines: 3,
+          border: const OutlineInputBorder(),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(strings.cancel),
+          child: Text(strings.cancel, style: TextStyle(color: ink)),
         ),
         FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: ink,
+            foregroundColor: model.backgroundColor,
+          ),
           onPressed: stale ? null : _save,
           child: Text(strings.formulaSave),
         ),

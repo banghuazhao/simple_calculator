@@ -103,13 +103,26 @@ void main() {
       );
     });
 
+    test('supports implicit multiplication and extended math functions', () {
+      expect(ExpressionEngine.evaluate('2(3)'), 6);
+      expect(ExpressionEngine.evaluate('(2 + 1)(3 + 1)'), 12);
+      expect(ExpressionEngine.evaluate('2pi'), closeTo(2 * math.pi, 1e-12));
+      expect(ExpressionEngine.evaluate('2sin(30)'), closeTo(1, 1e-12));
+      expect(ExpressionEngine.evaluate('log2(8)'), closeTo(3, 1e-12));
+      expect(ExpressionEngine.evaluate('cbrt(-27)'), closeTo(-3, 1e-12));
+      expect(ExpressionEngine.evaluate('mod(17, 5)'), 2);
+      expect(ExpressionEngine.evaluate('floor(3.9) + ceil(2.1) + round(2.6)'), 9);
+      expect(ExpressionEngine.evaluate('cosh(0) + sinh(0) + tanh(0)'), 1);
+      expect(ExpressionEngine.toFraction(0.75), '3/4');
+      expect(ExpressionEngine.toFraction(1 / 3), '1/3');
+      expect(ExpressionEngine.toFraction(-1.25), '-5/4');
+    });
+
     test(
-      'rejects malformed, implicit, unbounded, and non-finite expressions',
+      'rejects malformed, unbounded, and non-finite expressions',
       () {
         for (final expression in [
           '',
-          '2(3)',
-          '2pi',
           '3 +',
           '(1 + 2',
           'sin 30',

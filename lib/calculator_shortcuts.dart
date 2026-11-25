@@ -12,12 +12,24 @@ class _CalculatorUndoIntent extends Intent {
   const _CalculatorUndoIntent();
 }
 
+class _CalculatorRedoIntent extends Intent {
+  const _CalculatorRedoIntent();
+}
+
 class _CalculatorPasteIntent extends Intent {
   const _CalculatorPasteIntent();
 }
 
 class _CalculatorCopyIntent extends Intent {
   const _CalculatorCopyIntent();
+}
+
+class _CalculatorHistoryIntent extends Intent {
+  const _CalculatorHistoryIntent();
+}
+
+class _CalculatorToolsIntent extends Intent {
+  const _CalculatorToolsIntent();
 }
 
 class _CalculatorAction<T extends Intent> extends Action<T> {
@@ -43,15 +55,21 @@ class CalculatorShortcuts extends StatefulWidget {
     required this.child,
     required this.onKey,
     required this.onUndo,
+    this.onRedo,
     this.onCopy,
     this.onPaste,
+    this.onHistory,
+    this.onTools,
   });
 
   final Widget child;
   final ValueChanged<KeySymbol> onKey;
   final VoidCallback onUndo;
+  final VoidCallback? onRedo;
   final VoidCallback? onCopy;
   final VoidCallback? onPaste;
+  final VoidCallback? onHistory;
+  final VoidCallback? onTools;
 
   @override
   State<CalculatorShortcuts> createState() => _CalculatorShortcutsState();
@@ -147,6 +165,26 @@ class CalculatorShortcuts extends StatefulWidget {
           includeRepeats: false,
         )] =
         const _CalculatorUndoIntent();
+    bindings[const SingleActivator(
+          LogicalKeyboardKey.keyZ,
+          control: true,
+          shift: true,
+          includeRepeats: false,
+        )] =
+        const _CalculatorRedoIntent();
+    bindings[const SingleActivator(
+          LogicalKeyboardKey.keyZ,
+          meta: true,
+          shift: true,
+          includeRepeats: false,
+        )] =
+        const _CalculatorRedoIntent();
+    bindings[const SingleActivator(
+          LogicalKeyboardKey.keyY,
+          control: true,
+          includeRepeats: false,
+        )] =
+        const _CalculatorRedoIntent();
     for (final control in [true, false]) {
       bindings[SingleActivator(
         LogicalKeyboardKey.keyC,
@@ -160,6 +198,18 @@ class CalculatorShortcuts extends StatefulWidget {
         meta: !control,
         includeRepeats: false,
       )] = const _CalculatorPasteIntent();
+      bindings[SingleActivator(
+        LogicalKeyboardKey.keyH,
+        control: control,
+        meta: !control,
+        includeRepeats: false,
+      )] = const _CalculatorHistoryIntent();
+      bindings[SingleActivator(
+        LogicalKeyboardKey.keyK,
+        control: control,
+        meta: !control,
+        includeRepeats: false,
+      )] = const _CalculatorToolsIntent();
     }
     return bindings;
   }
@@ -204,6 +254,13 @@ class _CalculatorShortcutsState extends State<CalculatorShortcuts> {
               widget.onUndo();
             },
           ),
+          _CalculatorRedoIntent: _CalculatorAction<_CalculatorRedoIntent>(
+            isAvailable: () => widget.onRedo != null && canHandle(),
+            callback: (_) {
+              _inputFocus.requestFocus();
+              widget.onRedo!();
+            },
+          ),
           _CalculatorCopyIntent: _CalculatorAction<_CalculatorCopyIntent>(
             isAvailable: () => widget.onCopy != null && canHandle(),
             callback: (_) => widget.onCopy!(),
@@ -214,6 +271,14 @@ class _CalculatorShortcutsState extends State<CalculatorShortcuts> {
               _inputFocus.requestFocus();
               widget.onPaste!();
             },
+          ),
+          _CalculatorHistoryIntent: _CalculatorAction<_CalculatorHistoryIntent>(
+            isAvailable: () => widget.onHistory != null && canHandle(),
+            callback: (_) => widget.onHistory!(),
+          ),
+          _CalculatorToolsIntent: _CalculatorAction<_CalculatorToolsIntent>(
+            isAvailable: () => widget.onTools != null && canHandle(),
+            callback: (_) => widget.onTools!(),
           ),
         },
         child: Focus(

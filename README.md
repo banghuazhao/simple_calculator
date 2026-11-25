@@ -45,15 +45,19 @@ A clean, themeable calculator app built with Flutter — available on iOS.
 ```
 lib/
 ├── main.dart               # App entry, MobileAds init, App Open ad wiring
-├── calculator.dart         # Main screen with banner ad
-├── display.dart            # Result display widget
-├── key-pad.dart            # Calculator keypad
-├── processor.dart          # Calculation logic
-├── more_page.dart          # Settings / themes / more apps (interstitial ad)
+├── calculator.dart         # Main screen with banner ad & tablet/desktop history sidebar
+├── display.dart            # Result display widget with live preview & swipe-to-backspace
+├── key_pad.dart            # Calculator keypad with active operator highlight
+├── processor.dart          # Calculation, undo/redo, memory, and history logic
+├── history_sheet.dart      # Searchable, grouped, pinnable history sheet & sidebar
+├── everyday_tools_page.dart # Tip splitter, unit price, discount/tax, margin & date tools
+├── unit_converter_page.dart # Offline unit converter across 8 categories
+├── more_page.dart          # Settings, named themes, system light/dark, and input preferences
+├── premium/                # Scientific, programmer base, graphing, formulas & custom theme
 └── util/
     ├── ads_manager.dart    # AdMob ID resolution + AppOpenAdManager
-    ├── ThemeModel.dart     # Theme state
-    ├── StorageManager.dart # Theme persistence
+    ├── theme_model.dart    # Theme state, contrast, system sync & custom palettes
+    ├── storage_manager.dart # Preferences persistence
     └── local_storage.dart  # SharedPreferences wrapper
 ```
 
@@ -88,4 +92,4 @@ flutter run
 
 Requires Flutter 3.x. To run the native desktop app, use `flutter run -d macos` on a Mac with Xcode. SwiftSum supports macOS 12 and later.
 
-The iOS and Mac App Store targets use `com.appsbay.simpleCalculator` and the same SwiftSum Premium product. Premium unlocks the scientific calculator and reusable formulas on Mac. Use **Restore Purchases** with the same Apple Account to access an existing purchase.
+The Mac App Store target uses `com.appsbay.simpleCalculatorMac` and its own SwiftSum Premium purchase. Premium unlocks the scientific calculator and reusable formulas on Mac. Use **Restore Purchases** with the Apple Account that purchased Premium for Mac.

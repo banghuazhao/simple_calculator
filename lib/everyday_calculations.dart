@@ -42,6 +42,9 @@ class EverydayNumber {
     final scaled = numerator * _hundred;
     return scaled % denominator == BigInt.zero ? scaled ~/ denominator : null;
   }
+
+  EverydayNumber multiplyWhole(BigInt factor) =>
+      EverydayNumber._(numerator * factor, denominator);
 }
 
 final _hundred = BigInt.from(100);
@@ -57,6 +60,17 @@ class BillSplit {
     total = bill + tip;
     baseShare = total ~/ people;
     extraPeople = total % people;
+
+    // Rounded up to the nearest whole currency unit (100 cents) per person.
+    final perPersonMin = extraPeople > BigInt.zero
+        ? baseShare + BigInt.one
+        : baseShare;
+    final rem = perPersonMin % _hundred;
+    roundedPerPerson = rem == BigInt.zero
+        ? perPersonMin
+        : perPersonMin + (_hundred - rem);
+    roundedTotal = roundedPerPerson * people;
+    roundedTip = roundedTotal - bill;
   }
 
   final BigInt people;
@@ -64,6 +78,9 @@ class BillSplit {
   late final BigInt total;
   late final BigInt baseShare;
   late final BigInt extraPeople;
+  late final BigInt roundedPerPerson;
+  late final BigInt roundedTotal;
+  late final BigInt roundedTip;
 }
 
 class UnitPrice implements Comparable<UnitPrice> {
@@ -77,10 +94,36 @@ class UnitPrice implements Comparable<UnitPrice> {
   final BigInt _numerator;
   final BigInt _denominator;
 
+  double get asDouble => _numerator.toDouble() / _denominator.toDouble();
+
   @override
   int compareTo(UnitPrice other) => (_numerator * other._denominator).compareTo(
     other._numerator * _denominator,
   );
+
+  /// Percentage saved by choosing `this` instead of a more expensive [other].
+  double? percentSavingsOver(UnitPrice other) {
+    if (other._numerator == BigInt.zero || compareTo(other) >= 0) return null;
+    final diffNum =
+        other._numerator * _denominator - _numerator * other._denominator;
+    final denom = other._numerator * _denominator;
+    if (denom == BigInt.zero) return null;
+    return (diffNum * BigInt.from(10000) ~/ denom).toDouble() / 100.0;
+  }
+
+  /// Formatted savings per base unit compared to a more expensive [other].
+  String? formattedSavingsOver(UnitPrice other) {
+    if (compareTo(other) >= 0) return null;
+    final diffNum =
+        other._numerator * _denominator - _numerator * other._denominator;
+    final diffDen = _denominator * other._denominator;
+    final scaled = BigInt.from(10000) * diffNum;
+    final tenThousandths = (scaled + diffDen ~/ BigInt.two) ~/ diffDen;
+    if (tenThousandths == BigInt.zero && diffNum > BigInt.zero) {
+      return '< 0.0001';
+    }
+    return _fixed(tenThousandths, 4).replaceFirst(RegExp(r'0{1,2}$'), '');
+  }
 
   String get formatted {
     final scaled = BigInt.from(10000) * _numerator;
@@ -91,6 +134,86 @@ class UnitPrice implements Comparable<UnitPrice> {
     }
     return _fixed(tenThousandths, 4).replaceFirst(RegExp(r'0{1,2}$'), '');
   }
+}
+
+class DiscountCalculation {
+  DiscountCalculation({
+    required this.originalPrice,
+    required this.discountPercent,
+    required this.extraDiscountPercent,
+    required this.taxPercent,
+  }) {
+    final afterFirst = originalPrice * (1 - discountPercent / 100);
+    discountedSubtotal = afterFirst * (1 - extraDiscountPercent / 100);
+    totalSavings = originalPrice - discountedSubtotal;
+    taxAmount = discountedSubtotal * (taxPercent / 100);
+    finalPrice = discountedSubtotal + taxAmount;
+  }
+
+  final double originalPrice;
+  final double discountPercent;
+  final double extraDiscountPercent;
+  final double taxPercent;
+  late final double discountedSubtotal;
+  late final double totalSavings;
+  late final double taxAmount;
+  late final double finalPrice;
+}
+
+class PercentChangeCalculation {
+  PercentChangeCalculation({required this.from, required this.to})
+    : difference = to - from,
+      percentChange = from == 0 ? null : ((to - from) / from.abs()) * 100;
+
+  final double from;
+  final double to;
+  final double difference;
+  final double? percentChange;
+}
+
+class MarginCalculation {
+  MarginCalculation({required this.cost, required this.sellingPrice})
+    : profit = sellingPrice - cost,
+      markupPercent = cost == 0 ? null : ((sellingPrice - cost) / cost) * 100,
+      marginPercent = sellingPrice == 0
+          ? null
+          : ((sellingPrice - cost) / sellingPrice) * 100;
+
+  final double cost;
+  final double sellingPrice;
+  final double profit;
+  final double? markupPercent;
+  final double? marginPercent;
+}
+
+class DateDifference {
+  DateDifference({required DateTime start, required DateTime end}) {
+    final a = DateTime(start.year, start.month, start.day);
+    final b = DateTime(end.year, end.month, end.day);
+    final earlier = a.isBefore(b) ? a : b;
+    final later = a.isBefore(b) ? b : a;
+    signedDays = b.difference(a).inDays;
+    totalDays = later.difference(earlier).inDays;
+    weeks = totalDays ~/ 7;
+    remainingDays = totalDays % 7;
+
+    // Count Monday–Friday weekdays in [earlier, later) in O(1) time.
+    final fullWeeks = totalDays ~/ 7;
+    var weekdays = fullWeeks * 5;
+    for (var i = 0; i < totalDays % 7; i++) {
+      final day = earlier.add(Duration(days: fullWeeks * 7 + i));
+      if (day.weekday >= DateTime.monday && day.weekday <= DateTime.friday) {
+        weekdays++;
+      }
+    }
+    businessDays = weekdays;
+  }
+
+  late final int signedDays;
+  late final int totalDays;
+  late final int weeks;
+  late final int remainingDays;
+  late final int businessDays;
 }
 
 String formatCents(BigInt cents) => _fixed(cents, 2);

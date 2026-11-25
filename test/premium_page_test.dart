@@ -33,7 +33,7 @@ class _FakeStore implements PremiumStore {
 }
 
 void main() {
-  testWidgets('Mac restores the shared Premium purchase and stays ad-free', (
+  testWidgets('Mac restores its Premium purchase and stays ad-free', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});

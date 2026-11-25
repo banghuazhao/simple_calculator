@@ -20,6 +20,30 @@ import 'generated/l10n.dart';
 
 import 'package:desktop_window/desktop_window.dart';
 
+const _kMacWindowWidthKey = 'macos_window_width';
+const _kMacWindowHeightKey = 'macos_window_height';
+
+Size _savedMacWindowSize() {
+  try {
+    final prefs = StorageManager.sharedPreferences;
+    final width = prefs?.getDouble(_kMacWindowWidthKey);
+    final height = prefs?.getDouble(_kMacWindowHeightKey);
+    if (width != null &&
+        height != null &&
+        width.isFinite &&
+        height.isFinite &&
+        width >= 320 &&
+        width <= 2400 &&
+        height >= 540 &&
+        height <= 1800) {
+      return Size(width, height);
+    }
+  } catch (error) {
+    debugPrint('Saved macOS window size unavailable: $error');
+  }
+  return const Size(350, 700);
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageManager.init();
@@ -27,6 +51,7 @@ Future<void> main() async {
   InputSettings.instance.load();
   Processor.restoreHistory();
   Processor.restoreDraft();
+  Processor.restoreMemory();
   final premium = PremiumController();
   unawaited(premium.initialize());
   runApp(CalculatorApp(premiumController: premium));
@@ -39,8 +64,10 @@ Future<void> main() async {
           [DeviceOrientation.portraitUp]);
     }));
     if (Platform.isMacOS) {
-      unawaited(_runOptionalService('desktop window',
-          () => DesktopWindow.setWindowSize(const Size(350, 700))));
+      unawaited(_runOptionalService('desktop window', () async {
+        await DesktopWindow.setMinWindowSize(const Size(320, 540));
+        await DesktopWindow.setWindowSize(_savedMacWindowSize());
+      }));
     }
     if (Platform.isAndroid || Platform.isIOS) {
       unawaited(_runOptionalService(
@@ -82,28 +109,77 @@ Future<void> _initializeAds(PremiumController premium) async {
   }
 }
 
-class CalculatorApp extends StatelessWidget {
+class CalculatorApp extends StatefulWidget {
   const CalculatorApp({super.key, this.premiumController});
 
   final PremiumController? premiumController;
 
   @override
+  State<CalculatorApp> createState() => _CalculatorAppState();
+}
+
+class _CalculatorAppState extends State<CalculatorApp>
+    with WidgetsBindingObserver {
+  Timer? _windowSaveTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isMacOS) {
+      WidgetsBinding.instance.addObserver(this);
+    }
+  }
+
+  @override
+  void dispose() {
+    _windowSaveTimer?.cancel();
+    if (Platform.isMacOS) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (!Platform.isMacOS) return;
+    _windowSaveTimer?.cancel();
+    _windowSaveTimer = Timer(const Duration(milliseconds: 400), () async {
+      try {
+        final size = await DesktopWindow.getWindowSize();
+        final prefs = StorageManager.sharedPreferences;
+        if (prefs != null && size.width >= 320 && size.height >= 540) {
+          await prefs.setDouble(_kMacWindowWidthKey, size.width);
+          await prefs.setDouble(_kMacWindowHeightKey, size.height);
+        }
+      } catch (error) {
+        debugPrint('Could not persist macOS window size: $error');
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider<ThemeModel>(
-            create: (context) => ThemeModel(),
-          ),
-          if (premiumController case final controller?)
-            ChangeNotifierProvider<PremiumController>.value(value: controller)
-          else
-            ChangeNotifierProvider<PremiumController>(create: (_) {
-              final controller = PremiumController();
-              unawaited(controller.initialize());
-              return controller;
-            }),
-        ],
-        child: Consumer<ThemeModel>(builder: (context, themeModel, child) {
+      providers: [
+        ChangeNotifierProvider<ThemeModel>(
+          create: (context) => ThemeModel(),
+        ),
+        if (widget.premiumController case final controller?)
+          ChangeNotifierProvider<PremiumController>.value(value: controller)
+        else
+          ChangeNotifierProvider<PremiumController>(create: (_) {
+            final controller = PremiumController();
+            unawaited(controller.initialize());
+            return controller;
+          }),
+      ],
+      child: Consumer<ThemeModel>(
+        builder: (context, themeModel, child) {
+          final platformBrightness =
+              WidgetsBinding.instance.platformDispatcher.platformBrightness;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            themeModel.updatePlatformBrightness(platformBrightness);
+          });
           return MaterialApp(
             theme: themeModel.accessibilityTheme,
             debugShowCheckedModeBanner: false,
@@ -115,7 +191,6 @@ class CalculatorApp extends StatelessWidget {
             ],
             supportedLocales: S.delegate.supportedLocales,
             localeResolutionCallback: (locale, supportLocales) {
-              // print(locale);
               // 中文 简繁体处理
               if (locale?.languageCode == 'zh') {
                 final traditional = locale?.scriptCode == 'Hant' ||
@@ -129,8 +204,20 @@ class CalculatorApp extends StatelessWidget {
               }
               return const Locale('en', '');
             },
+            builder: (context, appChild) {
+              final resolved = themeModel.resolvedTheme(Theme.of(context));
+              return Theme(
+                data: resolved,
+                child: AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: themeModel.systemOverlayStyle,
+                  child: appChild ?? const SizedBox.shrink(),
+                ),
+              );
+            },
             home: const Calculator(),
           );
-        }));
+        },
+      ),
+    );
   }
 }

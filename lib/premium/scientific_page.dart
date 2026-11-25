@@ -5,11 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/premium/expression_engine.dart';
+import 'package:simple_calculator/premium/programmer_page.dart';
 import 'package:simple_calculator/premium/scientific_graph_page.dart';
 import 'package:simple_calculator/premium/scientific_history.dart';
 import 'package:simple_calculator/premium/scientific_history_page.dart';
 import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/clipboard_helper.dart';
+import 'package:simple_calculator/util/input_feedback.dart';
 import 'package:simple_calculator/util/storage_manager.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
@@ -26,7 +28,7 @@ class ScientificPage extends StatefulWidget {
 }
 
 class _ScientificPageState extends State<ScientificPage> {
-  static const _functions = [
+  static const _basicFunctions = [
     'sin',
     'cos',
     'tan',
@@ -39,6 +41,17 @@ class _ScientificPageState extends State<ScientificPage> {
     'abs',
     'nCr',
     'nPr',
+  ];
+  static const _extraFunctions = [
+    'sinh',
+    'cosh',
+    'tanh',
+    'cbrt',
+    'log2',
+    'mod',
+    'floor',
+    'ceil',
+    'round',
   ];
   static const _keys = [
     '(',
@@ -75,6 +88,8 @@ class _ScientificPageState extends State<ScientificPage> {
   final _history = ScientificHistory.instance;
   late bool _degrees;
   bool _engineering = false;
+  bool _fraction = false;
+  bool _secondFunctions = false;
   bool _showKeyboard = false;
   FormatException? _error;
   double? _result;
@@ -107,6 +122,26 @@ class _ScientificPageState extends State<ScientificPage> {
     _expression.dispose();
     _expressionFocus.dispose();
     super.dispose();
+  }
+
+  double? _evaluatePreview() {
+    final source = _expression.text.trim();
+    if (source.isEmpty || _result != null) return null;
+    final answer = _inputAnswer;
+    try {
+      final compiled = ExpressionEngine.compile(source);
+      final value = compiled.evaluate(
+        degrees: _degrees,
+        variables: {
+          if (answer != null)
+            for (final name in compiled.variables)
+              if (name.toLowerCase() == 'ans') name: answer,
+        },
+      );
+      return value.isFinite ? value : null;
+    } on FormatException {
+      return null;
+    }
   }
 
   void _calculate() {
@@ -169,7 +204,6 @@ class _ScientificPageState extends State<ScientificPage> {
   }
 
   void _clearResult() {
-    if (_result == null && _error == null) return;
     setState(() {
       _result = null;
       _error = null;
@@ -218,7 +252,7 @@ class _ScientificPageState extends State<ScientificPage> {
       start -= text.substring(0, start).characters.last.length;
     }
     final selected = text.substring(start, end);
-    final twoArguments = token == 'nCr' || token == 'nPr';
+    final twoArguments = token == 'nCr' || token == 'nPr' || token == 'mod';
     final hasSelectedArgument = twoArguments && selected.isNotEmpty;
     final replacement = function
         ? '$token($selected${hasSelectedArgument ? ',' : ''})'
@@ -239,6 +273,7 @@ class _ScientificPageState extends State<ScientificPage> {
   }
 
   void _pressKey(String key) {
+    unawaited(InputFeedback.keyClick());
     switch (key) {
       case '=':
         _calculate();
@@ -288,6 +323,14 @@ class _ScientificPageState extends State<ScientificPage> {
     );
   }
 
+  void _openProgrammer() {
+    if (widget.canUse?.call() == false) return;
+    const page = ProgrammerPage();
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => widget.guard?.call(page) ?? page),
+    );
+  }
+
   void _useResult(double result) {
     if (widget.canUse?.call() == false) return;
     Processor.useResult(result);
@@ -295,6 +338,10 @@ class _ScientificPageState extends State<ScientificPage> {
   }
 
   String _formatResult(double value) {
+    if (_fraction) {
+      final frac = ExpressionEngine.toFraction(value);
+      if (frac != null) return frac;
+    }
     if (!_engineering || value == 0) return Processor.formatResult(value);
     final parts = value.toStringAsExponential(14).split('e');
     final exponent = int.parse(parts[1]);
@@ -342,6 +389,9 @@ class _ScientificPageState extends State<ScientificPage> {
     final error = _errorText(strings);
     final result = _result;
     final displayedResult = result == null ? null : _formatResult(result);
+    final livePreview = result == null && error == null
+        ? _evaluatePreview()
+        : null;
     final textStyle = TextStyle(color: ink);
 
     ChoiceChip angleChip(String label, bool degrees) => ChoiceChip(
@@ -375,7 +425,11 @@ class _ScientificPageState extends State<ScientificPage> {
           decoration: InputDecoration(
             labelText: strings.scientificExpression,
             labelStyle: textStyle,
-            helperText: error == null ? strings.scientificExpressionHelp : null,
+            helperText: error == null
+                ? (livePreview != null
+                      ? '= ${_formatResult(livePreview)}'
+                      : strings.scientificExpressionHelp)
+                : null,
             helperStyle: textStyle,
             helperMaxLines: 3,
             errorText: error,
@@ -396,6 +450,7 @@ class _ScientificPageState extends State<ScientificPage> {
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
+          runSpacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             angleChip(strings.scientificDegrees, true),
@@ -405,8 +460,22 @@ class _ScientificPageState extends State<ScientificPage> {
               child: FilterChip(
                 label: const Text('ENG'),
                 selected: _engineering,
-                onSelected: (selected) =>
-                    setState(() => _engineering = selected),
+                onSelected: (selected) => setState(() {
+                  _engineering = selected;
+                  if (selected) _fraction = false;
+                }),
+              ),
+            ),
+            Tooltip(
+              message: strings.scientificFraction,
+              child: FilterChip(
+                key: const ValueKey('scientific-fraction-chip'),
+                label: const Text('a/b'),
+                selected: _fraction,
+                onSelected: (selected) => setState(() {
+                  _fraction = selected;
+                  if (selected) _engineering = false;
+                }),
               ),
             ),
           ],
@@ -556,14 +625,29 @@ class _ScientificPageState extends State<ScientificPage> {
               spacing: 8,
               runSpacing: 4,
               children: [
-                for (final name in _functions)
+                FilterChip(
+                  key: const ValueKey('scientific-2nd-chip'),
+                  label: const Text('2nd'),
+                  selected: _secondFunctions,
+                  onSelected: (selected) =>
+                      setState(() => _secondFunctions = selected),
+                ),
+                for (final name in _secondFunctions
+                    ? _extraFunctions
+                    : _basicFunctions)
                   ActionChip(
                     label: Text(name),
-                    onPressed: () => _insert(name, function: true),
+                    onPressed: () {
+                      unawaited(InputFeedback.keyClick());
+                      _insert(name, function: true);
+                    },
                   ),
                 ActionChip(
                   label: const Text('e'),
-                  onPressed: () => _insert('e'),
+                  onPressed: () {
+                    unawaited(InputFeedback.keyClick());
+                    _insert('e');
+                  },
                 ),
               ],
             ),
@@ -614,6 +698,11 @@ class _ScientificPageState extends State<ScientificPage> {
                 ),
                 onPressed: _toggleKeyboard,
               ),
+            IconButton(
+              tooltip: strings.programmerMode,
+              onPressed: _openProgrammer,
+              icon: const Icon(Icons.memory),
+            ),
             IconButton(
               tooltip: strings.scientificHistory,
               onPressed: _openHistory,

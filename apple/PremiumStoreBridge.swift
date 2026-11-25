@@ -9,7 +9,11 @@ import StoreKit
 @available(macOS 12.0, *)
 @MainActor
 final class PremiumStoreBridge: NSObject, @preconcurrency FlutterStreamHandler {
+  #if os(macOS)
+  private static let productID = "com.appsbay.simpleCalculatorMac.premium"
+  #else
   private static let productID = "com.appsbay.simpleCalculator.premium"
+  #endif
 
   private var updatesTask: Task<Void, Never>?
   private var eventSink: FlutterEventSink?

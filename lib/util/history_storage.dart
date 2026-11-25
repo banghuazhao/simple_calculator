@@ -17,6 +17,7 @@ class StoredCalculation {
     this.rawExpression,
     this.isPinned = false,
     this.name,
+    this.timestampMs,
   });
 
   final int id;
@@ -26,6 +27,7 @@ class StoredCalculation {
   final String? rawExpression;
   final bool isPinned;
   final String? name;
+  final int? timestampMs;
 
   Map<String, Object> toJson() => {
     'id': id,
@@ -35,6 +37,7 @@ class StoredCalculation {
     'rawExpression': ?rawExpression,
     if (isPinned) 'pinned': true,
     'name': ?name,
+    'timestampMs': ?timestampMs,
   };
 }
 
@@ -133,6 +136,9 @@ class HistoryStorage {
     }
     seen.add(id);
     final name = savedName is String ? normalizeName(savedName) : '';
+    final savedTimestamp = legacy ? null : value['timestampMs'];
+    final timestampMs =
+        savedTimestamp is int && savedTimestamp > 0 ? savedTimestamp : null;
     return StoredCalculation(
       id: id,
       equation: equation,
@@ -141,6 +147,7 @@ class HistoryStorage {
       rawExpression: rawExpression as String?,
       isPinned: !legacy && value['pinned'] == true,
       name: name.isNotEmpty && name.length <= maxNameLength ? name : null,
+      timestampMs: timestampMs,
     );
   }
 

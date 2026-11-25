@@ -1,0 +1,4 @@
+- Resume unfinished calculations and tap a number to correct it.
+- Pin and name history entries, and copy them into a spreadsheet.
+- Everyday tools adds bill splitting, unit price comparison, and offline unit conversion.
+- SwiftSum Premium adds graphing, root finding, and more scientific functions.

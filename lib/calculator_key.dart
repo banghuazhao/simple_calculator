@@ -7,6 +7,7 @@ import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/key_controller.dart' as keycontroller;
 import 'package:simple_calculator/key_symbol.dart';
 import 'package:simple_calculator/util/input_feedback.dart';
+import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
 abstract class Keys {
@@ -34,8 +35,14 @@ abstract class Keys {
 }
 
 class CalculatorKey extends StatefulWidget {
-  const CalculatorKey({super.key, required this.symbol});
+  const CalculatorKey({
+    super.key,
+    required this.symbol,
+    this.isActive = false,
+  });
+
   final KeySymbol symbol;
+  final bool isActive;
 
   @override
   State<CalculatorKey> createState() => _CalculatorKeyState();
@@ -53,32 +60,70 @@ class _CalculatorKeyState extends State<CalculatorKey>
     end: 0.96,
   ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
+  Timer? _holdDelay;
+  Timer? _repeatTimer;
+  bool _repeated = false;
+
   @override
   void dispose() {
+    _cancelRepeat();
     _controller.dispose();
     super.dispose();
   }
 
+  void _cancelRepeat() {
+    _holdDelay?.cancel();
+    _holdDelay = null;
+    _repeatTimer?.cancel();
+    _repeatTimer = null;
+  }
+
   void _onTapDown(TapDownDetails _) {
-    unawaited(InputFeedback.lightImpact());
+    _repeated = false;
+    unawaited(InputFeedback.keyClick());
     if (!MediaQuery.disableAnimationsOf(context)) _controller.forward();
+    if (widget.symbol == Keys.back) {
+      _cancelRepeat();
+      _holdDelay = Timer(const Duration(milliseconds: 380), () {
+        if (!mounted) return;
+        _repeated = true;
+        _fireKey();
+        _repeatTimer = Timer.periodic(const Duration(milliseconds: 75), (_) {
+          if (!mounted) {
+            _cancelRepeat();
+            return;
+          }
+          unawaited(InputFeedback.lightImpact());
+          _fireKey();
+        });
+      });
+    }
   }
 
   void _onTapUp(TapUpDetails _) {
-    _activate();
+    _cancelRepeat();
+    _controller.reverse();
+    if (!_repeated) {
+      _fireKey();
+    }
+    _repeated = false;
   }
 
-  void _activate() {
-    _controller.reverse();
+  void _fireKey() {
     keycontroller.KeyController.fire(keycontroller.KeyEvent(widget));
   }
 
   void _onSemanticTap() {
-    unawaited(InputFeedback.lightImpact());
-    _activate();
+    unawaited(InputFeedback.keyClick());
+    _controller.reverse();
+    _fireKey();
   }
 
-  void _onTapCancel() => _controller.reverse();
+  void _onTapCancel() {
+    _cancelRepeat();
+    _repeated = false;
+    _controller.reverse();
+  }
 
   String _accessibilityLabel(S strings) {
     switch (widget.symbol) {
@@ -122,66 +167,90 @@ class _CalculatorKeyState extends State<CalculatorKey>
     final heightBased = max(0.0, (availableHeight * 0.60 - 40) / 5);
     size = min(size, heightBased);
 
-    final Color color;
+    final Color baseColor;
     switch (widget.symbol.type) {
       case KeyType.function:
-        color = model.buttonColor3;
+        baseColor = model.buttonColor3;
         break;
       case KeyType.operator:
-        color = model.buttonColor2;
+        baseColor = model.buttonColor2;
         break;
       case KeyType.integer:
-        color = model.buttonColor1;
+        baseColor = model.buttonColor1;
     }
 
-    final foreground = ThemeModel.readableOn(color, model.textColor2);
+    final isActive = widget.isActive && widget.symbol.type == KeyType.operator;
+    final baseForeground = ThemeModel.readableOn(baseColor, model.textColor2);
+    final Color color = isActive ? baseForeground : baseColor;
+    final Color foreground = isActive
+        ? ThemeModel.readableOn(color, baseColor)
+        : baseForeground;
+
     final isEquals = widget.symbol == Keys.equals;
     final style =
         Theme.of(context).textTheme.headlineSmall?.copyWith(
           color: foreground,
-          fontWeight: isEquals ? FontWeight.w700 : FontWeight.w500,
+          fontWeight: isEquals || isActive ? FontWeight.w700 : FontWeight.w500,
         ) ??
         const TextStyle();
-    final keyFace = Padding(
-      padding: const EdgeInsets.all(4),
-      child: SizedBox(
-        width: max(0.0, size - 8),
-        height: max(0.0, size - 8),
-        child: Container(
-          decoration: BoxDecoration(
-            color: color,
-            border: model.highContrastEnabled
-                ? Border.all(color: Colors.white, width: 1.5)
-                : isEquals
-                ? Border.all(color: foreground.withValues(alpha: 0.5), width: 2)
-                : null,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(widget.symbol.value, style: style),
+
+    return ListenableBuilder(
+      listenable: InputSettings.instance,
+      builder: (context, _) {
+        final displayLabel = widget.symbol == Keys.decimal
+            ? InputSettings.instance.decimalSeparator
+            : widget.symbol.value;
+        final keyFace = Padding(
+          padding: const EdgeInsets.all(4),
+          child: SizedBox(
+            width: max(0.0, size - 8),
+            height: max(0.0, size - 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                border: model.highContrastEnabled
+                    ? Border.all(
+                        color: isActive ? Colors.yellowAccent : Colors.white,
+                        width: isActive ? 2.5 : 1.5,
+                      )
+                    : isActive
+                    ? Border.all(color: baseColor, width: 2.5)
+                    : isEquals
+                    ? Border.all(
+                        color: foreground.withValues(alpha: 0.5),
+                        width: 2,
+                      )
+                    : null,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(displayLabel, style: style),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        );
 
-    return Semantics(
-      label: _accessibilityLabel(S.of(context)),
-      button: true,
-      onTap: _onSemanticTap,
-      excludeSemantics: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        excludeFromSemantics: true,
-        onTapDown: _onTapDown,
-        onTapUp: _onTapUp,
-        onTapCancel: _onTapCancel,
-        child: reduceMotion
-            ? keyFace
-            : ScaleTransition(scale: _scale, child: keyFace),
-      ),
+        return Semantics(
+          label: _accessibilityLabel(S.of(context)),
+          button: true,
+          selected: isActive ? true : null,
+          onTap: _onSemanticTap,
+          excludeSemantics: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            excludeFromSemantics: true,
+            onTapDown: _onTapDown,
+            onTapUp: _onTapUp,
+            onTapCancel: _onTapCancel,
+            child: reduceMotion
+                ? keyFace
+                : ScaleTransition(scale: _scale, child: keyFace),
+          ),
+        );
+      },
     );
   }
 }

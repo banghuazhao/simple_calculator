@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/help_page.dart';
+import 'package:simple_calculator/premium/custom_theme_page.dart';
 import 'package:simple_calculator/premium/premium_controller.dart';
 import 'package:simple_calculator/premium/premium_page.dart';
 import 'package:simple_calculator/util/theme_model.dart';
@@ -24,6 +25,7 @@ class MorePage extends StatefulWidget {
 }
 
 class _MorePageState extends State<MorePage> {
+  final ScrollController _themeScrollController = ScrollController();
   InterstitialAd? _interstitialAd;
   int _interstitialLoadAttempts = 0;
   bool _interstitialLoading = false;
@@ -119,19 +121,65 @@ class _MorePageState extends State<MorePage> {
     _premium = context.read<PremiumController?>();
     _premium?.addListener(_syncInterstitial);
     _syncInterstitial();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_themeScrollController.hasClients) return;
+      final index = context.read<ThemeModel>().activeThemeIndex;
+      if (index <= 0) return;
+      final target = (index * 90.0).clamp(
+        0.0,
+        _themeScrollController.position.maxScrollExtent,
+      );
+      _themeScrollController.jumpTo(target);
+    });
   }
 
   @override
   void dispose() {
+    _themeScrollController.dispose();
     _premium?.removeListener(_syncInterstitial);
     unawaited(AdsManager.disposeAd(_interstitialAd));
     super.dispose();
+  }
+
+  Widget _themeIndexPicker({
+    required String label,
+    required int value,
+    required ValueChanged<int> onChanged,
+    required ThemeModel model,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(label),
+      trailing: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: value,
+          dropdownColor: model.backgroundColor,
+          style: TextStyle(color: model.panelTextColor, fontSize: 14),
+          onChanged: (selected) {
+            if (selected != null) {
+              onChanged(selected);
+              _themeChanged = true;
+            }
+          },
+          items: [
+            for (var i = 0; i < ThemeModel.themeCount; i++)
+              DropdownMenuItem(
+                value: i,
+                child: Text(ThemeModel.themeName(i)),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final premiumSupported = context.select<PremiumController?, bool>(
       (premium) => premium?.isSupported ?? false,
+    );
+    final isPremium = context.select<PremiumController?, bool>(
+      (premium) => premium?.isPremium ?? false,
     );
     final showMoreApps = !Platform.isMacOS &&
         context.select<PremiumController?, bool>(
@@ -351,6 +399,7 @@ class _MorePageState extends State<MorePage> {
     }
     final model = context.watch<ThemeModel>();
     final strings = S.of(context);
+    final canUseCustomTheme = isPremium || !premiumSupported;
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) {
@@ -379,83 +428,169 @@ class _MorePageState extends State<MorePage> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 680),
-              child: ListView(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
-                  _SettingsGroup(
-                    child: Column(
-                      children: [
-                        if (premiumSupported) ...[
-                          ListTile(
-                            leading: const Icon(
-                              Icons.workspace_premium_outlined,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _SettingsGroup(
+                      child: Column(
+                        children: [
+                          if (premiumSupported) ...[
+                            ListTile(
+                              leading: const Icon(
+                                Icons.workspace_premium_outlined,
+                              ),
+                              title: Text(strings.premium),
+                              trailing: const Icon(Icons.chevron_right_rounded),
+                              onTap: () => Navigator.push<void>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const PremiumPage(),
+                                ),
+                              ),
                             ),
-                            title: Text(strings.premium),
+                            Divider(
+                              height: 1,
+                              indent: 16,
+                              endIndent: 16,
+                              color: model.panelBorderColor,
+                            ),
+                          ],
+                          ListTile(
+                            leading: const Icon(Icons.help_outline),
+                            title: Text(strings.helpAndShortcuts),
                             trailing: const Icon(Icons.chevron_right_rounded),
                             onTap: () => Navigator.push<void>(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const PremiumPage(),
+                                builder: (_) => const HelpPage(),
                               ),
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsHeading(strings.theme),
+                    _SettingsGroup(
+                      child: Column(
+                        children: [
+                          const HighContrastSetting(),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            height: 204,
+                            child: ListView.separated(
+                              controller: _themeScrollController,
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              itemCount: ThemeModel.themeCount,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 8),
+                              itemBuilder: (context, index) => _ThemePreview(
+                                number: index + 1,
+                                name: ThemeModel.themeName(index),
+                                selected:
+                                    !model.useCustomTheme &&
+                                    index == model.activeThemeIndex,
+                                onTap: () {
+                                  if (!model.useCustomTheme &&
+                                      !model.followSystemTheme &&
+                                      index == model.themeColor) {
+                                    return;
+                                  }
+                                  model.switchTheme(index);
+                                  _themeChanged = true;
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           Divider(
                             height: 1,
                             indent: 16,
                             endIndent: 16,
                             color: model.panelBorderColor,
                           ),
-                        ],
-                        ListTile(
-                          leading: const Icon(Icons.help_outline),
-                          title: Text(strings.helpAndShortcuts),
-                          trailing: const Icon(Icons.chevron_right_rounded),
-                          onTap: () => Navigator.push<void>(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HelpPage()),
+                          SwitchListTile.adaptive(
+                            key: const ValueKey('follow-system-theme-setting'),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            title: Text(strings.followSystemTheme),
+                            subtitle: Text(
+                              strings.followSystemThemeDescription,
+                            ),
+                            value: model.followSystemTheme,
+                            onChanged: (enabled) {
+                              model.setFollowSystemTheme(enabled);
+                              _themeChanged = true;
+                            },
+                            activeThumbColor: model.highContrastEnabled
+                                ? Colors.black
+                                : null,
+                            activeTrackColor: model.highContrastEnabled
+                                ? Colors.white
+                                : null,
+                            inactiveThumbColor: model.highContrastEnabled
+                                ? Colors.white
+                                : null,
+                            inactiveTrackColor: model.highContrastEnabled
+                                ? const Color(0xff444444)
+                                : null,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const InputSettingsSection(),
-                  const SizedBox(height: 16),
-                  _SettingsHeading(strings.theme),
-                  _SettingsGroup(
-                    child: Column(
-                      children: [
-                        const HighContrastSetting(),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 176,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            itemCount: 18,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(width: 8),
-                            itemBuilder: (context, index) => _ThemePreview(
-                              number: index + 1,
-                              selected: index == model.themeColor,
-                              onTap: () {
-                                if (index == model.themeColor) return;
-                                model.switchTheme(index);
-                                _themeChanged = true;
-                              },
+                          if (model.followSystemTheme) ...[
+                            _themeIndexPicker(
+                              label: strings.lightTheme,
+                              value: model.lightThemeIndex,
+                              onChanged: model.setLightThemeIndex,
+                              model: model,
+                            ),
+                            _themeIndexPicker(
+                              label: strings.darkTheme,
+                              value: model.darkThemeIndex,
+                              onChanged: model.setDarkThemeIndex,
+                              model: model,
+                            ),
+                          ],
+                          Divider(
+                            height: 1,
+                            indent: 16,
+                            endIndent: 16,
+                            color: model.panelBorderColor,
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.palette_outlined),
+                            title: Text(strings.customTheme),
+                            subtitle: Text(strings.customThemeDescription),
+                            trailing: Icon(
+                              canUseCustomTheme
+                                  ? Icons.chevron_right_rounded
+                                  : Icons.workspace_premium_outlined,
+                            ),
+                            onTap: () => Navigator.push<void>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => canUseCustomTheme
+                                    ? const CustomThemePage()
+                                    : const PremiumPage(),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  if (showMoreApps) ...[
-                    const SizedBox(height: 24),
-                    _SettingsHeading(strings.MoreApps),
-                    for (final item in items) MoreAppsRow.factory(item),
+                    const SizedBox(height: 16),
+                    const InputSettingsSection(),
+                    if (showMoreApps) ...[
+                      const SizedBox(height: 24),
+                      _SettingsHeading(strings.MoreApps),
+                      for (final item in items) MoreAppsRow.factory(item),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -516,11 +651,13 @@ class _SettingsGroup extends StatelessWidget {
 class _ThemePreview extends StatelessWidget {
   const _ThemePreview({
     required this.number,
+    required this.name,
     required this.selected,
     required this.onTap,
   });
 
   final int number;
+  final String name;
   final bool selected;
   final VoidCallback onTap;
 
@@ -532,54 +669,76 @@ class _ThemePreview extends StatelessWidget {
 
     return Semantics(
       label: '${S.of(context).theme} $number',
+      hint: name,
       selected: selected,
       button: true,
       onTap: onTap,
       excludeSemantics: true,
-      child: Material(
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: Ink(
-          width: 82,
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            border: Border.all(
-              color: selected ? selectionColor : model.panelBorderColor,
-              width: selected ? 2 : 1,
-            ),
-            image: DecorationImage(
-              image: AssetImage('assets/theme/theme$number.png'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: InkWell(
-            onTap: onTap,
-            child: selected
-                ? Align(
-                    alignment: AlignmentDirectional.topEnd,
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: selectionColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.check_rounded,
-                            size: 16,
-                            color: ThemeModel.readableOn(
-                              selectionColor,
-                              model.panelColor,
-                            ),
-                          ),
-                        ),
-                      ),
+      child: SizedBox(
+        width: 82,
+        child: Column(
+          children: [
+            Expanded(
+              child: Material(
+                borderRadius: radius,
+                clipBehavior: Clip.antiAlias,
+                child: Ink(
+                  width: 82,
+                  decoration: BoxDecoration(
+                    borderRadius: radius,
+                    border: Border.all(
+                      color: selected ? selectionColor : model.panelBorderColor,
+                      width: selected ? 2 : 1,
                     ),
-                  )
-                : null,
-          ),
+                    image: DecorationImage(
+                      image: AssetImage('assets/theme/theme$number.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: InkWell(
+                    onTap: onTap,
+                    child: selected
+                        ? Align(
+                            alignment: AlignmentDirectional.topEnd,
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: selectionColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Icon(
+                                    Icons.check_rounded,
+                                    size: 16,
+                                    color: ThemeModel.readableOn(
+                                      selectionColor,
+                                      model.panelColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: model.panelTextColor,
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -618,6 +777,35 @@ class InputSettingsSection extends StatelessWidget {
     final model = Provider.of<ThemeModel>(context);
     final strings = S.of(context);
     final settings = InputSettings.instance;
+
+    Widget switchRow({
+      required Key key,
+      required String title,
+      required String subtitle,
+      required bool value,
+      required ValueChanged<bool> onChanged,
+    }) => SwitchListTile.adaptive(
+      key: key,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      value: value,
+      onChanged: onChanged,
+      activeThumbColor: model.highContrastEnabled ? Colors.black : null,
+      activeTrackColor: model.highContrastEnabled ? Colors.white : null,
+      inactiveThumbColor: model.highContrastEnabled ? Colors.white : null,
+      inactiveTrackColor: model.highContrastEnabled
+          ? const Color(0xff444444)
+          : null,
+    );
+
+    Widget divider() => Divider(
+      height: 1,
+      indent: 16,
+      endIndent: 16,
+      color: model.panelBorderColor,
+    );
+
     return AnimatedBuilder(
       animation: settings,
       builder: (context, _) => Column(
@@ -627,51 +815,60 @@ class InputSettingsSection extends StatelessWidget {
           _SettingsGroup(
             child: Column(
               children: [
-                SwitchListTile.adaptive(
+                switchRow(
                   key: const ValueKey('haptics-setting'),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  title: Text(strings.hapticFeedback),
-                  subtitle: Text(strings.hapticFeedbackDescription),
+                  title: strings.hapticFeedback,
+                  subtitle: strings.hapticFeedbackDescription,
                   value: settings.hapticsEnabled,
                   onChanged: settings.setHapticsEnabled,
-                  activeThumbColor: model.highContrastEnabled
-                      ? Colors.black
-                      : null,
-                  activeTrackColor: model.highContrastEnabled
-                      ? Colors.white
-                      : null,
-                  inactiveThumbColor: model.highContrastEnabled
-                      ? Colors.white
-                      : null,
-                  inactiveTrackColor: model.highContrastEnabled
-                      ? const Color(0xff444444)
-                      : null,
                 ),
-                Divider(
-                  height: 1,
-                  indent: 16,
-                  endIndent: 16,
-                  color: model.panelBorderColor,
+                divider(),
+                switchRow(
+                  key: const ValueKey('sound-effects-setting'),
+                  title: strings.soundEffects,
+                  subtitle: strings.soundEffectsDescription,
+                  value: settings.soundEffectsEnabled,
+                  onChanged: settings.setSoundEffectsEnabled,
                 ),
-                SwitchListTile.adaptive(
+                divider(),
+                switchRow(
                   key: const ValueKey('shake-setting'),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  title: Text(strings.shakeToUndo),
-                  subtitle: Text(strings.shakeToUndoDescription),
+                  title: strings.shakeToUndo,
+                  subtitle: strings.shakeToUndoDescription,
                   value: settings.shakeToUndoEnabled,
                   onChanged: settings.setShakeToUndoEnabled,
-                  activeThumbColor: model.highContrastEnabled
-                      ? Colors.black
-                      : null,
-                  activeTrackColor: model.highContrastEnabled
-                      ? Colors.white
-                      : null,
-                  inactiveThumbColor: model.highContrastEnabled
-                      ? Colors.white
-                      : null,
-                  inactiveTrackColor: model.highContrastEnabled
-                      ? const Color(0xff444444)
-                      : null,
+                ),
+                divider(),
+                switchRow(
+                  key: const ValueKey('thousands-separator-setting'),
+                  title: strings.thousandsSeparator,
+                  subtitle: strings.thousandsSeparatorDescription,
+                  value: settings.thousandsSeparatorEnabled,
+                  onChanged: settings.setThousandsSeparatorEnabled,
+                ),
+                divider(),
+                switchRow(
+                  key: const ValueKey('comma-decimal-setting'),
+                  title: strings.commaDecimal,
+                  subtitle: strings.commaDecimalDescription,
+                  value: settings.commaDecimalEnabled,
+                  onChanged: settings.setCommaDecimalEnabled,
+                ),
+                divider(),
+                switchRow(
+                  key: const ValueKey('memory-bar-setting'),
+                  title: strings.memoryBar,
+                  subtitle: strings.memoryBarDescription,
+                  value: settings.memoryBarEnabled,
+                  onChanged: settings.setMemoryBarEnabled,
+                ),
+                divider(),
+                switchRow(
+                  key: const ValueKey('repeat-equals-setting'),
+                  title: strings.repeatEquals,
+                  subtitle: strings.repeatEqualsDescription,
+                  value: settings.repeatEqualsEnabled,
+                  onChanged: settings.setRepeatEqualsEnabled,
                 ),
               ],
             ),

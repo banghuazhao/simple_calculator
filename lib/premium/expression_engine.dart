@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 
 /// Evaluates scientific expressions without changing the calculator's input
-/// or history. Multiplication must be written explicitly, such as `2 * pi`.
+/// or history. Supports explicit and implicit multiplication (e.g. `2pi`,
+/// `2(3 + 4)`, `2sin(30)`).
 class ExpressionEngine {
   static const maxLength = 512;
 
@@ -28,6 +29,46 @@ class ExpressionEngine {
   /// in saved formulas when written without parentheses.
   static Set<String> variablesIn(String expression) =>
       compile(expression).variables;
+
+  /// Returns a reduced rational fraction representation (`p/q`) when [value]
+  /// is within [tolerance] of a fraction with denominator <= [maxDenominator].
+  static String? toFraction(
+    double value, {
+    int maxDenominator = 10000,
+    double tolerance = 1e-9,
+  }) {
+    if (!value.isFinite) return null;
+    if (value == 0) return '0';
+    final sign = value < 0 ? '-' : '';
+    final abs = value.abs();
+    if (abs > 1e12) return null;
+    if ((abs - abs.roundToDouble()).abs() <= tolerance) {
+      return '$sign${abs.round()}';
+    }
+    var h1 = 1, h2 = 0;
+    var k1 = 0, k2 = 1;
+    var b = abs;
+    for (var i = 0; i < 64; i++) {
+      final a = b.floor();
+      final h = a * h1 + h2;
+      final k = a * k1 + k2;
+      if (k > maxDenominator) break;
+      h2 = h1;
+      h1 = h;
+      k2 = k1;
+      k1 = k;
+      if ((abs - h1 / k1).abs() <= tolerance * math.max(1.0, abs)) {
+        return k1 == 1 ? '$sign$h1' : '$sign$h1/$k1';
+      }
+      final frac = b - a;
+      if (frac <= 1e-15) break;
+      b = 1 / frac;
+    }
+    if (k1 > 0 && (abs - h1 / k1).abs() <= tolerance * math.max(1.0, abs)) {
+      return k1 == 1 ? '$sign$h1' : '$sign$h1/$k1';
+    }
+    return null;
+  }
 }
 
 enum ExpressionError {
@@ -83,6 +124,7 @@ class _ExpressionParser {
     r'(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?',
   );
   static final _name = RegExp(r'[A-Za-z_][A-Za-z_0-9]*|π');
+  static final _implicitStart = RegExp(r'[A-Za-z_π(]');
   static const _constants = {'pi': math.pi, 'π': math.pi, 'e': math.e};
   static final _functions = <String, _ScientificFunction>{
     'sqrt': (value, _) => math.sqrt(value),
@@ -97,10 +139,25 @@ class _ExpressionParser {
     'asin': (value, degrees) => _fromRadians(math.asin(value), degrees),
     'acos': (value, degrees) => _fromRadians(math.acos(value), degrees),
     'atan': (value, degrees) => _fromRadians(math.atan(value), degrees),
+    'sinh': (value, _) => (math.exp(value) - math.exp(-value)) / 2,
+    'cosh': (value, _) => (math.exp(value) + math.exp(-value)) / 2,
+    'tanh': (value, _) {
+      if (value > 20) return 1;
+      if (value < -20) return -1;
+      final e2 = math.exp(2 * value);
+      return (e2 - 1) / (e2 + 1);
+    },
+    'log2': (value, _) => _log(value) / math.ln2,
+    'cbrt': (value, _) =>
+        value < 0 ? -math.pow(-value, 1 / 3).toDouble() : math.pow(value, 1 / 3).toDouble(),
+    'floor': (value, _) => value.floorToDouble(),
+    'ceil': (value, _) => value.ceilToDouble(),
+    'round': (value, _) => value.roundToDouble(),
   };
   static const _pairFunctions = <String, _Operation>{
     'ncr': _combinations,
     'npr': _permutations,
+    'mod': _modulo,
   };
 
   final String _source;
@@ -149,10 +206,26 @@ class _ExpressionParser {
       } else if (_take('/')) {
         final offset = _offset - 1;
         left = _binary(left, _unary(depth), _divide, offset);
+      } else if (_hasImplicitFactor()) {
+        final offset = _offset;
+        left = _binary(left, _powerTerm(depth), (a, b) => a * b, offset);
       } else {
         return left;
       }
     }
+  }
+
+  bool _hasImplicitFactor() {
+    final before = _offset;
+    _skipWhitespace();
+    if (_offset >= _input.length) {
+      _offset = before;
+      return false;
+    }
+    final ch = _input[_offset];
+    final matches = _implicitStart.hasMatch(ch);
+    _offset = before;
+    return matches;
   }
 
   _Expression _unary(int depth) {
@@ -163,6 +236,13 @@ class _ExpressionParser {
     if (_take('-')) {
       final operand = _unary(depth + 1);
       return (evaluation) => -operand(evaluation);
+    }
+    return _powerTerm(depth);
+  }
+
+  _Expression _powerTerm(int depth) {
+    if (depth > _maxNesting) {
+      _fail('Expression is nested too deeply', kind: ExpressionError.tooDeep);
     }
     final primary = _primary(depth);
     final base = _take('!')
@@ -178,6 +258,18 @@ class _ExpressionParser {
 
     final literal = _match(_number);
     if (literal != null) {
+      // Reject malformed incomplete scientific exponents like `1e` or `1e+`
+      // rather than silently parsing them as `1 * e`.
+      if (_offset < _input.length &&
+          (_input[_offset] == 'e' || _input[_offset] == 'E')) {
+        final next = _offset + 1;
+        if (next >= _input.length ||
+            _input[next] == '+' ||
+            _input[next] == '-' ||
+            !RegExp(r'[A-Za-z_]').hasMatch(_input[next])) {
+          _fail('Incomplete scientific exponent');
+        }
+      }
       final value = double.parse(literal);
       return _checked(_offset - literal.length, (_) => value);
     }
@@ -330,6 +422,11 @@ const _combinatoricOverflow = ExpressionException(
 double _divide(double left, double right) {
   if (right == 0) throw _divisionByZero;
   return left / right;
+}
+
+double _modulo(double left, double right) {
+  if (right == 0) throw _divisionByZero;
+  return left % right;
 }
 
 double _power(double base, double exponent) {

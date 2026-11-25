@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
 import 'package:simple_calculator/premium/expression_engine.dart';
 import 'package:simple_calculator/premium/formula_storage.dart';
+import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
@@ -18,8 +19,16 @@ class FormulasPage extends StatefulWidget {
 
 class _FormulasPageState extends State<FormulasPage> {
   final _storage = FormulaStorage.instance;
+  final _search = TextEditingController();
   late List<SavedFormula> _formulas = _storage.load();
+  String _query = '';
   bool _interactionPending = false;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
 
   Future<bool> _persist(List<SavedFormula> formulas) async {
     if (!mounted || widget.canEdit?.call() == false) return false;
@@ -72,25 +81,84 @@ class _FormulasPageState extends State<FormulasPage> {
     }
   }
 
+  Future<void> _duplicate(int index) async {
+    if (_interactionPending || widget.canEdit?.call() == false) return;
+    if (_formulas.length >= FormulaStorage.maxFormulas) {
+      _showMessage(context, S.of(context).formulaLimitReached);
+      return;
+    }
+    _interactionPending = true;
+    try {
+      final original = _formulas[index];
+      final suffix = ' (copy)';
+      final maxBase = FormulaStorage.maxNameLength - suffix.length;
+      final baseName = original.name.length > maxBase
+          ? original.name.substring(0, maxBase)
+          : original.name;
+      final copy = SavedFormula(
+        name: '$baseName$suffix',
+        expression: original.expression,
+        baseline: Map<String, double>.of(original.baseline),
+        alternate: Map<String, double>.of(original.alternate),
+        inputMetadata: Map<String, FormulaInputMetadata>.of(
+          original.inputMetadata,
+        ),
+        baselineName: original.baselineName,
+        alternateName: original.alternateName,
+      );
+      final updated = List<SavedFormula>.of(_formulas)..insert(index + 1, copy);
+      if (!await _persist(updated) && mounted) {
+        _showMessage(context, S.of(context).formulaSaveFailed);
+      }
+    } finally {
+      _interactionPending = false;
+    }
+  }
+
+  Future<void> _move(int index, int delta) async {
+    final target = index + delta;
+    if (target < 0 ||
+        target >= _formulas.length ||
+        _interactionPending ||
+        widget.canEdit?.call() == false) {
+      return;
+    }
+    _interactionPending = true;
+    try {
+      final updated = List<SavedFormula>.of(_formulas);
+      final item = updated.removeAt(index);
+      updated.insert(target, item);
+      await _persist(updated);
+    } finally {
+      _interactionPending = false;
+    }
+  }
+
   Future<void> _delete(int index) async {
     if (_interactionPending || widget.canEdit?.call() == false) return;
     _interactionPending = true;
     try {
       final strings = S.of(context);
+      final model = context.read<ThemeModel>();
+      final ink = model.readableTextColor;
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           scrollable: true,
-          title: Text(strings.formulaDelete),
-          content: Text(strings.formulaDeleteMessage),
+          backgroundColor: model.backgroundColor,
+          title: Text(strings.formulaDelete, style: TextStyle(color: ink)),
+          content: Text(
+            strings.formulaDeleteMessage,
+            style: TextStyle(color: ink),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(strings.cancel),
+              child: Text(strings.cancel, style: TextStyle(color: ink)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(strings.formulaDelete),
+              child: Text(strings.formulaDelete, style: TextStyle(color: ink)),
             ),
           ],
         ),
@@ -127,17 +195,65 @@ class _FormulasPageState extends State<FormulasPage> {
       baseline: const {'price': 80, 'tax_percent': 8},
       alternate: const {'price': 80, 'tax_percent': 12},
     ),
+    SavedFormula(
+      name: strings.formulaExampleLoan,
+      expression:
+          'principal * (rate / 1200) / (1 - (1 + rate / 1200)^(-months))',
+      baseline: const {'principal': 250000, 'rate': 6.0, 'months': 360},
+      alternate: const {'principal': 250000, 'rate': 5.5, 'months': 360},
+    ),
+    SavedFormula(
+      name: strings.formulaExampleCompound,
+      expression: 'principal * (1 + rate / 100)^years',
+      baseline: const {'principal': 10000, 'rate': 5, 'years': 10},
+      alternate: const {'principal': 10000, 'rate': 7, 'years': 10},
+    ),
+    SavedFormula(
+      name: strings.formulaExampleMargin,
+      expression: '(price - cost) / price * 100',
+      baseline: const {'price': 100, 'cost': 65},
+      alternate: const {'price': 110, 'cost': 65},
+    ),
+    SavedFormula(
+      name: strings.formulaExampleBmi,
+      expression: 'weight_kg / (height_m ^ 2)',
+      baseline: const {'weight_kg': 70, 'height_m': 1.75},
+      alternate: const {'weight_kg': 65, 'height_m': 1.75},
+    ),
+    SavedFormula(
+      name: strings.formulaExampleFuel,
+      expression: 'distance_km / 100 * liters_per_100km * price_per_liter',
+      baseline: const {
+        'distance_km': 300,
+        'liters_per_100km': 8,
+        'price_per_liter': 2.5,
+      },
+      alternate: const {
+        'distance_km': 300,
+        'liters_per_100km': 6,
+        'price_per_liter': 2.5,
+      },
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     final model = context.watch<ThemeModel>();
     final strings = S.of(context);
+    final q = _query.trim().toLowerCase();
+    final visibleIndices = <int>[
+      for (var i = 0; i < _formulas.length; i++)
+        if (q.isEmpty ||
+            _formulas[i].name.toLowerCase().contains(q) ||
+            _formulas[i].expression.toLowerCase().contains(q))
+          i,
+    ];
+
     return _FormulaScaffold(
       title: strings.reusableFormulas,
       body: ListView.builder(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        itemCount: _formulas.isEmpty ? 2 : _formulas.length + 1,
+        itemCount: _formulas.isEmpty ? 2 : visibleIndices.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Column(
@@ -148,6 +264,28 @@ class _FormulasPageState extends State<FormulasPage> {
                   icon: const Icon(Icons.add),
                   label: Text(strings.formulaNew),
                 ),
+                if (_formulas.length >= 3) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    key: const ValueKey('formula-search'),
+                    controller: _search,
+                    onChanged: (value) => setState(() => _query = value),
+                    decoration: InputDecoration(
+                      labelText: strings.formulaSearch,
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _query.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: strings.clearSearch,
+                              onPressed: () {
+                                _search.clear();
+                                setState(() => _query = '');
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                    ),
+                  ),
+                ],
                 ExpansionTile(
                   key: PageStorageKey(
                     _formulas.isEmpty
@@ -176,31 +314,61 @@ class _FormulasPageState extends State<FormulasPage> {
               child: Text(strings.formulaEmpty),
             );
           }
-          final formula = _formulas[index - 1];
+          final realIndex = visibleIndices[index - 1];
+          final formula = _formulas[realIndex];
           return Card(
             margin: const EdgeInsets.only(top: 10),
             elevation: 0,
-            color: model.textColor1.withValues(alpha: 0.06),
+            color: model.panelColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: model.dividerColor),
+              side: BorderSide(color: model.panelBorderColor),
             ),
             child: ListTile(
               title: Text(
                 formula.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: model.panelTextColor),
               ),
               subtitle: Text(
                 formula.expression,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: model.panelTextColor),
               ),
-              onTap: () => _openFormula(index: index - 1, runFirst: true),
-              trailing: IconButton(
-                tooltip: strings.formulaDelete,
-                onPressed: () => _delete(index - 1),
-                icon: const Icon(Icons.delete_outline),
+              onTap: () => _openFormula(index: realIndex, runFirst: true),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (q.isEmpty && _formulas.length > 1) ...[
+                    if (realIndex > 0)
+                      IconButton(
+                        tooltip: strings.formulaMoveUp,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _move(realIndex, -1),
+                        icon: const Icon(Icons.arrow_upward, size: 18),
+                      ),
+                    if (realIndex < _formulas.length - 1)
+                      IconButton(
+                        tooltip: strings.formulaMoveDown,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => _move(realIndex, 1),
+                        icon: const Icon(Icons.arrow_downward, size: 18),
+                      ),
+                  ],
+                  IconButton(
+                    tooltip: strings.formulaDuplicate,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => _duplicate(realIndex),
+                    icon: const Icon(Icons.copy_outlined, size: 18),
+                  ),
+                  IconButton(
+                    tooltip: strings.formulaDelete,
+                    onPressed: () => _delete(realIndex),
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ],
               ),
             ),
           );
@@ -312,6 +480,11 @@ class _FormulaWorkspaceState extends State<_FormulaWorkspace> {
     }
   }
 
+  void _useInCalculator(double value) {
+    Processor.useResult(value);
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
   Future<void> _save() async {
     if (_saving || widget.canEdit?.call() == false) return;
     setState(() => _submitted = true);
@@ -376,8 +549,8 @@ class _FormulaWorkspaceState extends State<_FormulaWorkspace> {
     final value = result.value;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: model.textColor1.withValues(alpha: 0.06),
-        border: Border.all(color: model.dividerColor),
+        color: model.panelColor,
+        border: Border.all(color: model.panelBorderColor),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -385,14 +558,28 @@ class _FormulaWorkspaceState extends State<_FormulaWorkspace> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Semantics(
-              header: true,
-              child: Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: model.textColor1),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: model.panelTextColor,
+                      ),
+                    ),
+                  ),
+                ),
+                if (value != null)
+                  IconButton(
+                    tooltip: strings.reuseResult,
+                    visualDensity: VisualDensity.compact,
+                    color: model.panelTextColor,
+                    icon: const Icon(Icons.calculate_outlined, size: 20),
+                    onPressed: () => _useInCalculator(value),
+                  ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
@@ -402,9 +589,10 @@ class _FormulaWorkspaceState extends State<_FormulaWorkspace> {
                   ? strings.error
                   : strings.formulaNoResult,
               key: ValueKey('formula-$keyPrefix-result'),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(color: model.textColor1),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: model.panelTextColor,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
             for (final variable in _variables!)
               Padding(
@@ -453,6 +641,16 @@ class _FormulaWorkspaceState extends State<_FormulaWorkspace> {
         : null;
     final differenceText = difference != null && difference.isFinite
         ? _resultText(difference)
+        : null;
+    final percentChange =
+        difference != null &&
+            difference.isFinite &&
+            baselineValue != null &&
+            baselineValue != 0
+        ? (difference / baselineValue.abs()) * 100
+        : null;
+    final percentText = percentChange != null && percentChange.isFinite
+        ? '${percentChange >= 0 ? '+' : ''}${_resultText(percentChange)}%'
         : null;
     final baselineName = _baselineName.trim();
     final alternateName = _alternateName.trim();
@@ -506,12 +704,38 @@ class _FormulaWorkspaceState extends State<_FormulaWorkspace> {
         if (difference != null) ...[
           const SizedBox(height: 16),
           Text(differenceTitle),
-          Text(
-            differenceText ?? strings.error,
-            key: const ValueKey('formula-difference-result'),
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(color: model.textColor1),
+          Row(
+            children: [
+              Text(
+                differenceText ?? strings.error,
+                key: const ValueKey('formula-difference-result'),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: model.textColor1,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              if (percentText != null) ...[
+                const SizedBox(width: 10),
+                Text(
+                  '($percentText)',
+                  key: const ValueKey('formula-difference-percent'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: model.mutedTextColor,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+              if (differenceText != null) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  tooltip: strings.reuseResult,
+                  visualDensity: VisualDensity.compact,
+                  color: model.textColor1,
+                  icon: const Icon(Icons.calculate_outlined, size: 20),
+                  onPressed: () => _useInCalculator(difference),
+                ),
+              ],
+            ],
           ),
         ],
         if (baselineValue != null &&

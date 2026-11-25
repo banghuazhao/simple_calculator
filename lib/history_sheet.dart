@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_calculator/generated/l10n.dart';
@@ -10,12 +11,15 @@ import 'package:simple_calculator/processor.dart';
 import 'package:simple_calculator/util/clipboard_helper.dart';
 import 'package:simple_calculator/util/history_storage.dart';
 import 'package:simple_calculator/util/input_feedback.dart';
+import 'package:simple_calculator/util/input_settings.dart';
 import 'package:simple_calculator/util/theme_model.dart';
 
 enum _HistoryEntryAction { edit, pin, name, delete }
 
 class HistorySheet extends StatefulWidget {
-  const HistorySheet({super.key});
+  const HistorySheet({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   State<HistorySheet> createState() => _HistorySheetState();
@@ -27,12 +31,25 @@ class _HistorySheetState extends State<HistorySheet> {
   static final _groupedNumber = RegExp(r'^\d{1,3}(?:,\d{3})+(?:\.\d*)?$');
 
   final TextEditingController _search = TextEditingController();
+  StreamSubscription<CalcState>? _processorSub;
   String _query = '';
+  bool _pinnedOnly = false;
   int _deletionRevision = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.embedded) {
+      _processorSub = Processor.listen((_) {
+        if (mounted) setState(() {});
+      });
+    }
+  }
 
   @override
   void dispose() {
     _deletionRevision++;
+    unawaited(_processorSub?.cancel());
     _search.dispose();
     super.dispose();
   }
@@ -51,7 +68,11 @@ class _HistorySheetState extends State<HistorySheet> {
     );
     if (applied != true || !mounted || !sheetContext.mounted) return;
     _deletionRevision++;
-    Navigator.of(sheetContext).pop();
+    if (widget.embedded) {
+      setState(() {});
+    } else {
+      Navigator.of(sheetContext).pop();
+    }
   }
 
   void _pin(BuildContext context, HistoryEntry entry) {
@@ -77,20 +98,26 @@ class _HistorySheetState extends State<HistorySheet> {
 
   Future<void> _clearHistory(BuildContext sheetContext) async {
     final strings = S.of(sheetContext);
+    final model = Provider.of<ThemeModel>(sheetContext, listen: false);
+    final ink = model.readableTextColor;
     final confirmed = await showDialog<bool>(
       context: sheetContext,
       builder: (dialogContext) => AlertDialog(
         scrollable: true,
-        title: Text(strings.clearHistoryTitle),
-        content: Text(strings.clearHistoryMessage),
+        backgroundColor: model.backgroundColor,
+        title: Text(strings.clearHistoryTitle, style: TextStyle(color: ink)),
+        content: Text(
+          strings.clearHistoryMessage,
+          style: TextStyle(color: ink),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(strings.cancel),
+            child: Text(strings.cancel, style: TextStyle(color: ink)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(strings.clear),
+            child: Text(strings.clear, style: TextStyle(color: ink)),
           ),
         ],
       ),
@@ -102,7 +129,10 @@ class _HistorySheetState extends State<HistorySheet> {
     messenger.removeCurrentSnackBar();
     Processor.clearHistory();
     _search.clear();
-    setState(() => _query = '');
+    setState(() {
+      _query = '';
+      _pinnedOnly = false;
+    });
     unawaited(InputFeedback.mediumImpact());
   }
 
@@ -134,11 +164,43 @@ class _HistorySheetState extends State<HistorySheet> {
     );
   }
 
-  Widget _entry(BuildContext context, HistoryEntry entry, ThemeModel model) {
+  String? _dateBucket(HistoryEntry entry, S strings, DateTime todayStart) {
+    if (entry.isPinned) return null;
+    final ms = entry.timestampMs;
+    if (ms == null) return null;
+    final date = DateTime.fromMillisecondsSinceEpoch(ms);
+    final entryDay = DateTime(date.year, date.month, date.day);
+    final diffDays = todayStart.difference(entryDay).inDays;
+    if (diffDays <= 0) return strings.historyToday;
+    if (diffDays == 1) return strings.historyYesterday;
+    return strings.historyEarlier;
+  }
+
+  double? _sumResults(List<HistoryEntry> entries) {
+    if (entries.length < 2) return null;
+    var total = 0.0;
+    for (final entry in entries) {
+      final value = double.tryParse(entry.preciseResult);
+      if (value == null || !value.isFinite) return null;
+      total += value;
+      if (!total.isFinite) return null;
+    }
+    return total;
+  }
+
+  Widget _entry(
+    BuildContext context,
+    HistoryEntry entry,
+    ThemeModel model, {
+    String? sectionHeader,
+  }) {
     final strings = S.of(context);
     final textColor = model.textColor1;
     final name = entry.name;
-    return Dismissible(
+    final formattedResult = InputSettings.instance.formatDisplayNumber(
+      entry.result,
+    );
+    final row = Dismissible(
       key: ValueKey(entry.id),
       direction: DismissDirection.endToStart,
       background: Container(
@@ -164,12 +226,13 @@ class _HistorySheetState extends State<HistorySheet> {
                   Processor.setFromHistory(
                     entry.result,
                     preciseResult: entry.preciseResult,
+                    asOperandIfPending: true,
                   );
-                  Navigator.pop(context);
+                  if (!widget.embedded) Navigator.pop(context);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
+                    horizontal: 20,
                     vertical: 12,
                   ),
                   child: Column(
@@ -216,11 +279,12 @@ class _HistorySheetState extends State<HistorySheet> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        entry.result,
+                        formattedResult,
                         style: TextStyle(
                           color: textColor,
                           fontSize: 26,
                           fontWeight: FontWeight.w300,
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -300,11 +364,33 @@ class _HistorySheetState extends State<HistorySheet> {
         ],
       ),
     );
+    if (sectionHeader == null) return row;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 2),
+          child: Semantics(
+            header: true,
+            child: Text(
+              sectionHeader,
+              style: TextStyle(
+                color: model.mutedTextColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+        row,
+      ],
+    );
   }
 
   Widget _contents(BuildContext context, ThemeModel model) {
     final strings = S.of(context);
     final entries = Processor.historyLog;
+    final hasPinned = entries.any((entry) => entry.isPinned);
     final query = _searchable(_query);
     final numericQuery = query.replaceAllMapped(_searchNumber, (match) {
       final number = match[0]!;
@@ -312,36 +398,45 @@ class _HistorySheetState extends State<HistorySheet> {
           ? number.replaceAll(',', '')
           : number;
     });
-    final filtered = query.isEmpty
-        ? entries
-        : entries
-              .where(
-                (entry) =>
-                    _searchable(
-                      '${entry.equation} ${entry.result}',
-                    ).contains(numericQuery) ||
-                    _searchable(entry.name ?? '').contains(query),
-              )
-              .toList();
+    final filtered = entries.where((entry) {
+      if (_pinnedOnly && !entry.isPinned) return false;
+      if (query.isEmpty) return true;
+      return _searchable(
+            '${entry.equation} ${entry.result}',
+          ).contains(numericQuery) ||
+          _searchable(entry.name ?? '').contains(query);
+    }).toList();
+    final visibleSum = _sumResults(filtered);
+    final formattedSum = visibleSum == null
+        ? null
+        : InputSettings.instance.formatDisplayNumber(
+            Processor.formatResult(visibleSum),
+          );
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
     final textColor = model.textColor1;
+    final filterActive = query.isNotEmpty || _pinnedOnly;
+
     return CustomScrollView(
+      scrollCacheExtent: const ScrollCacheExtent.pixels(1200),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 4),
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: model.handleColor,
-                  borderRadius: BorderRadius.circular(2),
+        if (!widget.embedded)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 4),
+              child: Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: model.handleColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -358,7 +453,7 @@ class _HistorySheetState extends State<HistorySheet> {
                 final actions = <Widget>[
                   IconButton(
                     key: const ValueKey('history-copy-bulk'),
-                    tooltip: query.isEmpty
+                    tooltip: !filterActive
                         ? strings.copyAllHistory
                         : strings.copyMatchingHistory,
                     onPressed: filtered.isEmpty
@@ -435,31 +530,56 @@ class _HistorySheetState extends State<HistorySheet> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-            child: TextField(
-              key: const ValueKey('history-search'),
-              controller: _search,
-              style: TextStyle(color: textColor),
-              textInputAction: TextInputAction.search,
-              inputFormatters: [LengthLimitingTextInputFormatter(256)],
-              onChanged: (value) => setState(() => _query = value),
-              onSubmitted: (_) => FocusScope.of(context).unfocus(),
-              decoration: InputDecoration(
-                labelText: strings.searchHistory,
-                labelStyle: TextStyle(color: textColor),
-                prefixIcon: Icon(Icons.search, color: textColor),
-                suffixIcon: _query.isEmpty
-                    ? null
-                    : IconButton(
-                        tooltip: strings.clearSearch,
-                        onPressed: () {
-                          _search.clear();
-                          setState(() => _query = '');
-                        },
-                        icon: Icon(Icons.close, color: textColor),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  key: const ValueKey('history-search'),
+                  controller: _search,
+                  style: TextStyle(color: textColor),
+                  textInputAction: TextInputAction.search,
+                  inputFormatters: [LengthLimitingTextInputFormatter(256)],
+                  onChanged: (value) => setState(() => _query = value),
+                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                  decoration: InputDecoration(
+                    labelText: strings.searchHistory,
+                    labelStyle: TextStyle(color: textColor),
+                    prefixIcon: Icon(Icons.search, color: textColor),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: strings.clearSearch,
+                            onPressed: () {
+                              _search.clear();
+                              setState(() => _query = '');
+                            },
+                            icon: Icon(Icons.close, color: textColor),
+                          ),
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                if (hasPinned || _pinnedOnly) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: FilterChip(
+                      key: const ValueKey('history-pinned-filter'),
+                      avatar: Icon(
+                        Icons.push_pin_outlined,
+                        size: 16,
+                        color: _pinnedOnly
+                            ? model.backgroundColor
+                            : model.panelTextColor,
                       ),
-                border: const OutlineInputBorder(),
-              ),
+                      label: Text(strings.historyPinnedOnly),
+                      selected: _pinnedOnly,
+                      onSelected: (selected) =>
+                          setState(() => _pinnedOnly = selected),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ),
@@ -471,7 +591,7 @@ class _HistorySheetState extends State<HistorySheet> {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  query.isEmpty
+                  !filterActive
                       ? strings.noCalculationsYet
                       : strings.noHistoryMatches,
                   textAlign: TextAlign.center,
@@ -480,7 +600,7 @@ class _HistorySheetState extends State<HistorySheet> {
               ),
             ),
           )
-        else
+        else ...[
           SliverPadding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             sliver: SliverList.separated(
@@ -491,8 +611,22 @@ class _HistorySheetState extends State<HistorySheet> {
                 );
                 return index < 0 ? null : index;
               },
-              itemBuilder: (_, index) =>
-                  _entry(context, filtered[index], model),
+              itemBuilder: (_, index) {
+                final entry = filtered[index];
+                final bucket = filtered.length >= 2
+                    ? _dateBucket(entry, strings, todayStart)
+                    : null;
+                final prevBucket = index == 0 || filtered.length < 2
+                    ? null
+                    : _dateBucket(filtered[index - 1], strings, todayStart);
+                final showHeader = bucket != null && bucket != prevBucket;
+                return _entry(
+                  context,
+                  entry,
+                  model,
+                  sectionHeader: showHeader ? bucket : null,
+                );
+              },
               separatorBuilder: (_, _) => Divider(
                 height: 1,
                 indent: 20,
@@ -501,6 +635,59 @@ class _HistorySheetState extends State<HistorySheet> {
               ),
             ),
           ),
+          if (visibleSum != null && formattedSum != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                child: DecoratedBox(
+                  key: const ValueKey('history-visible-sum'),
+                  decoration: BoxDecoration(
+                    color: model.panelColor,
+                    border: Border.all(color: model.panelBorderColor),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            strings.historyVisibleSum(
+                              filtered.length,
+                              formattedSum,
+                            ),
+                            style: TextStyle(
+                              color: model.panelTextColor,
+                              fontWeight: FontWeight.w600,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Processor.useResult(visibleSum);
+                            if (!widget.embedded) Navigator.pop(context);
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: model.panelTextColor,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: Text(strings.historyUseSum),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ],
     );
   }
@@ -508,37 +695,57 @@ class _HistorySheetState extends State<HistorySheet> {
   @override
   Widget build(BuildContext context) {
     final model = Provider.of<ThemeModel>(context);
+    if (widget.embedded) {
+      return ListenableBuilder(
+        listenable: InputSettings.instance,
+        builder: (context, _) => ScaffoldMessenger(
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: model.backgroundColor,
+            body: SafeArea(
+              top: false,
+              child: Builder(
+                builder: (context) => _contents(context, model),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     final media = MediaQuery.of(context);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final available = max(
-          0.0,
-          min(constraints.maxHeight, media.size.height) -
-              media.viewInsets.bottom,
-        );
-        final height = min(
-          available,
-          media.viewInsets.bottom > 0 ? available : media.size.height * 0.65,
-        );
-        return Padding(
-          padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
-          child: SizedBox(
-            height: height,
-            child: ScaffoldMessenger(
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                backgroundColor: model.backgroundColor,
-                body: SafeArea(
-                  top: false,
-                  child: Builder(
-                    builder: (context) => _contents(context, model),
+    return ListenableBuilder(
+      listenable: InputSettings.instance,
+      builder: (context, _) => LayoutBuilder(
+        builder: (context, constraints) {
+          final available = max(
+            0.0,
+            min(constraints.maxHeight, media.size.height) -
+                media.viewInsets.bottom,
+          );
+          final height = min(
+            available,
+            media.viewInsets.bottom > 0 ? available : media.size.height * 0.65,
+          );
+          return Padding(
+            padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+            child: SizedBox(
+              height: height,
+              child: ScaffoldMessenger(
+                child: Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  backgroundColor: model.backgroundColor,
+                  body: SafeArea(
+                    top: false,
+                    child: Builder(
+                      builder: (context) => _contents(context, model),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

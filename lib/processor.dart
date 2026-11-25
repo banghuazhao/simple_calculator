@@ -6,6 +6,8 @@ import 'package:simple_calculator/key_controller.dart';
 import 'package:simple_calculator/key_symbol.dart';
 import 'package:simple_calculator/util/calculator_draft_storage.dart';
 import 'package:simple_calculator/util/history_storage.dart';
+import 'package:simple_calculator/util/input_settings.dart';
+import 'package:simple_calculator/util/storage_manager.dart';
 
 enum OperandPosition { left, right }
 
@@ -33,6 +35,9 @@ class CalcState {
   final String history; // small equation line above (empty when not applicable)
   final bool isResult; // true when showing a freshly computed result
   final bool canUndo;
+  final bool canRedo;
+  final String? preview; // live preview before pressing =
+  final String? memory; // formatted saved memory value, if non-null
   final OperandEdit? leftOperand;
   final OperandEdit? rightOperand;
   final String? binaryOperator;
@@ -43,6 +48,9 @@ class CalcState {
     required this.history,
     this.isResult = false,
     this.canUndo = false,
+    this.canRedo = false,
+    this.preview,
+    this.memory,
     this.leftOperand,
     this.rightOperand,
     this.binaryOperator,
@@ -59,6 +67,7 @@ class HistoryEntry {
   final String? rawExpression;
   final bool isPinned;
   final String? name;
+  final int? timestampMs;
   const HistoryEntry({
     required this.id,
     required this.equation,
@@ -67,6 +76,7 @@ class HistoryEntry {
     this.rawExpression,
     this.isPinned = false,
     this.name,
+    this.timestampMs,
   });
 
   String get preciseResult => rawResult ?? result;
@@ -82,6 +92,7 @@ class HistoryEntry {
         rawExpression: rawExpression,
         isPinned: isPinned,
         name: name,
+        timestampMs: timestampMs,
       );
 }
 
@@ -101,15 +112,20 @@ typedef _Snapshot = CalculatorDraft;
 abstract class Processor {
   static const _Number _zero = (text: '0', preciseValue: null);
   static const _error = calculatorErrorResult;
+  static const _memoryKey = 'calculator_memory_v1';
+  static const int maxInputDigits = 15;
+
   static KeySymbol? _operator;
   static _Number _valA = _zero;
   static _Number? _valB;
   static bool _percentB = false;
   static _Calculation? _result;
   static int _inputRevision = 0;
+  static double? _memory;
 
   static final List<HistoryEntry> _history = [];
   static final List<_Snapshot> _undoStack = [];
+  static final List<_Snapshot> _redoStack = [];
   static int _historyIdSeq = 0;
 
   static final StreamController<CalcState> _controller =
@@ -124,6 +140,15 @@ abstract class Processor {
   /// The latest state is also available synchronously for the first frame.
   static CalcState get state => _calcState;
 
+  /// Current displayed finite numeric value, useful for bridging to tools.
+  static double? get currentNumericValue {
+    final result = _result;
+    if (result == _error) return null;
+    final active = result?.number ?? (_valB ?? _valA);
+    final value = _valueOf(active);
+    return value != null && value.isFinite ? value : null;
+  }
+
   /// Pinned calculations first, newest to oldest within each group.
   static List<HistoryEntry> get historyLog => List.unmodifiable([
     ..._history.where((entry) => entry.isPinned),
@@ -131,6 +156,32 @@ abstract class Processor {
   ]);
 
   static bool get canUndo => _undoStack.isNotEmpty;
+  static bool get canRedo => _redoStack.isNotEmpty;
+  static bool get hasMemory => _memory != null;
+  static double? get memoryValue => _memory;
+
+  static String? _computePreview() {
+    if (_result != null) return null;
+    final operator = _operator;
+    final right = _valB;
+    if (operator == null || right == null) return null;
+    final a = _valueOf(_valA);
+    final rightValue = _valueOf(right);
+    if (a == null || rightValue == null || !a.isFinite || !rightValue.isFinite) {
+      return null;
+    }
+    final b = _percentB
+        ? HistoryExpression.percentOperand(a, operator.value, rightValue)
+        : rightValue;
+    final value = switch (operator) {
+      Keys.divide => a / b,
+      Keys.multiply => a * b,
+      Keys.subtract => a - b,
+      _ => a + b,
+    };
+    if (!value.isFinite) return null;
+    return formatResult(value);
+  }
 
   static CalcState get _calcState {
     final result = _result;
@@ -147,6 +198,9 @@ abstract class Processor {
       history: result?.equation ?? expression,
       isResult: result != null,
       canUndo: canUndo,
+      canRedo: canRedo,
+      preview: _computePreview(),
+      memory: _memory == null ? null : formatResult(_memory!),
       leftOperand: editable ? _editFor(OperandPosition.left, _valA) : null,
       rightOperand: right == null
           ? null
@@ -166,7 +220,80 @@ abstract class Processor {
 
   static void dispose() => _controller.close();
 
-  // ── Undo ─────────────────────────────────────────────────────────────────
+  // ── Memory ───────────────────────────────────────────────────────────────
+
+  static void restoreMemory() {
+    try {
+      final raw = StorageManager.sharedPreferences?.get(_memoryKey);
+      if (raw is double && raw.isFinite) {
+        _memory = raw;
+      } else if (raw is int) {
+        _memory = raw.toDouble();
+      } else {
+        _memory = null;
+      }
+    } catch (_) {
+      _memory = null;
+    }
+    refresh();
+  }
+
+  static void _saveMemory() {
+    final prefs = StorageManager.sharedPreferences;
+    if (prefs == null) return;
+    final value = _memory;
+    if (value == null) {
+      unawaited(prefs.remove(_memoryKey));
+    } else {
+      unawaited(prefs.setDouble(_memoryKey, value));
+    }
+  }
+
+  static void memoryClear() {
+    if (_memory == null) return;
+    _memory = null;
+    _saveMemory();
+    refresh();
+  }
+
+  static void memoryAdd() {
+    final value = currentNumericValue;
+    if (value == null) return;
+    final updated = (_memory ?? 0) + value;
+    if (!updated.isFinite) return;
+    _memory = updated;
+    _saveMemory();
+    refresh();
+  }
+
+  static void memorySubtract() {
+    final value = currentNumericValue;
+    if (value == null) return;
+    final updated = (_memory ?? 0) - value;
+    if (!updated.isFinite) return;
+    _memory = updated;
+    _saveMemory();
+    refresh();
+  }
+
+  static void memoryRecall() {
+    final value = _memory;
+    if (value == null || !value.isFinite) return;
+    final before = _snapshot;
+    final number = _formattedNumber(value);
+    if (_result != null) {
+      _clear();
+      _valA = number;
+    } else if (_operator == null) {
+      _valA = number;
+    } else {
+      _valB = number;
+      _percentB = false;
+    }
+    _finishAction(before);
+  }
+
+  // ── Undo & Redo ──────────────────────────────────────────────────────────
 
   static _Snapshot get _snapshot => (
     valA: _valA,
@@ -181,12 +308,23 @@ abstract class Processor {
     if (before == _snapshot) return;
     _undoStack.add(before);
     if (_undoStack.length > 30) _undoStack.removeAt(0);
+    _redoStack.clear();
     _publishMutation();
   }
 
   static void undo() {
     if (_undoStack.isEmpty) return;
+    _redoStack.add(_snapshot);
+    if (_redoStack.length > 30) _redoStack.removeAt(0);
     _applySnapshot(_undoStack.removeLast());
+    _publishMutation();
+  }
+
+  static void redo() {
+    if (_redoStack.isEmpty) return;
+    _undoStack.add(_snapshot);
+    if (_undoStack.length > 30) _undoStack.removeAt(0);
+    _applySnapshot(_redoStack.removeLast());
     _publishMutation();
   }
 
@@ -195,6 +333,7 @@ abstract class Processor {
   static void restoreDraft() {
     final draft = CalculatorDraftStorage.instance.load();
     _undoStack.clear();
+    _redoStack.clear();
     if (draft == null) {
       _clear();
     } else {
@@ -238,6 +377,7 @@ abstract class Processor {
             rawExpression: entry.rawExpression,
             isPinned: isPinned,
             name: entry.name,
+            timestampMs: entry.timestampMs,
           );
         }),
       );
@@ -260,6 +400,7 @@ abstract class Processor {
             rawExpression: entry.rawExpression,
             isPinned: entry.isPinned,
             name: entry.name,
+            timestampMs: entry.timestampMs,
           ),
         ),
       ),
@@ -410,13 +551,30 @@ abstract class Processor {
     return true;
   }
 
-  /// Load a history result back into the calculator as the current value.
-  static void setFromHistory(String result, {String? preciseResult}) {
+  /// Load a history result back into the calculator as the current value, or
+  /// as the right operand when [asOperandIfPending] is true and an operator is
+  /// waiting for its second operand.
+  static void setFromHistory(
+    String result, {
+    String? preciseResult,
+    bool asOperandIfPending = false,
+  }) {
     if (!HistoryStorage.isValidNumber(result)) return;
     final preciseValue = preciseResult == null
         ? null
         : double.tryParse(preciseResult);
-    _useNumber(_number(result, preciseValue: preciseValue));
+    final number = _number(result, preciseValue: preciseValue);
+    if (asOperandIfPending &&
+        _result == null &&
+        _operator != null &&
+        _valB == null) {
+      final before = _snapshot;
+      _valB = number;
+      _percentB = false;
+      _finishAction(before);
+      return;
+    }
+    _useNumber(number);
   }
 
   /// Send a result from another tool to the calculator without rounding it.
@@ -491,8 +649,17 @@ abstract class Processor {
     if (_valB != null) _valB = _trimTrailingDecimal(_valB!);
 
     if (symbol == Keys.equals) {
-      // Pressing "=" again on a shown result must not log a duplicate entry.
-      if (_result != null) return;
+      if (_result != null) {
+        if (InputSettings.instance.repeatEqualsEnabled &&
+            _result != _error &&
+            _operator != null &&
+            _valB != null) {
+          _valA = _result!.number;
+          _result = null;
+          _calculate();
+        }
+        return;
+      }
       _calculate();
       return;
     }
@@ -534,7 +701,7 @@ abstract class Processor {
       if (text.contains(RegExp(r'[.eE]'))) return number;
       return _number('$text.');
     }
-    if (_countDigits(text) >= 9) return number;
+    if (_countDigits(text) >= maxInputDigits) return number;
     return _number(text == '0' ? value : '$text$value');
   }
 
@@ -656,6 +823,7 @@ abstract class Processor {
         result: number.text,
         rawResult: number.preciseValue?.toString(),
         rawExpression: rawExpression == expression ? null : rawExpression,
+        timestampMs: DateTime.now().millisecondsSinceEpoch,
       ),
     );
     _trimHistory();

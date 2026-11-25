@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -31,14 +32,21 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
   late final _expression = TextEditingController(
     text: widget.initialExpression,
   );
+  final _secondExpression = TextEditingController();
   final _minimum = TextEditingController(text: '-10');
   final _maximum = TextEditingController(text: '10');
+  late bool _degrees = widget.degrees;
   String? _compiledSource;
+  bool? _compiledDegrees;
   ScientificGraph? _compiledFunction;
+  String? _compiledSecondSource;
+  ScientificGraph? _compiledSecondFunction;
   _GraphData? _data;
   _GraphError? _error;
   GraphRootResult? _root;
+  GraphRootResult? _intersection;
   GraphPoint? _selected;
+  double? _selectedSecondY;
 
   @override
   void initState() {
@@ -49,6 +57,7 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
   @override
   void dispose() {
     _expression.dispose();
+    _secondExpression.dispose();
     _minimum.dispose();
     _maximum.dispose();
     super.dispose();
@@ -56,37 +65,119 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
 
   ScientificGraph _getFunction() {
     final source = _expression.text.trim();
-    if (_compiledSource != source || _compiledFunction == null) {
+    if (_compiledSource != source ||
+        _compiledDegrees != _degrees ||
+        _compiledFunction == null) {
       final function = ScientificGraph.compile(
         source,
-        degrees: widget.degrees,
+        degrees: _degrees,
         answer: widget.answer,
       );
       _compiledSource = source;
+      _compiledDegrees = _degrees;
       _compiledFunction = function;
     }
     return _compiledFunction!;
   }
 
+  ScientificGraph? _getSecondFunction() {
+    final source = _secondExpression.text.trim();
+    if (source.isEmpty) {
+      _compiledSecondSource = null;
+      _compiledSecondFunction = null;
+      return null;
+    }
+    if (_compiledSecondSource != source ||
+        _compiledDegrees != _degrees ||
+        _compiledSecondFunction == null) {
+      final function = ScientificGraph.compile(
+        source,
+        degrees: _degrees,
+        answer: widget.answer,
+      );
+      _compiledSecondSource = source;
+      _compiledSecondFunction = function;
+    }
+    return _compiledSecondFunction;
+  }
+
   void _clearOutput(String _) {
-    if (_data == null && _error == null && _root == null) return;
+    if (_data == null &&
+        _error == null &&
+        _root == null &&
+        _intersection == null) {
+      return;
+    }
     setState(() {
       _data = null;
       _error = null;
       _root = null;
+      _intersection = null;
       _selected = null;
+      _selectedSecondY = null;
     });
   }
 
-  void _submit({bool findRoot = false}) {
-    FocusManager.instance.primaryFocus?.unfocus();
-    setState(() => _updateGraph(findRoot: findRoot));
+  void _setDegrees(bool degrees) {
+    if (_degrees == degrees) return;
+    setState(() {
+      _degrees = degrees;
+      _compiledFunction = null;
+      _compiledSecondFunction = null;
+      if (_data != null) {
+        _updateGraph();
+      }
+    });
   }
 
-  void _updateGraph({bool findRoot = false}) {
+  void _zoom(double factor) {
+    final current = _data?.interval;
+    if (current == null) return;
+    final center = (current.minimum + current.maximum) / 2;
+    final half = (current.width / 2) * factor;
+    if (!half.isFinite || half <= 0) return;
+    final nextMin = center - half;
+    final nextMax = center + half;
+    if (GraphInterval.tryCreate(nextMin, nextMax) == null) return;
+    _minimum.text = Processor.formatResult(nextMin);
+    _maximum.text = Processor.formatResult(nextMax);
+    setState(() => _updateGraph());
+  }
+
+  void _panByFraction(double deltaFraction) {
+    final current = _data?.interval;
+    if (current == null) return;
+    final shift = current.width * deltaFraction;
+    final nextMin = current.minimum + shift;
+    final nextMax = current.maximum + shift;
+    if (GraphInterval.tryCreate(nextMin, nextMax) == null) return;
+    _minimum.text = Processor.formatResult(nextMin);
+    _maximum.text = Processor.formatResult(nextMax);
+    setState(() => _updateGraph());
+  }
+
+  void _resetView() {
+    _minimum.text = '-10';
+    _maximum.text = '10';
+    setState(() => _updateGraph());
+  }
+
+  void _submit({bool findRoot = false, bool findIntersection = false}) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(
+      () => _updateGraph(
+        findRoot: findRoot,
+        findIntersection: findIntersection,
+      ),
+    );
+  }
+
+  void _updateGraph({bool findRoot = false, bool findIntersection = false}) {
     _error = null;
     _root = null;
+    _intersection = null;
     _selected = null;
+    _selectedSecondY = null;
     final interval = GraphInterval.tryCreate(
       Processor.parseNumericInput(_minimum.text),
       Processor.parseNumericInput(_maximum.text),
@@ -97,8 +188,10 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
       return;
     }
     final ScientificGraph function;
+    final ScientificGraph? secondFunction;
     try {
       function = _getFunction();
+      secondFunction = _getSecondFunction();
     } on GraphVariablesException {
       _data = null;
       _error = _GraphError.variables;
@@ -111,13 +204,17 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
     final previous = _data;
     if (previous == null ||
         previous.function != function ||
+        previous.secondFunction != secondFunction ||
         previous.interval.minimum != interval.minimum ||
         previous.interval.maximum != interval.maximum) {
-      _data = _GraphData(function, interval);
+      _data = _GraphData(function, interval, secondFunction: secondFunction);
     }
     if (_data!.verticalRange == null) _error = _GraphError.noValues;
     if (findRoot) {
       _root = function.findRoot(interval);
+    }
+    if (findIntersection && secondFunction != null) {
+      _intersection = function.findIntersection(secondFunction, interval);
     }
   }
 
@@ -158,6 +255,18 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
       GraphRootStatus.unverified => strings.graphRootNotFound,
       null => null,
     };
+    final intersection = _intersection;
+    final intersectionText = switch (intersection?.status) {
+      GraphRootStatus.found => _coordinateText(
+        intersection!.root!,
+        strings,
+        root: true,
+      ),
+      GraphRootStatus.needsBracket ||
+      GraphRootStatus.unverified => strings.graphIntersectionNotFound,
+      null => null,
+    };
+    final hasSecond = _secondExpression.text.trim().isNotEmpty;
     final data = _data;
     final theme = Theme.of(context);
     return Theme(
@@ -165,6 +274,8 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
         colorScheme: theme.colorScheme.copyWith(
           primary: foreground,
           onPrimary: model.backgroundColor,
+          secondaryContainer: foreground,
+          onSecondaryContainer: model.backgroundColor,
           surface: model.backgroundColor,
           onSurface: foreground,
           onSurfaceVariant: foreground,
@@ -219,6 +330,38 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
                     onSubmitted: (_) => _submit(),
                   ),
                   const SizedBox(height: 12),
+                  TextField(
+                    key: const ValueKey('graph-second-expression'),
+                    controller: _secondExpression,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    smartDashesType: SmartDashesType.disabled,
+                    textInputAction: TextInputAction.done,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(
+                        ExpressionEngine.maxLength,
+                      ),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: strings.graphSecondFunction,
+                      suffixIcon: _secondExpression.text.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: strings.clearInput,
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                _secondExpression.clear();
+                                _clearOutput('');
+                              },
+                            ),
+                    ),
+                    onChanged: (value) {
+                      setState(() {});
+                      _clearOutput(value);
+                    },
+                    onSubmitted: (_) => _submit(),
+                  ),
+                  const SizedBox(height: 12),
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final minimum = _boundField(strings.graphXMin, _minimum);
@@ -243,11 +386,20 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
                     },
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    widget.degrees
-                        ? strings.scientificDegrees
-                        : strings.scientificRadians,
-                    style: TextStyle(color: foreground),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: Text(strings.scientificDegrees),
+                        selected: _degrees,
+                        onSelected: (_) => _setDegrees(true),
+                      ),
+                      ChoiceChip(
+                        label: Text(strings.scientificRadians),
+                        selected: !_degrees,
+                        onSelected: (_) => _setDegrees(false),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -271,9 +423,22 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
                         icon: const Icon(Icons.adjust),
                         label: Text(strings.graphFindRoot),
                       ),
+                      if (hasSecond)
+                        OutlinedButton.icon(
+                          key: const ValueKey('graph-find-intersection'),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(48, 48),
+                            side: BorderSide(color: foreground),
+                          ),
+                          onPressed: () => _submit(findIntersection: true),
+                          icon: const Icon(Icons.join_inner),
+                          label: Text(strings.graphFindIntersection),
+                        ),
                     ],
                   ),
-                  if (error != null || rootText != null)
+                  if (error != null ||
+                      rootText != null ||
+                      intersectionText != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: Semantics(
@@ -296,6 +461,19 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
                                 rootText,
                                 style: TextStyle(color: foreground),
                               ),
+                            if (intersection?.root != null)
+                              Text(
+                                strings.graphIntersectionResult,
+                                style: TextStyle(
+                                  color: foreground,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            if (intersectionText != null)
+                              SelectableText(
+                                intersectionText,
+                                style: TextStyle(color: foreground),
+                              ),
                           ],
                         ),
                       ),
@@ -307,21 +485,39 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
                         final range = data.verticalRange;
                         final plot = range == null
                             ? null
-                            : _GraphPlot(
-                                data: data,
-                                range: range,
-                                selected: _selected,
-                                root: root?.root,
-                                model: model,
-                                onInspect: (fraction) {
-                                  final x = data.interval.position(fraction);
-                                  setState(() {
-                                    _selected = (
-                                      x: x,
-                                      y: data.function.valueAt(x),
-                                    );
-                                  });
-                                },
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _GraphPlot(
+                                    data: data,
+                                    range: range,
+                                    selected: _selected,
+                                    selectedSecondY: _selectedSecondY,
+                                    root: root?.root,
+                                    intersection: intersection?.root,
+                                    model: model,
+                                    onZoomIn: () => _zoom(0.5),
+                                    onZoomOut: () => _zoom(2.0),
+                                    onReset: _resetView,
+                                    onZoomFactor: _zoom,
+                                    onPanFraction: _panByFraction,
+                                    onInspect: (fraction) {
+                                      final x = data.interval.position(
+                                        fraction,
+                                      );
+                                      setState(() {
+                                        _selected = (
+                                          x: x,
+                                          y: data.function.valueAt(x),
+                                        );
+                                        _selectedSecondY = data.secondFunction
+                                            ?.valueAt(x);
+                                      });
+                                    },
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _GraphKeyPoints(data: data, model: model),
+                                ],
                               );
                         final table = _GraphValueTable(
                           points: data.table,
@@ -362,18 +558,30 @@ String _coordinateText(GraphPoint point, S strings, {bool root = false}) {
 }
 
 class _GraphData {
-  _GraphData(this.function, this.interval) {
+  _GraphData(this.function, this.interval, {this.secondFunction}) {
     final samples = function.curve(interval);
     points = List.unmodifiable(samples);
+    secondPoints = secondFunction == null
+        ? const []
+        : List.unmodifiable(secondFunction!.curve(interval));
     table = List.unmodifiable(function.valueTable(interval));
-    verticalRange = _VerticalRange.forPoints(samples);
+    verticalRange = _VerticalRange.forPoints([...samples, ...secondPoints]);
+    yIntercept = function.yIntercept(interval);
+    final ext = ScientificGraph.extrema(samples);
+    minimumPoint = ext.min;
+    maximumPoint = ext.max;
   }
 
   final ScientificGraph function;
+  final ScientificGraph? secondFunction;
   final GraphInterval interval;
   late final List<GraphPoint> points;
+  late final List<GraphPoint> secondPoints;
   late final List<GraphPoint> table;
   late final _VerticalRange? verticalRange;
+  late final double? yIntercept;
+  late final GraphPoint? minimumPoint;
+  late final GraphPoint? maximumPoint;
 }
 
 class _VerticalRange {
@@ -414,44 +622,123 @@ class _VerticalRange {
   }
 }
 
-class _GraphPlot extends StatelessWidget {
+class _GraphKeyPoints extends StatelessWidget {
+  const _GraphKeyPoints({required this.data, required this.model});
+
+  final _GraphData data;
+  final ThemeModel model;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = S.of(context);
+    final style = TextStyle(
+      color: model.panelTextColor,
+      fontSize: 13,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final items = <String>[
+      if (data.yIntercept != null)
+        '${strings.graphYIntercept}: (0, ${Processor.formatResult(data.yIntercept!)})',
+      if (data.minimumPoint case final min?)
+        '${strings.graphMinimum}: (${Processor.formatResult(min.x)}, ${Processor.formatResult(min.y!)})',
+      if (data.maximumPoint case final max?)
+        '${strings.graphMaximum}: (${Processor.formatResult(max.x)}, ${Processor.formatResult(max.y!)})',
+    ];
+    if (items.isEmpty) return const SizedBox.shrink();
+    return DecoratedBox(
+      decoration: _panelDecoration(model),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              strings.graphKeyPoints,
+              style: style.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            for (final item in items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: SelectableText(item, style: style),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GraphPlot extends StatefulWidget {
   const _GraphPlot({
     required this.data,
     required this.range,
     required this.selected,
+    required this.selectedSecondY,
     required this.root,
+    required this.intersection,
     required this.model,
     required this.onInspect,
+    required this.onZoomIn,
+    required this.onZoomOut,
+    required this.onReset,
+    required this.onZoomFactor,
+    required this.onPanFraction,
   });
 
   final _GraphData data;
   final _VerticalRange range;
   final GraphPoint? selected;
+  final double? selectedSecondY;
   final GraphRoot? root;
+  final GraphRoot? intersection;
   final ThemeModel model;
   final ValueChanged<double> onInspect;
+  final VoidCallback onZoomIn;
+  final VoidCallback onZoomOut;
+  final VoidCallback onReset;
+  final ValueChanged<double> onZoomFactor;
+  final ValueChanged<double> onPanFraction;
+
+  @override
+  State<_GraphPlot> createState() => _GraphPlotState();
+}
+
+class _GraphPlotState extends State<_GraphPlot> {
+  final Map<int, Offset> _pointers = {};
+  double? _lastPinchSpan;
+  Offset? _lastPinchCenter;
 
   double get _inspectionFraction {
-    final x = selected?.x;
-    final interval = data.interval;
+    final x = widget.selected?.x;
+    final interval = widget.data.interval;
     return x == null ? 0.5 : (x - interval.minimum) / interval.width;
   }
 
-  Widget _plotViewport(S strings, Color curve, Color axis) => LayoutBuilder(
+  Widget _plotViewport(
+    S strings,
+    Color curve,
+    Color secondCurve,
+    Color axis,
+  ) => LayoutBuilder(
     builder: (context, constraints) {
-      void inspect(Offset localPosition) =>
-          onInspect((localPosition.dx / constraints.maxWidth).clamp(0.0, 1.0));
+      void inspect(Offset localPosition) => widget.onInspect(
+        (localPosition.dx / constraints.maxWidth).clamp(0.0, 1.0),
+      );
       final fraction = _inspectionFraction;
       final lower = (fraction - 0.1).clamp(0.0, 1.0);
       final higher = (fraction + 0.1).clamp(0.0, 1.0);
-      void decrease() => onInspect(lower);
-      void increase() => onInspect(higher);
+      void decrease() => widget.onInspect(lower);
+      void increase() => widget.onInspect(higher);
       String descriptionAt(double position) {
-        final x = data.interval.position(position);
-        return _coordinateText((x: x, y: data.function.valueAt(x)), strings);
+        final x = widget.data.interval.position(position);
+        return _coordinateText(
+          (x: x, y: widget.data.function.valueAt(x)),
+          strings,
+        );
       }
 
-      final point = selected;
+      final point = widget.selected;
       return Semantics(
         label: strings.scientificGraph,
         value: point == null
@@ -471,28 +758,90 @@ class _GraphPlot extends StatelessWidget {
             child: Builder(
               builder: (context) {
                 final focus = Focus.of(context);
-                return MouseRegion(
-                  cursor: SystemMouseCursors.precise,
-                  child: GestureDetector(
-                    key: const ValueKey('scientific-graph-plot'),
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (details) {
-                      focus.requestFocus();
-                      inspect(details.localPosition);
-                    },
-                    onHorizontalDragStart: (details) =>
-                        inspect(details.localPosition),
-                    onHorizontalDragUpdate: (details) =>
-                        inspect(details.localPosition),
-                    child: CustomPaint(
-                      painter: _PlotPainter(
-                        data: data,
-                        range: range,
-                        selected: point,
-                        root: root,
-                        curve: curve,
-                        axis: axis,
-                        focused: focus.hasPrimaryFocus,
+                return Listener(
+                  onPointerDown: (event) {
+                    _pointers[event.pointer] = event.localPosition;
+                    if (_pointers.length == 2) {
+                      final pts = _pointers.values.toList();
+                      _lastPinchSpan = (pts[0] - pts[1]).distance;
+                      _lastPinchCenter = (pts[0] + pts[1]) / 2;
+                    }
+                  },
+                  onPointerMove: (event) {
+                    if (!_pointers.containsKey(event.pointer)) return;
+                    _pointers[event.pointer] = event.localPosition;
+                    if (_pointers.length == 2) {
+                      final pts = _pointers.values.toList();
+                      final span = (pts[0] - pts[1]).distance;
+                      final center = (pts[0] + pts[1]) / 2;
+                      final prevSpan = _lastPinchSpan;
+                      final prevCenter = _lastPinchCenter;
+                      if (prevSpan != null && prevSpan > 10 && span > 10) {
+                        final ratio = prevSpan / span;
+                        if ((ratio - 1).abs() > 0.04) {
+                          widget.onZoomFactor(ratio.clamp(0.5, 2.0));
+                          _lastPinchSpan = span;
+                        }
+                      }
+                      if (prevCenter != null && constraints.maxWidth > 0) {
+                        final dx = center.dx - prevCenter.dx;
+                        if (dx.abs() > 8) {
+                          widget.onPanFraction(-dx / constraints.maxWidth);
+                          _lastPinchCenter = center;
+                        }
+                      }
+                    }
+                  },
+                  onPointerUp: (event) {
+                    _pointers.remove(event.pointer);
+                    if (_pointers.length < 2) {
+                      _lastPinchSpan = null;
+                      _lastPinchCenter = null;
+                    }
+                  },
+                  onPointerCancel: (event) {
+                    _pointers.remove(event.pointer);
+                    if (_pointers.length < 2) {
+                      _lastPinchSpan = null;
+                      _lastPinchCenter = null;
+                    }
+                  },
+                  onPointerSignal: (signal) {
+                    if (signal is PointerScrollEvent) {
+                      final factor = signal.scrollDelta.dy > 0 ? 1.2 : 0.8;
+                      widget.onZoomFactor(factor);
+                    }
+                  },
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.precise,
+                    child: GestureDetector(
+                      key: const ValueKey('scientific-graph-plot'),
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (details) {
+                        if (_pointers.length >= 2) return;
+                        focus.requestFocus();
+                        inspect(details.localPosition);
+                      },
+                      onHorizontalDragStart: (details) {
+                        if (_pointers.length >= 2) return;
+                        inspect(details.localPosition);
+                      },
+                      onHorizontalDragUpdate: (details) {
+                        if (_pointers.length >= 2) return;
+                        inspect(details.localPosition);
+                      },
+                      child: CustomPaint(
+                        painter: _PlotPainter(
+                          data: widget.data,
+                          range: widget.range,
+                          selected: point,
+                          root: widget.root,
+                          intersection: widget.intersection,
+                          curve: curve,
+                          secondCurve: secondCurve,
+                          axis: axis,
+                          focused: focus.hasPrimaryFocus,
+                        ),
                       ),
                     ),
                   ),
@@ -516,16 +865,22 @@ class _GraphPlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = S.of(context);
+    final model = widget.model;
     final labelStyle = TextStyle(
       color: model.panelTextColor,
       fontSize: 12,
       fontFeatures: const [FontFeature.tabularFigures()],
     );
     final curve = ThemeModel.readableOn(model.panelColor, model.buttonColor2);
+    final secondCurve = ThemeModel.readableOn(
+      model.panelColor,
+      model.buttonColor3,
+    );
     final axis = model.panelTextColor.withValues(
       alpha: model.highContrastEnabled ? 0.8 : 0.7,
     );
-    final point = selected;
+    final point = widget.selected;
+    final secondY = widget.selectedSecondY;
     return DecoratedBox(
       decoration: _panelDecoration(model),
       child: Padding(
@@ -533,6 +888,32 @@ class _GraphPlot extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  tooltip: strings.graphZoomIn,
+                  visualDensity: VisualDensity.compact,
+                  color: model.panelTextColor,
+                  icon: const Icon(Icons.zoom_in, size: 20),
+                  onPressed: widget.onZoomIn,
+                ),
+                IconButton(
+                  tooltip: strings.graphZoomOut,
+                  visualDensity: VisualDensity.compact,
+                  color: model.panelTextColor,
+                  icon: const Icon(Icons.zoom_out, size: 20),
+                  onPressed: widget.onZoomOut,
+                ),
+                IconButton(
+                  tooltip: strings.graphResetView,
+                  visualDensity: VisualDensity.compact,
+                  color: model.panelTextColor,
+                  icon: const Icon(Icons.restart_alt, size: 20),
+                  onPressed: widget.onReset,
+                ),
+              ],
+            ),
             LayoutBuilder(
               builder: (context, constraints) {
                 final height = (constraints.maxWidth * 0.58).clamp(
@@ -554,13 +935,13 @@ class _GraphPlot extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                _axisText(range.maxValue),
+                                _axisText(widget.range.maxValue),
                                 style: labelStyle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                _axisText(range.minValue),
+                                _axisText(widget.range.minValue),
                                 style: labelStyle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -569,7 +950,9 @@ class _GraphPlot extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Expanded(child: _plotViewport(strings, curve, axis)),
+                      Expanded(
+                        child: _plotViewport(strings, curve, secondCurve, axis),
+                      ),
                     ],
                   ),
                 );
@@ -580,14 +963,14 @@ class _GraphPlot extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    _axisText(data.interval.minimum),
+                    _axisText(widget.data.interval.minimum),
                     style: labelStyle,
                   ),
                 ),
                 Text('x', style: labelStyle),
                 Expanded(
                   child: Text(
-                    _axisText(data.interval.maximum),
+                    _axisText(widget.data.interval.maximum),
                     style: labelStyle,
                     textAlign: TextAlign.end,
                   ),
@@ -603,9 +986,19 @@ class _GraphPlot extends StatelessWidget {
             else
               Semantics(
                 liveRegion: true,
-                child: SelectableText(
-                  _coordinateText(point, strings),
-                  style: TextStyle(color: model.panelTextColor),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SelectableText(
+                      _coordinateText(point, strings),
+                      style: TextStyle(color: model.panelTextColor),
+                    ),
+                    if (widget.data.secondFunction != null)
+                      SelectableText(
+                        'g(x) = ${secondY == null ? strings.graphUndefined : Processor.formatResult(secondY)}',
+                        style: TextStyle(color: model.panelTextColor),
+                      ),
+                  ],
                 ),
               ),
           ],
@@ -685,7 +1078,9 @@ class _PlotPainter extends CustomPainter {
     required this.range,
     required this.selected,
     required this.root,
+    required this.intersection,
     required this.curve,
+    required this.secondCurve,
     required this.axis,
     required this.focused,
   });
@@ -694,9 +1089,60 @@ class _PlotPainter extends CustomPainter {
   final _VerticalRange range;
   final GraphPoint? selected;
   final GraphRoot? root;
+  final GraphRoot? intersection;
   final Color curve;
+  final Color secondCurve;
   final Color axis;
   final bool focused;
+
+  void _paintCurve(
+    Canvas canvas,
+    Size size,
+    List<GraphPoint> points,
+    Color color,
+    double Function(double) toX,
+    double Function(double) toY, {
+    double strokeWidth = 2.25,
+  }) {
+    if (points.isEmpty) return;
+    final path = Path();
+    final dotPaint = Paint()..color = color;
+    var penDown = false;
+    double? prevScreenY;
+    for (var i = 0; i < points.length; i++) {
+      final point = points[i];
+      final y = point.y;
+      if (y == null) {
+        penDown = false;
+        prevScreenY = null;
+        continue;
+      }
+      final sx = toX(point.x);
+      final sy = toY(y);
+      // Break across steep vertical asymptote jumps rather than connecting them.
+      final hugeJump =
+          prevScreenY != null && (sy - prevScreenY).abs() > size.height * 1.15;
+      if (penDown && !hugeJump) {
+        path.lineTo(sx, sy);
+      } else {
+        path.moveTo(sx, sy);
+        if (i + 1 == points.length || points[i + 1].y == null) {
+          canvas.drawCircle(Offset(sx, sy), 2, dotPaint);
+        }
+        penDown = true;
+      }
+      prevScreenY = sy;
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..strokeWidth = strokeWidth,
+    );
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -729,36 +1175,20 @@ class _PlotPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), axisPaint);
     }
 
-    final path = Path();
-    final dotPaint = Paint()..color = curve;
-    var penDown = false;
-    for (var i = 0; i < data.points.length; i++) {
-      final point = data.points[i];
-      final y = point.y;
-      if (y == null) {
-        penDown = false;
-        continue;
-      }
-      if (penDown) {
-        path.lineTo(toX(point.x), toY(y));
-      } else {
-        path.moveTo(toX(point.x), toY(y));
-        if (i + 1 == data.points.length || data.points[i + 1].y == null) {
-          canvas.drawCircle(Offset(toX(point.x), toY(y)), 2, dotPaint);
-        }
-        penDown = true;
-      }
+    _paintCurve(canvas, size, data.points, curve, toX, toY);
+    if (data.secondPoints.isNotEmpty) {
+      _paintCurve(
+        canvas,
+        size,
+        data.secondPoints,
+        secondCurve,
+        toX,
+        toY,
+        strokeWidth: 2.0,
+      );
     }
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = curve
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..strokeWidth = 2.25,
-    );
 
+    final dotPaint = Paint()..color = curve;
     final marker = selected;
     if (marker != null) {
       final x = toX(marker.x);
@@ -766,6 +1196,14 @@ class _PlotPainter extends CustomPainter {
       final y = marker.y;
       if (y != null) {
         canvas.drawCircle(Offset(x, toY(y)), 4, dotPaint);
+      }
+      final gY = data.secondFunction?.valueAt(marker.x);
+      if (gY != null) {
+        canvas.drawCircle(
+          Offset(x, toY(gY)),
+          4,
+          Paint()..color = secondCurve,
+        );
       }
     }
     final zero = root;
@@ -777,6 +1215,17 @@ class _PlotPainter extends CustomPainter {
           ..color = curve
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2,
+      );
+    }
+    final inter = intersection;
+    if (inter != null) {
+      canvas.drawCircle(
+        Offset(toX(inter.x), toY(inter.y)),
+        7,
+        Paint()
+          ..color = secondCurve
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.5,
       );
     }
     canvas.restore();
@@ -795,7 +1244,9 @@ class _PlotPainter extends CustomPainter {
       range != oldDelegate.range ||
       selected != oldDelegate.selected ||
       root != oldDelegate.root ||
+      intersection != oldDelegate.intersection ||
       curve != oldDelegate.curve ||
+      secondCurve != oldDelegate.secondCurve ||
       axis != oldDelegate.axis ||
       focused != oldDelegate.focused;
 }
