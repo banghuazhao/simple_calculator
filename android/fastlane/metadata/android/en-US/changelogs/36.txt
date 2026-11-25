@@ -1,0 +1,4 @@
+- Added optional memory keys (MC, MR, M+, M−), redo, repeat equals, key click sounds, and thousands/comma decimal formatting.
+- Expanded Everyday tools with discount & tax calculations and improved date math.
+- SwiftSum Premium adds Programmer mode (DEC/HEX/OCT/BIN), custom theme colors, and graph value tables.
+- Fixed edge-case bugs in DST date calculations, comma paste, memory overflow, and graphing.
