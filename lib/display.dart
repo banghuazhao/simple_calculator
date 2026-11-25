@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,12 @@ class Display extends StatelessWidget {
   String _formatForDisplay(String s) =>
       InputSettings.instance.formatDisplayNumber(s);
 
-  Widget _operand(OperandEdit operand, String label, TextStyle style) {
+  Widget _operand(
+    OperandEdit operand,
+    String label,
+    TextStyle style,
+    double slotHeight,
+  ) {
     final percent =
         operand.position == OperandPosition.right && rightOperandIsPercent;
     final value = '${_formatForDisplay(operand.display)}${percent ? '%' : ''}';
@@ -51,13 +57,18 @@ class Display extends StatelessWidget {
         child: TextButton(
           style: TextButton.styleFrom(
             foregroundColor: style.color,
-            minimumSize: const Size(48, 48),
+            minimumSize: Size(48, math.min(48, slotHeight)),
+            maximumSize: Size(double.infinity, slotHeight),
             padding: const EdgeInsets.symmetric(horizontal: 8),
             visualDensity: VisualDensity.standard,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             textStyle: style.copyWith(decoration: TextDecoration.underline),
           ),
           onPressed: () => onCorrectOperand!(operand),
-          child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(value, maxLines: 1, softWrap: false),
+          ),
         ),
       ),
     );
@@ -134,180 +145,280 @@ class Display extends StatelessWidget {
                 },
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Material(
-                color: model.panelColor,
-                clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: model.panelBorderColor),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (left != null &&
-                          operator != null &&
-                          onCorrectOperand != null)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final preferredPanelHeight = compact ? 156.0 : 188.0;
+                final panelHeight = constraints.maxHeight.isFinite
+                    ? math.min(constraints.maxHeight, preferredPanelHeight)
+                    : preferredPanelHeight;
+                // Account for top/bottom card padding (8) and 1px border (2).
+                final innerHeight = math.max(0.0, panelHeight - 10);
+                final textScaler = MediaQuery.textScalerOf(context);
+                final previewFontSize = compact ? 15.0 : 18.0;
+                final basePreviewHeight = math.max(
+                  compact ? 28.0 : 32.0,
+                  textScaler.scale(previewFontSize) * 1.4 + 4,
+                );
+                final historySlotHeight = math.min(48.0, innerHeight * 0.36);
+                final previewSlotHeight = math.min(
+                  basePreviewHeight,
+                  innerHeight * 0.24,
+                );
+                final mainSlotHeight = math.max(
+                  0.0,
+                  innerHeight - historySlotHeight - previewSlotHeight,
+                );
+
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(
+                    height: panelHeight,
+                    child: Material(
+                      key: const ValueKey('display-panel'),
+                      color: model.panelColor,
+                      clipBehavior: Clip.antiAlias,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: model.panelBorderColor),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _operand(
-                              left,
-                              strings.editFirstOperand,
-                              historyStyle,
-                            ),
-                            Text(operator, style: historyStyle),
-                            if (right != null)
-                              _operand(
-                                right,
-                                strings.editSecondOperand,
-                                historyStyle,
-                              ),
-                            if (copyCalculation != null) ...[
-                              Text('=', style: historyStyle),
-                              IconButton(
-                                tooltip: strings.copyCalculation,
-                                color: textColor,
-                                onPressed: copyCalculation,
-                                icon: const Icon(Icons.copy_outlined, size: 18),
-                              ),
-                            ],
-                          ],
-                        )
-                      else if (history.isNotEmpty)
-                        Semantics(
-                          label: copyCalculation == null
-                              ? history
-                              : strings.copyCalculation,
-                          value: copyCalculation == null ? null : history,
-                          button: copyCalculation != null,
-                          onTap: copyCalculation,
-                          excludeSemantics: true,
-                          child: InkWell(
-                            excludeFromSemantics: true,
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: copyCalculation,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: AnimatedSwitcher(
-                                duration: transitionDuration,
-                                child: Align(
-                                  key: ValueKey(history),
-                                  alignment: Alignment.centerRight,
-                                  child: Text(
-                                    history,
-                                    style: historyStyle,
-                                    textAlign: TextAlign.right,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      Flexible(
-                        child: Row(
-                          children: [
-                            if (onPaste != null)
-                              IconButton(
-                                tooltip: strings.pasteNumber,
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.all(6),
-                                constraints: const BoxConstraints(
-                                  minWidth: 40,
-                                  minHeight: 40,
-                                ),
-                                onPressed: onPaste,
-                                icon: Icon(
-                                  Icons.content_paste_outlined,
-                                  color: textColor,
-                                  size: 20,
-                                ),
-                              ),
-                            Expanded(
-                              child: Semantics(
-                                label: isError
-                                    ? strings.error
-                                    : strings.copyResult,
-                                value: isError ? null : formattedCurrent,
-                                button: !isError,
-                                onTap: copyNumber,
-                                excludeSemantics: true,
-                                child: InkWell(
-                                  excludeFromSemantics: true,
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: copyNumber,
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      minHeight: 48,
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          if (!isError) ...[
-                                            Icon(
-                                              Icons.copy_outlined,
-                                              color: textColor,
-                                              size: 20,
+                            SizedBox(
+                              height: historySlotHeight,
+                              child:
+                                  left != null &&
+                                      operator != null &&
+                                      onCorrectOperand != null
+                                  ? Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        _operand(
+                                          left,
+                                          strings.editFirstOperand,
+                                          historyStyle,
+                                          historySlotHeight,
+                                        ),
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            operator,
+                                            style: historyStyle,
+                                          ),
+                                        ),
+                                        if (right != null)
+                                          _operand(
+                                            right,
+                                            strings.editSecondOperand,
+                                            historyStyle,
+                                            historySlotHeight,
+                                          ),
+                                        if (copyCalculation != null) ...[
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              '=',
+                                              style: historyStyle,
                                             ),
-                                            const SizedBox(width: 12),
-                                          ],
-                                          Expanded(
-                                            child: AnimatedSwitcher(
-                                              duration: transitionDuration,
-                                              child: Align(
-                                                key: displayKey,
+                                          ),
+                                          IconButton(
+                                            tooltip: strings.copyCalculation,
+                                            color: textColor,
+                                            style: IconButton.styleFrom(
+                                              tapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                            ),
+                                            padding: EdgeInsets.zero,
+                                            constraints: BoxConstraints(
+                                              minWidth: 48,
+                                              minHeight: math.min(
+                                                48.0,
+                                                historySlotHeight,
+                                              ),
+                                              maxHeight: historySlotHeight,
+                                            ),
+                                            onPressed: copyCalculation,
+                                            icon: const Icon(
+                                              Icons.copy_outlined,
+                                              size: 18,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    )
+                                  : history.isNotEmpty
+                                  ? Semantics(
+                                      label: copyCalculation == null
+                                          ? history
+                                          : strings.copyCalculation,
+                                      value: copyCalculation == null
+                                          ? null
+                                          : history,
+                                      button: copyCalculation != null,
+                                      onTap: copyCalculation,
+                                      excludeSemantics: true,
+                                      child: InkWell(
+                                        excludeFromSemantics: true,
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: copyCalculation,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                          ),
+                                          child: AnimatedSwitcher(
+                                            duration: transitionDuration,
+                                            child: Align(
+                                              key: ValueKey(history),
+                                              alignment: Alignment.centerRight,
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
                                                 alignment:
                                                     Alignment.centerRight,
-                                                heightFactor: 1,
-                                                child: AutoSizeText(
-                                                  formattedCurrent,
-                                                  style: mainStyle,
-                                                  maxLines: 1,
+                                                child: Text(
+                                                  history,
+                                                  style: historyStyle,
                                                   textAlign: TextAlign.right,
-                                                  minFontSize: 12,
+                                                  maxLines: 1,
+                                                  softWrap: false,
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        ],
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  if (onPaste != null)
+                                    IconButton(
+                                      tooltip: strings.pasteNumber,
+                                      visualDensity: VisualDensity.compact,
+                                      padding: const EdgeInsets.all(6),
+                                      constraints: BoxConstraints(
+                                        minWidth: 40,
+                                        minHeight: math.min(
+                                          40.0,
+                                          mainSlotHeight,
+                                        ),
+                                      ),
+                                      onPressed: onPaste,
+                                      icon: Icon(
+                                        Icons.content_paste_outlined,
+                                        color: textColor,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: Semantics(
+                                      label: isError
+                                          ? strings.error
+                                          : strings.copyResult,
+                                      value: isError ? null : formattedCurrent,
+                                      button: !isError,
+                                      onTap: copyNumber,
+                                      excludeSemantics: true,
+                                      child: InkWell(
+                                        excludeFromSemantics: true,
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: copyNumber,
+                                        child: ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            minHeight: math.min(
+                                              48.0,
+                                              mainSlotHeight,
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                if (!isError) ...[
+                                                  Icon(
+                                                    Icons.copy_outlined,
+                                                    color: textColor,
+                                                    size: 20,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                ],
+                                                Expanded(
+                                                  child: AnimatedSwitcher(
+                                                    duration:
+                                                        transitionDuration,
+                                                    child: Align(
+                                                      key: displayKey,
+                                                      alignment:
+                                                          Alignment.centerRight,
+                                                      heightFactor: 1,
+                                                      child: AutoSizeText(
+                                                        formattedCurrent,
+                                                        style: mainStyle,
+                                                        maxLines: 1,
+                                                        textAlign:
+                                                            TextAlign.right,
+                                                        minFontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: previewSlotHeight,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 0, 8, 2),
+                                child: AnimatedSwitcher(
+                                  duration: transitionDuration,
+                                  child: showPreview
+                                      ? Align(
+                                          key: const ValueKey(
+                                            'display-live-preview-visible',
+                                          ),
+                                          alignment: Alignment.centerRight,
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                              '= ${_formatForDisplay(preview!)}',
+                                              key: const ValueKey(
+                                                'display-live-preview',
+                                              ),
+                                              style: previewStyle,
+                                              maxLines: 1,
+                                              softWrap: false,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox.shrink(
+                                          key: ValueKey(
+                                            'display-live-preview-empty',
+                                          ),
+                                        ),
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      if (showPreview)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 0, 8, 2),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              '= ${_formatForDisplay(preview!)}',
-                              key: const ValueKey('display-live-preview'),
-                              style: previewStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         );

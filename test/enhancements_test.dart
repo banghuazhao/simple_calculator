@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -140,6 +141,66 @@ void main() {
       expect(find.byKey(const ValueKey('display-live-preview')), findsOneWidget);
       expect(find.text('= 20'), findsOneWidget);
     });
+
+    testWidgets(
+      'display panel height and main readout stay fixed when preview and history toggle',
+      (tester) async {
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.platformDispatcher.clearAllTestValues);
+
+        Future<void> tapKey(String label) async {
+          await tester.tap(
+            find.descendant(
+              of: find.byType(CalculatorKey),
+              matching: find.text(label),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+
+        final panelFinder = find.byKey(const ValueKey('display-panel'));
+        final mainTextFinder = find.descendant(
+          of: panelFinder,
+          matching: find.byType(AutoSizeText),
+        );
+
+        for (final config in const [
+          (size: Size(393, 852), scale: 1.0),
+          (size: Size(320, 568), scale: 1.0),
+          (size: Size(375, 667), scale: 3.2),
+        ]) {
+          await tester.binding.setSurfaceSize(config.size);
+          tester.platformDispatcher.textScaleFactorTestValue = config.scale;
+          await tester.pumpWidget(const CalculatorApp());
+          await tester.pumpAndSettle();
+
+          await tapKey('C');
+          final initialPanelRect = tester.getRect(panelFinder);
+          final initialMainCenterY = tester.getCenter(mainTextFinder).dy;
+
+          for (final symbol in ['1', '2', '+', '8', '=', 'C']) {
+            await tapKey(symbol);
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: 'No overflow at ${config.size} scale ${config.scale} after $symbol',
+            );
+            expect(
+              tester.getRect(panelFinder),
+              initialPanelRect,
+              reason:
+                  'Panel rect must stay fixed at ${config.size} scale ${config.scale} after $symbol',
+            );
+            expect(
+              tester.getCenter(mainTextFinder).dy,
+              closeTo(initialMainCenterY, 0.5),
+              reason:
+                  'Main number Y must stay fixed at ${config.size} scale ${config.scale} after $symbol',
+            );
+          }
+        }
+      },
+    );
   });
 
   group('everyday calculations & expanded units', () {
