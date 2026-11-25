@@ -257,19 +257,21 @@ class _CalculatorState extends State<Calculator> {
             button('M+', strings.memoryAdd, Processor.memoryAdd),
             button('M−', strings.memorySubtract, Processor.memorySubtract),
             if (hasMemory)
-              Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: Text(
-                  'M: ${InputSettings.instance.formatDisplayNumber(state.memory!)}',
-                  key: const ValueKey('calculator-memory-value'),
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Text(
+                    'M: ${InputSettings.instance.formatDisplayNumber(state.memory!)}',
+                    key: const ValueKey('calculator-memory-value'),
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
           ],

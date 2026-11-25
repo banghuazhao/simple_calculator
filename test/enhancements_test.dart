@@ -274,5 +274,34 @@ void main() {
       expect(model.useCustomTheme, isTrue);
       expect(model.backgroundColor, const Color(0xff121212));
     });
+
+    test('rubber-duck audit regressions: DST dates, comma paste, unit savings rounding', () {
+      // DST spring-forward boundary in Pacific/Auckland (2026-09-27 -> 2026-09-28)
+      final dstDiff = DateDifference(
+        start: DateTime(2026, 9, 27),
+        end: DateTime(2026, 9, 28),
+      );
+      expect(dstDiff.totalDays, 1);
+
+      // Comma-decimal input parsing when enabled
+      InputSettings.instance.setCommaDecimalEnabled(true);
+      expect(Processor.parseNumericInput('12,5'), 12.5);
+      expect(Processor.parseNumericInput('1.234,56'), 1234.56);
+      InputSettings.instance.setCommaDecimalEnabled(false);
+      expect(Processor.parseNumericInput('12,5'), isNull);
+
+      // Half-up rounding for percentage savings (2/3 saved -> 66.67%)
+      final cheap = UnitPrice(
+        price: BigInt.from(100),
+        size: EverydayNumber.parse('1')!,
+        baseUnits: EverydayNumber.parse('1')!,
+      );
+      final pricey = UnitPrice(
+        price: BigInt.from(300),
+        size: EverydayNumber.parse('1')!,
+        baseUnits: EverydayNumber.parse('1')!,
+      );
+      expect(cheap.percentSavingsOver(pricey), 66.67);
+    });
   });
 }

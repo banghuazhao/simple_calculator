@@ -51,15 +51,29 @@ class _ProgrammerPageState extends State<ProgrammerPage> {
   }
 
   int? _parse(String text) {
-    final cleaned = text.trim().replaceAll(RegExp(r'[\s_,]+'), '');
+    final cleaned = text
+        .trim()
+        .replaceAll('−', '-')
+        .replaceAll(RegExp(r'[\s_,]+'), '');
     if (cleaned.isEmpty) return null;
-    final normalized = cleaned.replaceFirst(RegExp(r'^0[xXbBoO]'), '');
-    return int.tryParse(normalized, radix: _base.radix);
+    final negative = cleaned.startsWith('-');
+    var body = negative || cleaned.startsWith('+')
+        ? cleaned.substring(1)
+        : cleaned;
+    final prefix = switch (_base) {
+      _NumberBase.hex => RegExp(r'^0[xX]'),
+      _NumberBase.bin => RegExp(r'^0[bB]'),
+      _NumberBase.oct => RegExp(r'^0[oO]'),
+      _NumberBase.dec => null,
+    };
+    if (prefix != null) body = body.replaceFirst(prefix, '');
+    if (body.isEmpty) return null;
+    return int.tryParse(negative ? '-$body' : body, radix: _base.radix);
   }
 
   String _formatBase(int value, int radix) {
     final negative = value < 0;
-    final raw = value.abs().toRadixString(radix).toUpperCase();
+    final raw = BigInt.from(value).abs().toRadixString(radix).toUpperCase();
     if (radix == 2) {
       final padded = raw.padLeft(((raw.length + 3) ~/ 4) * 4, '0');
       final grouped = padded
@@ -182,10 +196,16 @@ class _ProgrammerPageState extends State<ProgrammerPage> {
                           label: Text(base.label),
                           selected: _base == base,
                           onSelected: (_) => setState(() {
-                            final parsed = _parse(_primary.text);
+                            final parsedA = _parse(_primary.text);
+                            final parsedB = _parse(_secondary.text);
                             _base = base;
-                            if (parsed != null) {
-                              _primary.text = parsed
+                            if (parsedA != null) {
+                              _primary.text = parsedA
+                                  .toRadixString(base.radix)
+                                  .toUpperCase();
+                            }
+                            if (parsedB != null) {
+                              _secondary.text = parsedB
                                   .toRadixString(base.radix)
                                   .toUpperCase();
                             }

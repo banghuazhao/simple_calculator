@@ -108,7 +108,8 @@ class UnitPrice implements Comparable<UnitPrice> {
         other._numerator * _denominator - _numerator * other._denominator;
     final denom = other._numerator * _denominator;
     if (denom == BigInt.zero) return null;
-    return (diffNum * BigInt.from(10000) ~/ denom).toDouble() / 100.0;
+    final scaled = diffNum * BigInt.from(10000);
+    return ((scaled + denom ~/ BigInt.two) ~/ denom).toDouble() / 100.0;
   }
 
   /// Formatted savings per base unit compared to a more expensive [other].
@@ -188,8 +189,10 @@ class MarginCalculation {
 
 class DateDifference {
   DateDifference({required DateTime start, required DateTime end}) {
-    final a = DateTime(start.year, start.month, start.day);
-    final b = DateTime(end.year, end.month, end.day);
+    // Use UTC midnight so DST spring-forward/fall-back transitions never
+    // shorten or lengthen calendar days.
+    final a = DateTime.utc(start.year, start.month, start.day);
+    final b = DateTime.utc(end.year, end.month, end.day);
     final earlier = a.isBefore(b) ? a : b;
     final later = a.isBefore(b) ? b : a;
     signedDays = b.difference(a).inDays;

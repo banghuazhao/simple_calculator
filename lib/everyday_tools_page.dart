@@ -130,7 +130,8 @@ class _BillSplitterPageState extends State<_BillSplitterPage> {
         ? BillSplit(bill: bill, tipPercent: tip, people: people)
         : null;
     final displayValue = Processor.currentNumericValue;
-    final canPullDisplay = displayValue != null && displayValue > 0;
+    final canPullDisplay =
+        displayValue != null && displayValue > 0 && displayValue < 1e12;
     final selectedTip = _tip.text.trim();
 
     return _ToolPage(
@@ -1174,7 +1175,7 @@ class _DateCalculatorPageState extends State<_DateCalculatorPage> {
     final diff = DateDifference(start: _start, end: _end);
     final offsetVal = int.tryParse(_offsetDays.text.trim());
     final targetDate = offsetVal != null && offsetVal.abs() <= 100000
-        ? _start.add(Duration(days: offsetVal))
+        ? DateTime(_start.year, _start.month, _start.day + offsetVal)
         : null;
 
     Widget dateTile(String label, DateTime value, VoidCallback onTap) =>

@@ -491,10 +491,17 @@ abstract class Processor {
     var value = text.trim().replaceAll('\u2212', '-');
     if (value.startsWith('+')) value = value.substring(1);
     if (value.contains(',')) {
-      if (!RegExp(r'^-?[0-9]{1,3}(,[0-9]{3})+(\.[0-9]*)?$').hasMatch(value)) {
-        return null;
+      if (InputSettings.instance.commaDecimalEnabled &&
+          RegExp(
+            r'^-?(?:[0-9]{1,3}(\.[0-9]{3})+|[0-9]+),[0-9]*(?:[eE][+-]?[0-9]+)?$',
+          ).hasMatch(value)) {
+        value = value.replaceAll('.', '').replaceFirst(',', '.');
+      } else {
+        if (!RegExp(r'^-?[0-9]{1,3}(,[0-9]{3})+(\.[0-9]*)?$').hasMatch(value)) {
+          return null;
+        }
+        value = value.replaceAll(',', '');
       }
-      value = value.replaceAll(',', '');
     }
     if (!HistoryStorage.isValidNumber(value)) return null;
     return double.parse(value);

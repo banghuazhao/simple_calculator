@@ -351,6 +351,7 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
                               icon: const Icon(Icons.close),
                               onPressed: () {
                                 _secondExpression.clear();
+                                setState(() {});
                                 _clearOutput('');
                               },
                             ),
@@ -521,6 +522,7 @@ class _ScientificGraphPageState extends State<ScientificGraphPage> {
                               );
                         final table = _GraphValueTable(
                           points: data.table,
+                          secondFunction: data.secondFunction,
                           model: model,
                         );
                         if (plot == null) return table;
@@ -1009,9 +1011,14 @@ class _GraphPlotState extends State<_GraphPlot> {
 }
 
 class _GraphValueTable extends StatelessWidget {
-  const _GraphValueTable({required this.points, required this.model});
+  const _GraphValueTable({
+    required this.points,
+    required this.model,
+    this.secondFunction,
+  });
 
   final List<GraphPoint> points;
+  final ScientificGraph? secondFunction;
   final ThemeModel model;
 
   @override
@@ -1026,6 +1033,7 @@ class _GraphValueTable extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Text(text, style: style, textAlign: TextAlign.end),
     );
+    final second = secondFunction;
     return DecoratedBox(
       decoration: _panelDecoration(model),
       child: Column(
@@ -1044,7 +1052,13 @@ class _GraphValueTable extends StatelessWidget {
                 horizontalInside: BorderSide(color: model.panelBorderColor),
               ),
               children: [
-                TableRow(children: [cell('x', heading), cell('f(x)', heading)]),
+                TableRow(
+                  children: [
+                    cell('x', heading),
+                    cell('f(x)', heading),
+                    if (second != null) cell('g(x)', heading),
+                  ],
+                ),
                 for (final point in points)
                   TableRow(
                     children: [
@@ -1055,6 +1069,18 @@ class _GraphValueTable extends StatelessWidget {
                             : Processor.formatResult(point.y!),
                         cellStyle,
                       ),
+                      if (second != null)
+                        Builder(
+                          builder: (_) {
+                            final gy = second.valueAt(point.x);
+                            return cell(
+                              gy == null
+                                  ? strings.graphUndefined
+                                  : Processor.formatResult(gy),
+                              cellStyle,
+                            );
+                          },
+                        ),
                     ],
                   ),
               ],

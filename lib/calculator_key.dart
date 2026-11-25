@@ -164,7 +164,11 @@ class _CalculatorKeyState extends State<CalculatorKey>
     // 16 may ignore portrait locks, so height must cap the keypad at every size.
     final availableHeight =
         screenSize.height - MediaQuery.paddingOf(context).vertical;
-    final heightBased = max(0.0, (availableHeight * 0.60 - 40) / 5);
+    final memoryReserve = InputSettings.instance.memoryBarEnabled ? 48.0 : 0.0;
+    final heightBased = max(
+      0.0,
+      (availableHeight * 0.60 - 40 - memoryReserve) / 5,
+    );
     size = min(size, heightBased);
 
     final Color baseColor;

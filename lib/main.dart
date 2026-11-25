@@ -121,22 +121,29 @@ class CalculatorApp extends StatefulWidget {
 class _CalculatorAppState extends State<CalculatorApp>
     with WidgetsBindingObserver {
   Timer? _windowSaveTimer;
+  Brightness _platformBrightness =
+      WidgetsBinding.instance.platformDispatcher.platformBrightness;
 
   @override
   void initState() {
     super.initState();
-    if (Platform.isMacOS) {
-      WidgetsBinding.instance.addObserver(this);
-    }
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     _windowSaveTimer?.cancel();
-    if (Platform.isMacOS) {
-      WidgetsBinding.instance.removeObserver(this);
-    }
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    final next =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    if (_platformBrightness != next) {
+      setState(() => _platformBrightness = next);
+    }
   }
 
   @override
@@ -175,10 +182,9 @@ class _CalculatorAppState extends State<CalculatorApp>
       ],
       child: Consumer<ThemeModel>(
         builder: (context, themeModel, child) {
-          final platformBrightness =
-              WidgetsBinding.instance.platformDispatcher.platformBrightness;
+          final brightness = _platformBrightness;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            themeModel.updatePlatformBrightness(platformBrightness);
+            themeModel.updatePlatformBrightness(brightness);
           });
           return MaterialApp(
             theme: themeModel.accessibilityTheme,
